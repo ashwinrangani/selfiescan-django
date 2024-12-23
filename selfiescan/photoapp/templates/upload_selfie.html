@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Selfie</title>
+</head>
+<body>
+    <h1>Upload Your Selfie</h1>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="selfie">Select a selfie:</label>
+        <input type="file" id="selfie" name="selfie" accept="image/*" required>
+        <label for="camera_selfie">Or capture a selfie:</label>
+        <input type="file" id="camera_selfie" name="camera_selfie" accept="image/*" capture="user">
+        <button type="submit">Upload</button>
+    </form>
+
+    {% if matches %}
+        <h2>Matching Photos</h2>
+        <ul>
+            {% for match, distance in matches %}
+                <li>
+                    <img src="{{ MEDIA_URL }}{{ match }}" alt="Matching Photo" style="width: 200px; height: 200px;" />
+                    <p>Distance: {{ distance }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+  
+</body>
+</html>
