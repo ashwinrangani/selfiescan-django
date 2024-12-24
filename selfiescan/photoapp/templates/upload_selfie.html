@@ -13,7 +13,7 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <label for="selfie">Select a selfie:</label>
-        <input type="file" id="selfie" name="selfie" accept="image/*" required>
+        <input type="file" id="selfie" name="selfie" accept="image/*" >
         <label for="camera_selfie">Or capture a selfie:</label>
         <input type="file" id="camera_selfie" name="camera_selfie" accept="image/*" capture="user">
         <button type="submit">Upload</button>
@@ -30,6 +30,10 @@
             {% endfor %}
         </ul>
     {% endif %}
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<script src="{% static 'js/script.js' %}"></script>
   
 </body>
 </html>
