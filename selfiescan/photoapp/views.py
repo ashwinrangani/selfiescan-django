@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def find_matches(selfie_path, encodings_file='encodings.pkl', thresold=0.6):
+def find_matches(selfie_path, encodings_file='encodings.pkl', thresold=0.9):
     selfie_image = face_recognition.load_image_file(selfie_path)
     selfie_encoding = face_recognition.face_encodings(selfie_image)
 
@@ -41,6 +41,7 @@ def upload_selfie(request):
             fs = FileSystemStorage()
             filename = fs.save(selfie.name, selfie)
             selfie_path = fs.path(filename)
+            
 
             try:
                 base_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of current file

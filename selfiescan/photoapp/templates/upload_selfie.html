@@ -3,37 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Selfie</title>
+    <title>SelfieScan</title>
+    
 </head>
 <body>
-    <h1>Upload Your Selfie</h1>
-    {% if message %}
-        <p>{{ message }}</p>
-    {% endif %}
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="selfie">Select a selfie:</label>
-        <input type="file" id="selfie" name="selfie" accept="image/*" >
-        <label for="camera_selfie">Or capture a selfie:</label>
-        <input type="file" id="camera_selfie" name="camera_selfie" accept="image/*" capture="user">
-        <button type="submit">Upload</button>
-    </form>
+    <header>
+        {% load static %}
+        <div class="logo">
+            SelfieScan
+            <span class="subtitle">Get Your Event Pictures</span>
+        </div>
+        {% comment %} <div>
+            <img src='{% static 'images/app-logo2.jpeg' %}' />
+        </div>   {% endcomment %}
+    </header>
+    <main>
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+       
+        
+        <div class="form-container">
+            <form method="post" enctype="multipart/form-data" class="upload-form">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="selfie" class="custom-file-upload">Select a Selfie</label>
+                    <input type="file" id="selfie" name="selfie" accept="image/*" class="hidden-input">
+                </div>
+                <div class="input-group">
+                    <label for="camera_selfie" class="custom-file-upload">Capture a Selfie</label>
+                    <input type="file" id="camera_selfie" name="camera_selfie" accept="image/*" capture="user" class="hidden-input">
+                </div>
+                <div id="image-preview-container">
+                    <img id="image-preview" style="display: none; max-width: 200px; max-height: 200px;" alt="Selected Image Preview">
+                    <button type="button" id="clear-preview" style="display: none; margin-top: 10px;">Clear Preview</button>
+                </div>
+                    <button type="submit" class="upload-btn">Upload</button>
+            </form>
+        </div>
 
-    {% if matches %}
-        <h2>Matching Photos</h2>
-        <ul>
-            {% for match, distance in matches %}
-                <li>
-                    <img src="{{ MEDIA_URL }}{{ match }}" alt="Matching Photo" style="width: 200px; height: 200px;" />
-                    <p>Distance: {{ distance }}</p>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+        {% if matches %}
+            <section class="matches-section">
+                <h2>Matching Photos</h2>
+                <ul class="matches-list">
+                    {% for match, distance in matches %}
+                        <li class="match-item">
+                            <img src="{{ MEDIA_URL }}{{ match }}" alt="Matching Photo" class="match-photo" />
+                            <p>Distance: {{ distance }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    </main>
     {% load static %}
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-<script src="{% static 'js/script.js' %}"></script>
-  
+    <script src="{% static 'js/form.js' %}"></script>
 </body>
 </html>
