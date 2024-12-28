@@ -1,64 +1,71 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
     <title>SelfieScan</title>
-    
 </head>
-<body>
-    <header>
-        {% load static %}
-        <div class="logo">
-            SelfieScan
-            <span class="subtitle">Get Your Event Pictures</span>
+<body class="bg-gray-100 text-gray-900">
+    <header class="bg-blue-500 text-white p-6">
+        <div class="container mx-auto flex items-center justify-between">
+            <img src="{% static 'images/app-logo.webp' %}" alt="App Logo" class="h-12">
+            <h1 class="text-3xl font-bold">SelfieScan</h1>
         </div>
-        {% comment %} <div>
-            <img src='{% static 'images/app-logo2.jpeg' %}' />
-        </div>   {% endcomment %}
     </header>
-    <main>
+
+    <main class="container mx-auto p-6">
         {% if message %}
-            <p class="message">{{ message }}</p>
+            <div class="bg-green-100 text-green-800 p-4 rounded mb-6">
+                {{ message }}
+            </div>
         {% endif %}
-       
-        
-        <div class="form-container">
-            <form method="post" enctype="multipart/form-data" class="upload-form">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
                 {% csrf_token %}
-                <div class="input-group">
-                    <label for="selfie" class="custom-file-upload">Select a Selfie</label>
-                    <input type="file" id="selfie" name="selfie" accept="image/*" class="hidden-input">
+                <div class="flex items-center justify-center space-x-4">
+                    <!-- Hidden input for file upload -->
+                    <input type="file" id="selfie" name="selfie" accept="image/*" class="hidden">
+                    <!-- Styled label as a button -->
+                    <label for="selfie" class="cursor-pointer bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                        Select a Selfie
+                    </label>
+
+                    <span class="text-gray-500 font-semibold">OR</span>
+
+                    <!-- Hidden input for camera capture -->
+                    <input type="file" id="camera_selfie" name="camera_selfie" accept="image/*" capture="user" class="hidden">
+                    <!-- Styled label as a button -->
+                    <label for="camera_selfie" class="cursor-pointer bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                        Capture a Selfie
+                    </label>
                 </div>
-                <div class="input-group">
-                    <label for="camera_selfie" class="custom-file-upload">Capture a Selfie</label>
-                    <input type="file" id="camera_selfie" name="camera_selfie" accept="image/*" capture="user" class="hidden-input">
+                <div id="image-preview-container" class="mt-4">
+                    <img id="image-preview" class="hidden w-48 h-48 object-cover rounded shadow" alt="Selected Image Preview">
+                    <button type="button" id="clear-preview" class="hidden mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Clear Preview</button>
                 </div>
-                <div id="image-preview-container">
-                    <img id="image-preview" style="display: none; max-width: 200px; max-height: 200px;" alt="Selected Image Preview">
-                    <button type="button" id="clear-preview" style="display: none; margin-top: 10px;">Clear Preview</button>
+                <div class='flex w-full items-center justify-center'>
+                <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded hover:bg-blue-700">Upload</button>
                 </div>
-                    <button type="submit" class="upload-btn">Upload</button>
             </form>
         </div>
 
         {% if matches %}
-            <section class="matches-section">
-                <h2>Matching Photos</h2>
-                <ul class="matches-list">
+            <section class="mt-8">
+                <h2 class="text-2xl font-semibold mb-4">Matching Photos</h2>
+                <ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {% for match, distance in matches %}
-                        <li class="match-item">
-                            <img src="{{ MEDIA_URL }}{{ match }}" alt="Matching Photo" class="match-photo" />
-                            <p>Distance: {{ distance }}</p>
+                        <li class="bg-white shadow rounded p-4">
+                            <img src="{{ MEDIA_URL }}{{ match }}" alt="Matching Photo" class="w-full h-48 object-cover rounded mb-4">
+                            <p class="text-gray-700">Distance: {{ distance }}</p>
                         </li>
                     {% endfor %}
                 </ul>
             </section>
         {% endif %}
     </main>
-    {% load static %}
 
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <script src="{% static 'js/form.js' %}"></script>
 </body>
 </html>
