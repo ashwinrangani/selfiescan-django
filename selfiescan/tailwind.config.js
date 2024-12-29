@@ -4,12 +4,16 @@ module.exports = {
     "./templates/**/*.html",
     "./**/templates/**/*.html",
     "./static/js/**/*.js", 
+    "./home/node_modules/flyonui/dist/js/*.js"
   ],
   theme: {
     extend: {
 
     },
   },
-  plugins: [],
+  plugins: [
+    require('flyonui'), 
+    require('flyonui/plugin')
+  ],
 }
 
