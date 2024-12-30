@@ -4,14 +4,13 @@
 
 {% block content %}
 
-<main class="container mx-auto p-6">
   {% if message %}
   <div class="bg-green-100 text-green-800 p-4 rounded mb-6">{{ message }}</div>
   {% endif %}
-  <div class="bg-white shadow-md rounded-lg p-6">
+  <div class="shadow-lg bg-inherit rounded-lg border border-blue-50">
     <form method="post" enctype="multipart/form-data" class="space-y-6">
       {% csrf_token %}
-      <div class="flex items-center justify-center space-x-4">
+      <div class="flex items-center justify-center gap-2 lg:gap-6">
         <!-- Hidden input for file upload -->
         <input
           type="file"
@@ -23,12 +22,12 @@
         <!-- Styled label as a button -->
         <label
           for="selfie"
-          class="cursor-pointer btn btn-gradient btn-primary btn-lg p-3"
+          class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
         >
           Select a Selfie
         </label>
 
-        <span class="text-gray-500 font-semibold">OR</span>
+        <span class="text-gray-600 font-semibold">OR</span>
 
         <!-- Hidden input for camera capture -->
         <input
@@ -42,7 +41,7 @@
         <!-- Styled label as a button -->
         <label
           for="camera_selfie"
-          class="cursor-pointer btn btn-gradient btn-primary btn-lg p-3"
+          class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
         >
           Capture a Selfie
         </label>
@@ -53,25 +52,26 @@
           class="hidden w-48 h-48 object-cover rounded shadow"
           alt="Selected Image Preview"
         />
+        
         <button
           type="button"
           id="clear-preview"
-          class="hidden mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+          class="hidden  mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
         >
           Clear Preview
         </button>
       </div>
-      <div class="flex w-full items-center justify-center">
+      <div class="flex w-full items-center justify-center pb-3">
         <button
           type="submit"
-          class="cursor-pointer btn btn-gradient btn-primary btn-lg btn-wide p-3"
+          class="cursor-pointer btn btn-gradient btn-primary btn-lg btn-wide p-2"
         >
           Upload
         </button>
       </div>
     </form>
   </div>
-
+  <div class="glass mt-2"></div>
   {% if matches %}
   <section class="mt-8">
     <h2 class="text-2xl font-semibold mb-4">Matching Photos</h2>
@@ -91,5 +91,5 @@
     </ul>
   </section>
   {% endif %}
-</main>
+
 {% endblock %}
