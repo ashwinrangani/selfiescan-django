@@ -16,7 +16,8 @@ module.exports = {
     require('flyonui/plugin')
   ],
   flyonui: {
-    themes: ["light", "dark", "gourmet", "corporate", "luxury", "soft"]
-  }
+    themes: ["light", "dark", "gourmet", "luxury", "soft"]
+  },
+  
 }
 
