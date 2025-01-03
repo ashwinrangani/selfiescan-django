@@ -1,97 +1,88 @@
 {% extends "base.html" %}
 
-{% block title %}Upload Selfie{% endblock %}
+{% block title %}SelfieScan{% endblock %}
 
 {% block content %}
 
-  {% if message %}
-  <div class="bg-green-100 text-green-800 p-4 rounded mb-6">{{ message }}</div>
-  {% endif %}
-  <div class="shadow-lg bg-inherit rounded-lg border border-blue-50">
-    <form method="post" enctype="multipart/form-data" class="space-y-6">
-      {% csrf_token %}
-      <div class="flex items-center justify-center gap-2 lg:gap-6">
-        <!-- Hidden input for file upload -->
-        <input
-          type="file"
-          id="selfie"
-          name="selfie"
-          accept="image/*"
-          class="hidden"
-        />
-        <!-- Styled label as a button -->
-        <label
-          for="selfie"
-          class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
-        >
-          Select a Selfie
-        </label>
+{% if message %}
+<div class="bg-green-100 text-green-800 p-4 rounded mb-6">{{ message }}</div>
+{% endif %}
 
-        <span class="text-gray-600 font-semibold">OR</span>
+<div class="shadow-lg bg-inherit rounded-lg border border-blue-50 p-6">
+  <form method="post" enctype="multipart/form-data" class="space-y-6" action="{% url 'upload_selfie' %}">
+    {% csrf_token %}
+    <div class="flex items-center justify-center gap-2 lg:gap-6">
+      <!-- File Upload -->
+      <input
+        type="file"
+        id="selfie"
+        name="selfie"
+        accept="image/*"
+        class="hidden"
+      />
+      <label
+        for="selfie"
+        class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
+      >
+        Select a Selfie
+      </label>
 
-        <!-- Hidden input for camera capture -->
-        <input
-          type="file"
-          id="camera_selfie"
-          name="camera_selfie"
-          accept="image/*"
-          capture="user"
-          class="hidden"
-        />
-        <!-- Styled label as a button -->
-        <label
-          for="camera_selfie"
-          class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
-        >
-          Capture a Selfie
-        </label>
-      </div>
-      <div id="image-preview-container" class="mt-4">
-        <img
-          id="image-preview"
-          class="hidden w-48 h-48 object-cover rounded shadow"
-          alt="Selected Image Preview"
-        />
-        
-        <button
-          type="button"
-          id="clear-preview"
-          class="hidden  mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
-        >
-          Clear Preview
-        </button>
-      </div>
-      <div class="flex w-full items-center justify-center pb-3">
-        <button
-          type="submit"
-          class="cursor-pointer btn btn-gradient btn-primary btn-lg btn-wide p-2"
-        >
-          Upload
-        </button>
-      </div>
-    </form>
-  </div>
-  <div class="glass mt-2"></div>
-  {% if matches %}
-  <section class="mt-8">
-    <h2 class="text-2xl font-semibold mb-4">Matching Photos</h2>
-    <ul
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-    >
-      {% for match, distance in matches %}
-      <li class="bg-white shadow rounded p-4">
-        <img
-          src="{{ MEDIA_URL }}{{ match }}"
-          alt="Matching Photo"
-          class="w-full h-48 object-cover rounded mb-4"
-        />
-        <p class="text-gray-700">Distance: {{ distance }}</p>
-      </li>
-      {% endfor %}
-    </ul>
-  </section>
-  {% else %}
-  {% comment %} <span class="loading loading-infinity loading-lg"></span> {% endcomment %}
-  {% endif %}
+      <span class="text-gray-600 font-semibold">OR</span>
+
+      <!-- Camera Capture -->
+      <input
+        type="file"
+        id="camera_selfie"
+        name="camera_selfie"
+        accept="image/*"
+        capture="user"
+        class="hidden"
+      />
+      <label
+        for="camera_selfie"
+        class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
+      >
+        Capture a Selfie
+      </label>
+    </div>
+
+    <!-- Image Preview -->
+    <div id="image-preview-container" class="mt-4 text-center">
+      <img
+        id="image-preview"
+        class="hidden w-48 h-48 object-cover rounded shadow mx-auto"
+        alt="Selected Image Preview"
+      />
+      <button
+        type="button"
+        id="clear-preview"
+        class="hidden mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+      >
+        Clear Preview
+      </button>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex w-full items-center justify-center pb-3">
+      <button
+        type="submit"
+        class="cursor-pointer btn btn-gradient btn-primary btn-lg btn-wide p-2"
+      >
+        Upload
+      </button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="text-center">
+      <span class="loading loading-infinity loading-lg hidden"></span>
+    </div>
+  </form>
+</div>
+
+<!-- Matches Section -->
+<div class="matches-section glass mt-8 p-4 rounded-lg">
+  <h2 class="text-2xl font-semibold mb-4">Matching Photos</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+</div>
 
 {% endblock %}

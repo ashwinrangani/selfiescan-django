@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Toggle the theme on button click
     themeToggle.addEventListener('click', () => {
-      const isDark = htmlElement.getAttribute('data-theme') === 'dark';
-      const newTheme = isDark ? 'gourmet' : 'dark';
+      const isDark = htmlElement.getAttribute('data-theme') === 'luxury';
+      const newTheme = isDark ? 'gourmet' : 'luxury';
   
       htmlElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   
     function toggleIcons(theme) {
-      if (theme === 'dark') {
+      if (theme === 'luxury') {
         lightIcon.classList.add('hidden');
         darkIcon.classList.remove('hidden');
       } else {

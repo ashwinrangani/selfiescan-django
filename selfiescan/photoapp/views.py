@@ -5,6 +5,7 @@ import os
 import pickle
 import face_recognition
 import logging
+from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,6 @@ def find_matches(selfie_path, encodings_file='encodings.pkl', thresold=0.9):
     return matches  # Return a list of tuples (relative_path, distance)
 
 
-# Create your views here.
 def upload_selfie(request):
     if request.method == 'POST':
         selfie = request.FILES.get('selfie') or request.FILES.get('camera_selfie')
@@ -41,37 +41,26 @@ def upload_selfie(request):
             fs = FileSystemStorage()
             filename = fs.save(selfie.name, selfie)
             selfie_path = fs.path(filename)
-            
 
             try:
-                base_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of current file
+                # Assuming you have a `find_matches` function for face recognition
+                base_dir = os.path.dirname(os.path.abspath(__file__))
                 encodings_file = os.path.join(base_dir, 'encodings.pkl')
 
                 matching_images = find_matches(selfie_path, encodings_file)
-                
-                if matching_images:
-                    return render(request, 'upload_selfie.html', {
-                        'message': 'Matching photos found',
-                        'matches': matching_images,  # List of tuples (path, distance)
-                        'selfie_url': fs.url(filename),
-                    })
 
-                else:
-                    return render(request, 'upload_selfie.html', {
-                        'message': 'No matching photos found',
-                        'selfie_url': fs.url(filename),
-                    })
-                    print("Media URLs for matches:", [settings.MEDIA_URL + match for match in matching_images])
-
-
-            except Exception as e:
-                return render(request, 'upload_selfie.html', {
-                    'message': f'Error during face recognition: {str(e)}',
-                    'selfie_url': fs.url(filename),
+                return JsonResponse({
+                    'message': 'Matching photos found' if matching_images else 'Matching photos not found',
+                    'matches': [{'path': settings.MEDIA_URL + match[0], 'distance': match[1]} for match in matching_images]
                 })
 
-    return render(request, 'upload_selfie.html')  # Render the upload form for GET requests
-  
+            except Exception as e:
+                return JsonResponse({'message': f'Error: {str(e)}'}, status=500)
+
+        return JsonResponse({'message': 'No file uploaded'}, status=400)
+
+    # Render the template on GET request
+    return render(request, 'upload_selfie.html')
 
 def generate_barcode():
     pass

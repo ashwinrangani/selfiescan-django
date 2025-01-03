@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraInput = document.getElementById('camera_selfie');
     const imagePreview = document.getElementById('image-preview');
     const clearPreviewButton = document.getElementById('clear-preview');
-    
+    const uploadForm = document.querySelector('form');
+    const loadingState = document.querySelector('.loading')
 
     function updatePreview(input) {
         if (input.files && input.files[0]) {
@@ -36,4 +37,40 @@ document.addEventListener('DOMContentLoaded', () => {
         updatePreview(cameraInput);
     });
     clearPreviewButton.addEventListener('click', clearPreview);
+
+    uploadForm.addEventListener('submit', (e) => {
+        e.preventDefault()
+        loadingState.style.display = 'block'
+        
+        const formdata = new FormData(uploadForm)
+
+        fetch(uploadForm.action, {
+            method: 'POST',
+            headers : {
+                'X-CSRFToken': uploadForm.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: formdata,
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            loadingState.style.display = 'none';
+            
+            if (data.matches) {
+                const matchesContainer = document.querySelector('.matches-section');
+                matchesContainer.innerHTML = '';
+                data.matches.forEach((match) => {
+                    matchesContainer.innerHTML += `
+                    <div class='card h-100 w-100'>
+                            <img src="${match.path}" alt="Match" />
+                            <p>Distance: ${match.distance}</p>
+                        </div>
+                    `;
+                });
+            }
+        })
+        .catch((error) => {
+            loadingSpinner.style.display = 'none'; // Hide the spinner
+            console.error('Error:', error);
+        });
+    })
 });
