@@ -60,8 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 matchesContainer.innerHTML = '';
                 data.matches.forEach((match) => {
                     matchesContainer.innerHTML += `
-                    <div class='card h-100 w-100'>
-                            <img src="${match.path}" alt="Match" />
+                    <div class="card group hover:shadow sm:max-w-sm">
+                            <img src="${match.path}" alt="Match" class="transition-transform duration-500 md:w-60 md:h-60 rounded-md group-hover:scale-110"'/>
                             <p>Distance: ${match.distance}</p>
                         </div>
                     `;
