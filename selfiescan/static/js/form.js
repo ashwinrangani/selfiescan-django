@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePreview.src = '';
         imagePreview.style.display = 'none';
         clearPreviewButton.style.display = 'none';
+        // const matchesContainer = document.querySelector('.matches-section');
+        // matchesContainer.innerHTML = ''
     }
 
     fileInput.addEventListener('change', () => {

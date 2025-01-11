@@ -9,7 +9,7 @@ from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
-def find_matches(selfie_path, encodings_file='encodings.pkl', thresold=0.9):
+def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.9):
     selfie_image = face_recognition.load_image_file(selfie_path)
     selfie_encoding = face_recognition.face_encodings(selfie_image)
 
@@ -26,7 +26,7 @@ def find_matches(selfie_path, encodings_file='encodings.pkl', thresold=0.9):
     distances = face_recognition.face_distance(encodings, selfie_encoding)
 
     for i, distance in enumerate(distances):
-        if distance <= thresold:  # Match Found
+        if distance <= threshold:  # Match Found
             path = os.path.relpath(identities[i], settings.MEDIA_ROOT)
             matches.append((path, distance))
     
@@ -41,6 +41,7 @@ def upload_selfie(request):
             fs = FileSystemStorage()
             filename = fs.save(selfie.name, selfie)
             selfie_path = fs.path(filename)
+            print(selfie_path)
 
             try:
                 # Assuming you have a `find_matches` function for face recognition
@@ -55,7 +56,13 @@ def upload_selfie(request):
                 })
 
             except Exception as e:
+                logger.error(f"Error in upload_selfie: {e}")
                 return JsonResponse({'message': f'Error: {str(e)}'}, status=500)
+            finally:
+                if os.path.exists(selfie_path):
+                    os.remove(selfie_path)
+                    print(f"Deleted temporary selfie file: {selfie_path}")
+                    
 
         return JsonResponse({'message': 'No file uploaded'}, status=400)
 
