@@ -87,4 +87,24 @@
   <!-- Cards will be appended dynamically here -->
 </div>
 
+<!--FullScreen View-->
+<div id="fullscreen-view" class="hidden fixed inset-0 bg-black bg-opacity-80 items-center justify-center z-50">
+  <div class="relative w-full h-full flex items-center justify-center">
+    <img id="fullscreen-image" class="max-w-full max-h-full rounded shadow" />
+    <button
+      id="download-button"
+      class="absolute top-4 right-20 btn btn-primary btn-sm"
+    >
+      Download
+    </button>
+    <button
+      id="close-button"
+      class="absolute top-4 right-4 btn btn-secondary btn-sm"
+    >
+      Close
+    </button>
+  </div>
+</div>
+
+
 {% endblock %}
