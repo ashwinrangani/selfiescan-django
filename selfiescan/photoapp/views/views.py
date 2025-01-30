@@ -33,7 +33,6 @@ def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.9):
     matches = sorted(matches, key=lambda x: x[1])  # Sort by distance
     return matches  # Return a list of tuples (relative_path, distance)
 
-
 def upload_selfie(request):
     if request.method == 'POST':
         selfie = request.FILES.get('selfie') or request.FILES.get('camera_selfie')
