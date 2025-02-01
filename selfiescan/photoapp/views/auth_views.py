@@ -1,4 +1,4 @@
-from django import render, redirect
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -29,17 +29,18 @@ def sign_up(request):
 
 
 def sign_in(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         email = request.POST['email']
         password = request.POST['password']
-        user = authenticate(request, email=email, password=password)
+        user = authenticate(request, username=email, password=password)
 
         if user is not None:
             login(request, user)
-            messages.success(request, 'Logged in successfully')
-            return redirect('upload_selfie')
+            messages.success(request, "Logged in successfully!")
+            return redirect('upload_selfie')  
         else:
-            messages.error(request, 'Invalid email or password')
+            messages.error(request, "Invalid username or password.")
+
     return render(request, 'signin.html')
 
 def sign_out(request):

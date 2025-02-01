@@ -78,12 +78,21 @@
             FAQs
           </a>
         </li>
+        {% if user.is_authenticated %}
         <li class="dropdown-footer gap-2">
-          <a class="btn btn-error btn-soft btn-block" href="#">
+          <a class="btn btn-error btn-soft btn-block" href="{% url 'signout' %}">
             <span class="icon-[tabler--logout]"></span>
             Sign out
           </a>
         </li>
+        {% else %}
+        <li class="dropdown-footer gap-2">
+          <a class="btn btn-error btn-soft btn-block" href="{% url 'signin' %}">
+            <span class="icon-[tabler--logout]"></span>
+            Sign In
+          </a>
+        </li>
+        {% endif %}
       </ul>
     </div>
   </div>
