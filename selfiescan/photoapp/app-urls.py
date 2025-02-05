@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views.views import upload_selfie, generate_barcode
 from .views.auth_views import sign_in, sign_up, sign_out
 
@@ -8,5 +8,6 @@ urlpatterns = [
     path('signin/', sign_in, name='signin'),
     path('signout/', sign_out, name='signout'),
     path('signup/', sign_up, name='signup'),
+    path('accounts/', include('allauth.urls')),
 ]
 

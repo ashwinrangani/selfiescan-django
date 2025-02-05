@@ -13,7 +13,7 @@
 
     <form method="POST" action="{% url 'signin' %}">
         {% csrf_token %}
-        <input type="email" name="email" placeholder="your email" required>
+        <input type="text" name="username" placeholder="username" required>
         <input type="password" name="password" placeholder="your password" required>
         <button type="submit">Sign In</button>
     </form>
