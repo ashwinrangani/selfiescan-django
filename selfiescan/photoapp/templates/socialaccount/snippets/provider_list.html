@@ -1,0 +1,11 @@
+<!-- {% load i18n %}
+{% load account socialaccount %}
+<div class="flex flex-col gap-3 w-full max-w-sm mx-auto">
+    {% for provider in socialaccount_providers %}
+        <a href="{% provider_login_url provider.id process=process %}"
+            class="flex items-center justify-center gap-2 w-full py-2 px-4 bg-white text-gray-700 border border-gray-300 rounded-lg shadow-md hover:bg-gray-100 transition-all">
+            <img src="{% static 'images/google-icon.svg' %}" alt="{{ provider.name }}" class="h-6 w-6">
+            <span class="font-medium">Continue with {{ provider.name }}</span>
+        </a>
+    {% endfor %}
+</div> -->

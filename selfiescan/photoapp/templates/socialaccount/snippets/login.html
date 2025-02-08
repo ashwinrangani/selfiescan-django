@@ -1,0 +1,20 @@
+{% load i18n %}
+{% load allauth %}
+{% load socialaccount %}
+{% get_providers as socialaccount_providers %}
+{% if socialaccount_providers %}
+    {% if not SOCIALACCOUNT_ONLY %}
+    <div class="divider">or continue with</div>
+    {% endif %}
+{% endif %}
+
+<div class="flex w-full flex-wrap gap-2">
+    {% for provider in socialaccount_providers %}
+        <a href="{% provider_login_url provider.id process=process %}" 
+            >
+            <button class="btn btn-soft btn-primary border-[#2b3137]   hover:border-[#2b3137] hover:bg-[#2b3137]/90" >
+            <span class="icon-[tabler--brand-google]"></span>{{ provider.name }}
+            </button>
+        </a>
+    {% endfor %}
+</div>
