@@ -9,7 +9,7 @@ from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
-def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.9):
+def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.6):
     selfie_image = face_recognition.load_image_file(selfie_path)
     selfie_encoding = face_recognition.face_encodings(selfie_image)
 
@@ -44,9 +44,8 @@ def upload_selfie(request):
 
             try:
                 # Assuming you have a `find_matches` function for face recognition
-                base_dir = os.path.dirname(os.path.abspath(__file__))
-                encodings_file = os.path.join(base_dir, 'encodings.pkl')
-
+                encodings_file = str(settings.BASE_DIR) + '/photoapp/encodings.pkl'
+               
                 matching_images = find_matches(selfie_path, encodings_file)
 
                 return JsonResponse({

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraInput = document.getElementById('camera_selfie');
     const imagePreview = document.getElementById('image-preview');
     const clearPreviewButton = document.getElementById('clear-preview');
-    const uploadForm = document.querySelector('form');
+    const uploadForm = document.getElementById('upload_selfie');
     const loadingState = document.querySelector('.loading')
 
     function updatePreview(input) {

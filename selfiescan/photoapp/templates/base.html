@@ -28,6 +28,25 @@
 </head>
 <body>
     {% include "navbar.html" %}
+    {% if messages %}
+    <div class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-50">
+        {% for message in messages %}
+            <div class="alert alert-soft 
+                {% if message.tags == 'success' %} alert-success {% endif %}
+                {% if message.tags == 'error' %} alert-danger {% endif %}
+                {% if message.tags == 'warning' %} alert-warning {% endif %}
+                {% if message.tags == 'info' %} alert-primary {% endif %}
+                removing:translate-x-5 removing:opacity-0 flex items-center gap-4 transition duration-300 ease-in-out"
+                role="alert" id="alert-{{ forloop.counter }}">
+                {{ message }}
+                <button class="ms-auto leading-none" data-remove-element="#alert-{{ forloop.counter }}" aria-label="Close Button">
+                    <span class="icon-[tabler--x] size-5"></span>
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
     <main class="p-6">
         {% block content %}{% endblock %}
     </main>
