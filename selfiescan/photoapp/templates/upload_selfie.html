@@ -8,7 +8,7 @@
 <div class="bg-green-100 text-green-800 p-4 rounded mb-6">{{ message }}</div>
 {% endif %}
 
-<div class="shadow-lg bg-inherit rounded-lg border border-blue-50 p-6">
+<div class="shadow-lg bg-inherit rounded-lg border border-blue-50 dark:border-none  p-6">
   <form method="post" enctype="multipart/form-data" id="upload_selfie" class="space-y-6" action="{% url 'upload_selfie' %}">
     {% csrf_token %}
     <div class="flex items-center justify-center gap-2 lg:gap-6">
