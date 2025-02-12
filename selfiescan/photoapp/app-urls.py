@@ -10,6 +10,6 @@ urlpatterns = [
     path('signout/', sign_out, name='signout'),
     path('signup/', sign_up, name='signup'),
     path('accounts/', include('allauth.urls')),
-    path('profile/', profile, name='profle')
+    path('profile/', profile, name='profile')
 ]
 

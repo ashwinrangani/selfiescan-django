@@ -13,7 +13,9 @@ def profile(request):
             form_profile.save()
             return redirect('profile')
     else:
-        form_user = updateUserForm(request.POST, instance=request.user)
-        form_profile = updateProfileForm(request.POST, request.FILES, instance=request.user.profile)
-    
-    return render(request, 'profile.html', {'form_user':form_user,'form_profile': form_profile})
+        form_user = updateUserForm(instance=request.user)
+        form_profile = updateProfileForm(instance=request.user.profile)
+
+    print('User First Name:', form_user.instance.first_name)  # Corrected print statement
+
+    return render(request, 'profile.html', {'user_form': form_user, 'profile_form': form_profile})
