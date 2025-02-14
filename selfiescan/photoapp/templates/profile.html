@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 <div class="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-900 shadow-lg rounded-xl">
     
     <!-- Profile Header -->
     <div class="flex items-center gap-4 mb-6">
-        <img class="w-24 h-24 rounded-full object-cover border-4 border-primary" 
+        <img id="profileImage" class="w-24 h-24 rounded-full object-cover border-4 border-primary" 
              src="{{ request.user.profile.profile_img.url }}" 
              alt="Profile Image">
         <div>
@@ -14,41 +15,57 @@
     </div>
 
     <!-- Profile Form -->
-    <form method="POST" enctype="multipart/form-data" class="space-y-4">
+    <form method="POST" id="profileForm" enctype="multipart/form-data" class="space-y-4">
         {% csrf_token %}
 
         <!-- Profile Picture Upload -->
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture</label>
-            <div class="flex items-center gap-4 mt-2">
-                <input type="file" class="input file:bg-primary file:text-white file:border-0 file:rounded-md file:px-3 file:py-2">
+            <div class="flex items-center w-72 gap-4 mt-2">
+                <input type="file" id="profileImgInput" class="input file:bg-primary file:text-white file:border-0 file:rounded-md file:px-3 file:py-2">
             </div>
         </div>
 
         <!-- First Name -->
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
-            {{ user_form.first_name }}
+            <p class="input rounded-full w-72 p-2">{{ user_form.first_name }}</p>
         </div>
 
         <!-- Last Name -->
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
-            {{ user_form.last_name }}
+           <p class="input rounded-full w-72 p-2">{{ user_form.last_name }}</p> 
         </div>
 
         <!-- Email -->
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-            {{ user_form.email }}
+            <p class="input rounded-full w-72 p-2">{{ user_form.email }}</p>
         </div>
 
         <!-- Update Button -->
-        <div class="flex justify-end">
+        <!-- <div class="flex justify-center">
             <button type="submit" class="btn btn-primary px-6 py-2 text-white font-semibold rounded-lg shadow-md">
                 Update Profile
+            </button> -->
+            <div class="flex justify-center">
+                <button id="updateProfileBtn" type="submit" class="btn btn-primary px-6 py-2 text-white font-semibold rounded-lg shadow-md">
+                <span id="btnText">Update Profile</span>
+                <span id="loadingSpinner" class="ml-2 hidden">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                    </svg>
+                </span>
             </button>
+        </div>
         </div>
     </form>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}
+

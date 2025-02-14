@@ -28,51 +28,60 @@ document.addEventListener('DOMContentLoaded', () => {
         // const matchesContainer = document.querySelector('.matches-section');
         // matchesContainer.innerHTML = ''
     }
-
-    fileInput.addEventListener('change', () => {
-        cameraInput.disabled = fileInput.files.length > 0;
-        updatePreview(fileInput);
-    });
-
-    cameraInput.addEventListener('change', () => {
-        fileInput.disabled = cameraInput.files.length > 0;
-        updatePreview(cameraInput);
-    });
-    clearPreviewButton.addEventListener('click', clearPreview);
-
-    uploadForm.addEventListener('submit', (e) => {
-        e.preventDefault()
-        loadingState.style.display = 'block'
-        
-        const formdata = new FormData(uploadForm)
-
-        fetch(uploadForm.action, {
-            method: 'POST',
-            headers : {
-                'X-CSRFToken': uploadForm.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-            body: formdata,
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            loadingState.style.display = 'none';
-            
-            if (data.matches) {
-                const matchesContainer = document.querySelector('.matches-section');
-                matchesContainer.innerHTML = '';
-                data.matches.forEach((match) => {
-                    matchesContainer.innerHTML += `
-                    <div class="card group hover:shadow sm:max-w-sm">
-                            <img src="${match.path}" alt="Match" class="transition-transform duration-500 md:w-60 md:h-60 rounded-md group-hover:scale-110"'/>
-                            <p>Distance: ${match.distance}</p>
-                        </div>
-                    `;
-                });
-            }
-        })
-        .catch((error) => {
-            loadingSpinner.style.display = 'none'; // Hide the spinner
-            console.error('Error:', error);
+    if (fileInput){
+        fileInput.addEventListener('change', () => {
+            cameraInput.disabled = fileInput.files.length > 0;
+            updatePreview(fileInput);
         });
-    })
+    }
+    
+    if(cameraInput){
+        cameraInput.addEventListener('change', () => {
+            fileInput.disabled = cameraInput.files.length > 0;
+            updatePreview(cameraInput);
+        }); 
+    }
+    if(clearPreviewButton){
+        clearPreviewButton.addEventListener('click', clearPreview);
+    }
+
+    
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', (e) => {
+            e.preventDefault()
+            loadingState.style.display = 'block'
+            
+            const formdata = new FormData(uploadForm)
+    
+            fetch(uploadForm.action, {
+                method: 'POST',
+                headers : {
+                    'X-CSRFToken': uploadForm.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: formdata,
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                loadingState.style.display = 'none';
+                
+                if (data.matches) {
+                    const matchesContainer = document.querySelector('.matches-section');
+                    matchesContainer.innerHTML = '';
+                    data.matches.forEach((match) => {
+                        matchesContainer.innerHTML += `
+                        <div class="card group hover:shadow sm:max-w-sm">
+                                <img src="${match.path}" alt="Match" class="transition-transform duration-500 md:w-60 md:h-60 rounded-md group-hover:scale-110"'/>
+                                <p>Distance: ${match.distance}</p>
+                            </div>
+                        `;
+                    });
+                }
+            })
+            .catch((error) => {
+                loadingSpinner.style.display = 'none';
+                console.error('Error:', error);
+            });
+        })
+    }
+    
 });

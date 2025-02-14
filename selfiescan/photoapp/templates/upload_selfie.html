@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}SelfieScan{% endblock %}
 
 {% block content %}
@@ -105,6 +105,10 @@
     </button>
   </div>
 </div>
-
-
 {% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/form.js' %}"></script>
+<script src="{% static 'js/download-img.js' %}"></script>
+{% endblock %}
+
