@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from ..forms import updateUserForm, updateProfileForm
 from django.contrib import messages
@@ -14,22 +14,19 @@ def profile(request):
             form_user.save()
             form_profile.save()
 
-            
             response_data = {
                 "success": True,
-                "profile_img_url": request.user.form_profile.profile_img.url,
+                "profile_img_url": request.user.profile.profile_img.url,  # ✅ Fixed reference
             }
             messages.success(request, "Profile updated successfully!")
             return JsonResponse(response_data)
 
-        
         else:
             messages.error(request, "There was an error updating your profile. Please check the fields.")
-        return JsonResponse({"success": False, "errors": form_user.errors}, status=400)
+            return JsonResponse({"success": False, "errors": form_user.errors}, status=400)  # ✅ Fixed return
+
     else:
         form_user = updateUserForm(instance=request.user)
         form_profile = updateProfileForm(instance=request.user.profile)
-
-    print('User First Name:', form_user.instance.first_name)
-
+    
     return render(request, 'profile.html', {'user_form': form_user, 'profile_form': form_profile})

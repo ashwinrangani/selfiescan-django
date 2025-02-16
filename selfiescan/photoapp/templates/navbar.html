@@ -36,23 +36,48 @@
     </button>
     <div class="dropdown relative inline-flex [--auto-close:inside] [--offset:8] [--placement:bottom-end]">
       <button id="dropdown-scrollable" type="button" class="dropdown-toggle flex items-center" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+        {% if user.is_authenticated %}
         <div class="avatar">
           <div class="size-9.5 rounded-full">
-            <img src="{{user.profile.profile_img.url}}" alt="avatar 1" />
+            <img src="{{user.profile.profile_img.url}}" alt="avatar" />
           </div>
         </div>
+        {% else %}
+        <div class="avatar placeholder">
+          <div class="bg-primary text-primary-content w-10 rounded-full">
+            <span class="text-md texr uppercase">G</span>
+          </div>
+        </div>
+        {% endif %}
+        
       </button>
       <ul class="dropdown-menu dropdown-open:opacity-100 hidden min-w-60" role="menu" aria-orientation="vertical" aria-labelledby="dropdown-avatar">
         <li class="dropdown-header gap-2">
+          {% if user.is_authenticated %}
           <div class="avatar">
             <div class="w-10 rounded-full">
               <img src="{{user.profile.profile_img.url}}" alt="avatar" />
             </div>
           </div>
+          {% else %}
+          <div class="avatar placeholder">
+            <div class="bg-primary text-primary-content w-10 rounded-full">
+              <span class="text-md uppercase">G</span>
+            </div>
+          </div>
+          {% endif %}
+          {% if user.is_authenticated %}
           <div>
             <h6 class="text-base-content/90 text-base font-semibold">{{user.first_name}} {{user.last_name}}</h6>
             <small class="text-base-content/50">{{user.get_username}}</small>
           </div>
+          {% else %}
+          <div>
+            <h6 class="text-base-content/90 text-base font-semibold">Guest</h6>
+            <small class="text-base-content/50">Anonymous</small>
+          </div>
+          {% endif %}
+          
         </li>
         <li>
           <a class="dropdown-item" href="{% url 'profile'%}" >

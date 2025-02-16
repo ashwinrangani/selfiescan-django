@@ -15,14 +15,14 @@
     </div>
 
     <!-- Profile Form -->
-    <form method="POST" id="profileForm" enctype="multipart/form-data" class="space-y-4">
+    <form method="POST" id="profileForm" enctype="multipart/form-data" class="space-y-4" action="{% url 'profile' %}">
         {% csrf_token %}
 
         <!-- Profile Picture Upload -->
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture</label>
             <div class="flex items-center w-72 gap-4 mt-2">
-                <input type="file" id="profileImgInput" class="input file:bg-primary file:text-white file:border-0 file:rounded-md file:px-3 file:py-2">
+                <input type="file" id="profileImgInput" name="profile_img" class="input file:bg-primary file:text-white file:border-0 file:rounded-md file:px-3 file:py-2">
             </div>
         </div>
 
