@@ -2,7 +2,7 @@ from django.urls import path, include
 from .views.views import upload_selfie, generate_barcode
 from .views.auth_views import sign_in, sign_up, sign_out
 from .views.profile import profile
-from .views.settings import settings
+from .views.acc_settings import settings
 
 urlpatterns = [
     path("", upload_selfie, name='upload_selfie'),

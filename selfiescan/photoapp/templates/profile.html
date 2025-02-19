@@ -22,7 +22,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture</label>
             <div class="flex items-center w-72 gap-4 mt-2">
-                <input type="file" id="profileImgInput" name="profile_img" class="input file:bg-primary file:text-white file:border-0 file:rounded-md file:px-3 file:py-2">
+                <input type="file" id="profileImgInput" name="profile_img" class="input file:bg-primary file:text-white file:border-0 file:rounded-full file:px-3 file:py-2">
             </div>
         </div>
 
@@ -45,12 +45,9 @@
         </div>
 
         <!-- Update Button -->
-        <!-- <div class="flex justify-center">
-            <button type="submit" class="btn btn-primary px-6 py-2 text-white font-semibold rounded-lg shadow-md">
-                Update Profile
-            </button> -->
+        
             <div class="flex justify-center">
-                <button id="updateProfileBtn" type="submit" class="btn btn-primary px-6 py-2 text-white font-semibold rounded-lg shadow-md">
+                <button id="updateProfileBtn" type="submit" class="btn btn-primary px-6 py-2 text-white font-semibold rounded-lg shadow-md" disabled>
                 <span id="btnText">Update Profile</span>
                 <span id="loadingSpinner" class="ml-2 hidden">
                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -61,9 +58,7 @@
             </button>
             
         </div>
-        <p id="successMessage" class="hidden py-1 text-sm">
-            Profile updated!
-        </p>
+        
     </form>
 </div>
 {% endblock %}

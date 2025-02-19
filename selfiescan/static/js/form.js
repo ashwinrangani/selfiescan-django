@@ -1,3 +1,5 @@
+// upload_selfie form
+
 document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('selfie');
     const cameraInput = document.getElementById('camera_selfie');
