@@ -962,18 +962,6 @@ html {
   color: var(--fallback-bc,oklch(var(--bc)/0.9));
 }
 
-.alert {
-  position: relative;
-  width: 100%;
-  padding: 1rem;
-  font-size: 1rem;
-  line-height: 1.375rem;
-  border-radius: var(--rounded-box, 0.5rem);
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-bg-opacity, 1)));
-  color: var(--fallback-bc,oklch(var(--bc)/0.8));
-}
-
 .avatar {
   position: relative;
   display: inline-flex;
@@ -1212,99 +1200,6 @@ html {
 .active .carousel-dot {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity, 1)));
-}
-
-.chat {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  -moz-column-gap: 1rem;
-       column-gap: 1rem;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-}
-
-.chat-bubble {
-  position: relative;
-  display: block;
-  width: -moz-fit-content;
-  width: fit-content;
-  padding: 0.75rem;
-  max-width: 90%;
-  border-radius: var(--rounded-box, 0.5rem);
-  min-height: 2.75rem;
-  min-width: 2.75rem;
-}
-
-.chat-bubble:before {
-  position: absolute;
-  bottom: 0px;
-  height: 1rem;
-  width: 1rem;
-  background-color: inherit;
-  content: "";
-  -webkit-mask-size: contain;
-          mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-          mask-position: center;
-}
-
-.chat-receiver .chat-bubble {
-  grid-column-start: 2;
-  border-end-start-radius: 0px;
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity, 1)));
-  color: var(--fallback-bc,oklch(var(--bc)/0.9));
-}
-
-.chat-receiver .chat-bubble:before {
-  -webkit-mask-image: url("data:image/svg+xml,%3csvg width='3' height='3' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill='black' d='m 0 3 L 3 3 L 3 0 C 3 1 1 3 0 3'/%3e%3c/svg%3e");
-          mask-image: url("data:image/svg+xml,%3csvg width='3' height='3' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill='black' d='m 0 3 L 3 3 L 3 0 C 3 1 1 3 0 3'/%3e%3c/svg%3e");
-  inset-inline-start: -0.749rem;
-}
-
-[dir="rtl"] .chat-receiver .chat-bubble:before {
-  -webkit-mask-image: url("data:image/svg+xml,%3csvg width='3' height='3' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill='black' d='m 0 3 L 1 3 L 3 3 C 2 3 0 1 0 0'/%3e%3c/svg%3e");
-          mask-image: url("data:image/svg+xml,%3csvg width='3' height='3' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill='black' d='m 0 3 L 1 3 L 3 3 C 2 3 0 1 0 0'/%3e%3c/svg%3e");
-}
-
-.chat-sender {
-  place-items: end;
-  grid-template-columns: 1fr auto;
-}
-
-.chat-sender .chat-header {
-  grid-column-start: 1;
-}
-
-.chat-sender .chat-footer {
-  grid-column-start: 1;
-}
-
-.chat-sender .chat-avatar {
-  grid-column-start: 2;
-}
-
-.chat-sender .chat-bubble {
-  grid-column-start: 1;
-  text-align: end;
-  border-end-end-radius: 0px;
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity, 1)));
-  --tw-text-opacity: 1;
-  color: var(--fallback-pc,oklch(var(--pc)/var(--tw-text-opacity, 1)));
-}
-
-.chat-sender .chat-bubble:before {
-  -webkit-mask-image: url("data:image/svg+xml,%3csvg width='3' height='3' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill='black' d='m 0 3 L 1 3 L 3 3 C 2 3 0 1 0 0'/%3e%3c/svg%3e");
-          mask-image: url("data:image/svg+xml,%3csvg width='3' height='3' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill='black' d='m 0 3 L 1 3 L 3 3 C 2 3 0 1 0 0'/%3e%3c/svg%3e");
-  inset-inline-start: 99.9%;
-}
-
-[dir="rtl"] .chat-sender .chat-bubble:before {
-  -webkit-mask-image: url("data:image/svg+xml,%3csvg width='3' height='3' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill='black' d='m 0 3 L 3 3 L 3 0 C 3 1 1 3 0 3'/%3e%3c/svg%3e");
-          mask-image: url("data:image/svg+xml,%3csvg width='3' height='3' xmlns='http://www.w3.org/2000/svg'%3e%3cpath fill='black' d='m 0 3 L 3 3 L 3 0 C 3 1 1 3 0 3'/%3e%3c/svg%3e");
 }
 
 .checkbox {
@@ -2137,89 +2032,6 @@ select.is-invalid + .advance-select-toggle:focus,
 .validate .advance-select:has(> select:invalid) ~ * > .error-message,
 .validate .advance-select:has(> select:invalid) ~ .error-message {
   display: block;
-}
-
-.alert-primary {
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity, 1)));
-  --tw-text-opacity: 1;
-  color: var(--fallback-pc,oklch(var(--pc)/var(--tw-text-opacity, 1)));
-}
-
-.alert-success {
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-su,oklch(var(--su)/var(--tw-bg-opacity, 1)));
-  --tw-text-opacity: 1;
-  color: var(--fallback-suc,oklch(var(--suc)/var(--tw-text-opacity, 1)));
-}
-
-.alert-warning {
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-wa,oklch(var(--wa)/var(--tw-bg-opacity, 1)));
-  --tw-text-opacity: 1;
-  color: var(--fallback-wac,oklch(var(--wac)/var(--tw-text-opacity, 1)));
-}
-
-.alert-soft {
-  border-width: 1px;
-  border-color: currentColor;
-}
-
-.alert-soft.alert-primary {
-  background-color: var(--fallback-p,oklch(var(--p)/0.2));
-  --tw-text-opacity: 1;
-  color: var(--fallback-p,oklch(var(--p)/var(--tw-text-opacity, 1)));
-}
-
-.alert-soft.alert-secondary {
-  background-color: var(--fallback-s,oklch(var(--s)/0.2));
-  --tw-text-opacity: 1;
-  color: var(--fallback-s,oklch(var(--s)/var(--tw-text-opacity, 1)));
-}
-
-.alert-soft.alert-neutral {
-  background-color: var(--fallback-n,oklch(var(--n)/0.2));
-  --tw-text-opacity: 1;
-  color: var(--fallback-n,oklch(var(--n)/var(--tw-text-opacity, 1)));
-}
-
-.alert-soft.alert-info {
-  background-color: var(--fallback-in,oklch(var(--in)/0.2));
-  --tw-text-opacity: 1;
-  color: var(--fallback-in,oklch(var(--in)/var(--tw-text-opacity, 1)));
-}
-
-.alert-soft.alert-success {
-  background-color: var(--fallback-su,oklch(var(--su)/0.2));
-  --tw-text-opacity: 1;
-  color: var(--fallback-su,oklch(var(--su)/var(--tw-text-opacity, 1)));
-}
-
-.alert-soft.alert-warning {
-  background-color: var(--fallback-wa,oklch(var(--wa)/0.2));
-  --tw-text-opacity: 1;
-  color: var(--fallback-wa,oklch(var(--wa)/var(--tw-text-opacity, 1)));
-}
-
-.alert-soft.alert-error {
-  background-color: var(--fallback-er,oklch(var(--er)/0.2));
-  --tw-text-opacity: 1;
-  color: var(--fallback-er,oklch(var(--er)/var(--tw-text-opacity, 1)));
-}
-
-.alert-outline.alert-primary {
-  --tw-text-opacity: 1;
-  color: var(--fallback-p,oklch(var(--p)/var(--tw-text-opacity, 1)));
-}
-
-.alert-outline.alert-success {
-  --tw-text-opacity: 1;
-  color: var(--fallback-su,oklch(var(--su)/var(--tw-text-opacity, 1)));
-}
-
-.alert-outline.alert-warning {
-  --tw-text-opacity: 1;
-  color: var(--fallback-wa,oklch(var(--wa)/var(--tw-text-opacity, 1)));
 }
 
 .avatar-group :where(.avatar) img {
@@ -5679,16 +5491,8 @@ textarea:focus-visible {
   top: -0.5rem;
 }
 
-.bottom-5 {
-  bottom: 1.25rem;
-}
-
 .bottom-full {
   bottom: 100%;
-}
-
-.right-1\/4 {
-  right: 25%;
 }
 
 .right-20 {
@@ -5750,10 +5554,6 @@ textarea:focus-visible {
   margin-left: 0.5rem;
 }
 
-.ms-auto {
-  margin-inline-start: auto;
-}
-
 .mt-1 {
   margin-top: 0.25rem;
 }
@@ -5768,10 +5568,6 @@ textarea:focus-visible {
 
 .mt-6 {
   margin-top: 1.5rem;
-}
-
-.ml-4 {
-  margin-left: 1rem;
 }
 
 .block {
@@ -6141,11 +5937,6 @@ textarea:focus-visible {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 
-.bg-green-600 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(22 163 74 / var(--tw-bg-opacity, 1));
-}
-
 .bg-opacity-80 {
   --tw-bg-opacity: 0.8;
 }
@@ -6215,11 +6006,6 @@ textarea:focus-visible {
   padding-bottom: 0.5rem;
 }
 
-.py-1 {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-}
-
 .pb-3 {
   padding-bottom: 0.75rem;
 }
@@ -6270,10 +6056,6 @@ textarea:focus-visible {
 
 .lowercase {
   text-transform: lowercase;
-}
-
-.leading-none {
-  line-height: 1;
 }
 
 .text-base-content\/50 {
@@ -6400,16 +6182,8 @@ textarea:focus-visible {
   transition-duration: 150ms;
 }
 
-.duration-300 {
-  transition-duration: 300ms;
-}
-
 .duration-500 {
   transition-duration: 500ms;
-}
-
-.ease-in-out {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .\[--auto-close\:inside\] {
@@ -6560,8 +6334,8 @@ textarea:focus-visible {
   --progress-color: var(--fallback-su,oklch(var(--su)/1));
 }
 
-.file\:rounded-md::file-selector-button {
-  border-radius: 0.375rem;
+.file\:rounded-full::file-selector-button {
+  border-radius: 9999px;
 }
 
 .file\:border-0::file-selector-button {
@@ -6696,15 +6470,6 @@ textarea:focus-visible {
 
 .dropdown-menu.open.dropdown-open\:opacity-100 {
   opacity: 1;
-}
-
-.removing.removing\:translate-x-5 {
-  --tw-translate-x: 1.25rem;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.removing.removing\:opacity-0 {
-  opacity: 0;
 }
 
 .selected .combo-box-selected\:block {
