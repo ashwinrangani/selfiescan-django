@@ -4,7 +4,6 @@
 <div class="container mx-auto p-6">
     <h1 class="text-2xl font-bold mb-4">Account Settings</h1>
    
-    <!-- Username Update -->
     <div class="mb-4">
         {% csrf_token %}
         <label class="block font-semibold">Username:</label>
@@ -12,18 +11,15 @@
         <button id="updateUsernameBtn" class="btn btn-primary mt-2">Update Username</button>
     </div>
 
-    <!-- Account Info -->
     <div class="mb-4">
         <p><strong>Account Created:</strong> {{ user.date_joined }}</p>
         <p><strong>Last Login:</strong> {{ user.last_login }}</p>
     </div>
 
-    <!-- Password Update -->
     <div class="mb-4">
         <a href="{% url 'account_change_password' %}" class="btn btn-secondary">Change Password</a>
     </div>
 
-    <!-- Delete Account -->
     <button id="deleteAccountBtn" class="btn btn-danger">Delete Account</button>
 </div>
 {% endblock %}
