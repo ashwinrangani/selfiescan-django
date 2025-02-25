@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load allauth i18n %}
+
+{% block head_title %}
+    {% trans "Email Addresses" %}
+{% endblock head_title %}
+
+{% block content %}
+<div class="flex justify-center items-center">
+    <div class="max-w-md p-8 rounded-lg shadow-lg">
+        
+        <h1 class="text-3xl font-bold text-center mb-6">
+            {% trans "Email Addresses" %}
+        </h1>
+
+        {% if emailaddresses %}
+            <p class="text-center mb-4">
+                {% trans 'The following email addresses are associated with your account:' %}
+            </p>
+
+            <form method="post" action="{% url 'account_email' %}">
+                {% csrf_token %}
+                
+                <div class="space-y-3">
+                    {% for radio in emailaddress_radios %}
+                        {% with emailaddress=radio.emailaddress %}
+                            <div class="flex justify-between items-center rounded-lg">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="email" value="{{ emailaddress.email }}" 
+                                           id="{{ radio.id }}" class="radio" {% if radio.checked %}checked{% endif %}>
+                                    {{ emailaddress.email }}
+                                </label>
+                                <div class="flex items-center gap-1 ml-1">
+                                    {% if emailaddress.verified %}
+                                        <span class="badge badge-success badge-sm">{% trans "Verified" %}</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary badge-sm">{% trans "Unverified" %}</span>
+                                    {% endif %}
+                                    {% if emailaddress.primary %}
+                                        <span class="badge badge-primary badge-sm">{% trans "Primary" %}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+
+                <div class="mt-5 flex flex-col gap-2">
+                    <button type="submit" name="action_primary" class="btn btn-primary w-full">
+                        {% trans 'Make Primary' %}
+                    </button>
+                    <button type="submit" name="action_send" class="btn btn-secondary w-full">
+                        {% trans 'Re-send Verification' %}
+                    </button>
+                    <button type="submit" name="action_remove" class="btn btn-danger w-full" id="deleteEmailBtn">
+                        {% trans 'Remove' %}
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            {% include "account/snippets/warn_no_email.html" %}
+        {% endif %}
+
+        {% if can_add_email %}
+            <h2 class="text-xl font-semibold text-center mt-6">
+                {% trans "Add Email Address" %}
+            </h2>
+
+            <form method="post" action="{% url 'account_email' %}" class="mt-4">
+                {% csrf_token %}
+                <div>
+                    <label for="email" class="block font-semibold">{% trans "New Email" %}</label>
+                    <input type="email" name="email" id="email" required
+                        class="input w-full rounded-lg border border-gray-300 dark:border-gray-700 p-3 
+                        focus:ring focus:ring-primary focus:border-primary mt-1">
+                </div>
+
+                <div class="flex justify-center mt-4">
+                    <button type="submit" name="action_add" class="btn btn-primary w-full">
+                        {% trans "Add Email" %}
+                    </button>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    document.getElementById('deleteEmailBtn').addEventListener("click", function(e) {
+        if (!confirm("Do you really want to remove the selected email address?")) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}
