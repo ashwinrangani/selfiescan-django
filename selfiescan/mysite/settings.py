@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from django.template.context_processors import media
+import environ
+import os
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -75,14 +79,18 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "/"  # Redirect after logout
 ACCOUNT_SIGNUP_REDIRECT_URL = "/"  # Redirect after signup
 ACCOUNT_USERNAME_REQUIRED = True
 
+
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         # For each OAuth based provider, either add a ``SocialApp``
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
         'APP': {
-            'client_id': '493493127120-1hjgghuljq7lrfrc77vuonn3jq3u1560.apps.googleusercontent.com',
-            'secret': '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',
+            'client_id': env('GOOGLE_CLIENT_ID'),
+            'secret': env('GOOGLE_CLIENT_SECRET'),
             'key': ''
         }
     },
