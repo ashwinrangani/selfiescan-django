@@ -6,8 +6,8 @@
 {% endblock head_title %}
 
 {% block content %}
-<div class="flex justify-center items-center">
-    <div class="max-w-md p-8 rounded-lg shadow-lg">
+<div class="flex justify-center items-center max-w-xl mx-auto">
+    <div class="rounded-lg shadow-lg p-0 md:p-4 lg:p-5">
         
         <h1 class="text-3xl font-bold text-center mb-6">
             {% trans "Email Addresses" %}
@@ -52,9 +52,27 @@
                     <button type="submit" name="action_send" class="btn btn-secondary w-full">
                         {% trans 'Re-send Verification' %}
                     </button>
-                    <button type="submit" name="action_remove" class="btn btn-danger w-full" id="deleteEmailBtn">
-                        {% trans 'Remove' %}
-                    </button>
+                    <button type="button" class="btn btn-danger w-full" aria-haspopup="dialog" aria-expanded="false" aria-controls="basic-modal" data-overlay="#basic-modal" > Remove </button>
+
+                <div id="basic-modal" class="overlay modal overlay-open:opacity-100 hidden" role="dialog" tabindex="-1">
+                <div class="modal-dialog overlay-open:opacity-100">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        
+                        <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#basic-modal" >
+                        <span class="icon-[tabler--x] size-4"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Do you really want to remove the selected email address?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-soft btn-secondary" data-overlay="#basic-modal">Close</button>
+                        <button type="submit" name="action_remove" class="btn btn-primary">Remove</button>
+                    </div>
+                    </div>
+                </div>
+                </div>
                 </div>
             </form>
         {% else %}
@@ -85,13 +103,3 @@
     </div>
 </div>
 {% endblock content %}
-
-{% block scripts %}
-<script>
-    document.getElementById('deleteEmailBtn').addEventListener("click", function(e) {
-        if (!confirm("Do you really want to remove the selected email address?")) {
-            e.preventDefault();
-        }
-    });
-</script>
-{% endblock %}

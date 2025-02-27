@@ -19,11 +19,14 @@
     </div>
 
     <div class="mb-4 flex items-center justify-center gap-2">
-        <a href="{% url 'account_change_password' %}" class="btn btn-secondary">Change Password</a>
-        <a href="{% url 'account_email' %}" class="btn btn-secondary">Change Email</a>
+        <a href="{% url 'account_change_password' %}" class="btn">Change Password</a>
+        <a href="{% url 'account_email' %}" class="btn">Change Email</a>
     </div>
-
-    <button id="deleteAccountBtn" class="btn btn-danger">Delete Account</button>
+    <div class="flex items-center justify-center gap-2">
+    <button id="deleteAccountBtn" class="btn">Delete Account</button>
+    <a href="{% url 'upload_selfie' %}" class="btn btn-primary">Back to Home</a>
+    </div>
+ 
 </div>
 {% endblock %}
 {% block scripts %}
