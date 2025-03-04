@@ -35,11 +35,11 @@ SECRET_KEY = 'django-insecure-bl75(lby!wu6q)dehh1h4j=lj4wsv)&bititpjuc8b22bjv@ov
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '2692-27-59-84-43.ngrok-free.app','5029-27-59-85-65.ngrok-free.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '2692-27-59-84-43.ngrok-free.app','648d-27-59-94-194.ngrok-free.app']
 CSRF_TRUSTED_ORIGINS = [
     'https://2692-27-59-84-43.ngrok-free.app',
     'https://cb7f-27-59-94-28.ngrok-free.app',
-    'https://5029-27-59-85-65.ngrok-free.app',
+    'https://648d-27-59-94-194.ngrok-free.app',
 ]
 
 
@@ -85,6 +85,16 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': env('GOOGLE_CLIENT_ID'),
+            'secret': env('GOOGLE_CLIENT_SECRET'),
+            'key': ''
+        }
+    },
+    'facebook': {
         # For each OAuth based provider, either add a ``SocialApp``
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:

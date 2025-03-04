@@ -35,6 +35,19 @@ def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.6):
 
 def upload_selfie(request):
     if request.method == 'POST':
+        
+        upload_data = request.FILES.getlist('upload_data')
+        if upload_data:
+            fs = FileSystemStorage(location='media/uploads')
+            saved_data = []
+
+            for data in upload_data:
+                file_names = fs.save(data.name, data)
+                file_url = f"/media/uploads/{file_names}"
+                saved_data.append(file_url)
+        
+            return JsonResponse({"upload_success": True, "uploaded_images": len(saved_data)})
+
         selfie = request.FILES.get('selfie') or request.FILES.get('camera_selfie')
         if selfie:
             fs = FileSystemStorage()
@@ -43,7 +56,6 @@ def upload_selfie(request):
             print(selfie_path)
 
             try:
-                # Assuming you have a `find_matches` function for face recognition
                 encodings_file = str(settings.BASE_DIR) + '/photoapp/encodings.pkl'
                
                 matching_images = find_matches(selfie_path, encodings_file)

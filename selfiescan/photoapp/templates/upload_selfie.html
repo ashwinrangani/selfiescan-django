@@ -12,7 +12,24 @@
   <form method="post" enctype="multipart/form-data" id="upload_selfie" class="space-y-6" action="{% url 'upload_selfie' %}">
     {% csrf_token %}
     <div class="flex items-center justify-center gap-2 lg:gap-6">
-      <!-- File Upload -->
+      <!-- Upload data-->
+      <input
+        type="file"
+        id="upload_data"
+        name="upload_data"
+        accept="image/*"
+        class="hidden input"
+        multiple
+      />
+      <label
+        for="upload_data"
+        class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
+      >
+        Upload Photos
+      </label>
+      <!-- <button> Upload</button> -->
+
+      <!-- Upload Selfie-->
       <input
         type="file"
         id="selfie"

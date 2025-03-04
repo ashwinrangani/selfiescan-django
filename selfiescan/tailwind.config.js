@@ -8,7 +8,11 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        playwrite: ['"Playwrite IT Moderna"', 'cursive'],
+        pacifico: ['"Pacifico"', 'cursive'],
 
+      },
     },
   },
   plugins: [

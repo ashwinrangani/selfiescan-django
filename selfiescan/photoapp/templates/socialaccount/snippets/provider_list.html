@@ -1,4 +1,5 @@
-<!-- {% load i18n %}
+{% load i18n %}
+{% load static %}
 {% load account socialaccount %}
 <div class="flex flex-col gap-3 w-full max-w-sm mx-auto">
     {% for provider in socialaccount_providers %}
@@ -8,4 +9,4 @@
             <span class="font-medium">Continue with {{ provider.name }}</span>
         </a>
     {% endfor %}
-</div> -->
+</div>
