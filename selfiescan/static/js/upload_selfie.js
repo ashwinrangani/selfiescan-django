@@ -1,7 +1,6 @@
 // upload_selfie form
 
 document.addEventListener('DOMContentLoaded', () => {
-    const upload_data = document.getElementById('upload_data');
     const fileInput = document.getElementById('selfie');
     const cameraInput = document.getElementById('camera_selfie');
     const imagePreview = document.getElementById('image-preview');
@@ -18,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let index = 0; index < files.length; index++) {
             if (!allowed_types.includes(files[index].type)) {
-                alert("Invalid file type! Please upload only images.");
+                notyf.error("Invalid file type! Please upload only images.");
                 input.value = ''; 
                 
             }
@@ -49,12 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // matchesContainer.innerHTML = ''
     }
 
-    if (upload_data){
-        upload_data.addEventListener('change', (event) => {
-            validate_input(event.target);
-            cameraInput.disabled = fileInput.files.length > 0;            
-        });
-    }
     if (fileInput){
         fileInput.addEventListener('change', (event) => {
             validate_input(event.target);
@@ -83,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formdata = new FormData(uploadForm)
             
     // Check if any file input fields contain files
-    const fileInputs = [fileInput, cameraInput, upload_data];
+    const fileInputs = [fileInput, cameraInput];
     let hasFiles = false;
     
     fileInputs.forEach(input => {
@@ -93,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (!hasFiles) {
-        alert("Please select or upload files");
+        notyf.error("Please select or upload files");
         loadingState.style.display = 'none';
         return; // Stop form submission
     } 
@@ -122,9 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                     });
                 }
-                if(data.upload_success){
-                    notyf.success('Succesfully uploaded ' + String(data.uploaded_images) + ' images')
-                }
+                
             })
             .catch((error) => {
                 loadingState.style.display = 'none';

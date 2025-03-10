@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="relative">
+    <div class="absolute w-48 h-48 md:w-56 md:h-56 lg:w-60 lg:h-60 bg-indigo-500/30 opacity-40 rounded-full -top-7 left-0"></div>
+    <div class="absolute w-36 h-36 md:w-48 md:h-48 lg:w-48 lg:h-48 bg-teal-400/30 opacity-40 rounded-full top-60 md:top-72 lg:top-72 -left-5 "></div>
+    <div class="absolute w-40 h-40 bg-blue-500/30 opacity-40 rounded-full top-40 -right-5"></div>
+</div>
+
+<section class="hero py-20 text-center">
+    <div class="container w-full">
+        <h1 class="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white leading-tight animate-fade-in-up">
+            Find Your Photos with Ease!
+        </h1>
+        <p class="mt-4 text-lg md:text-xl text-gray-700 dark:text-gray-200 animate-fade-in-up animation-delay-200">
+            Upload your selfie and instantly retrieve your event photos.
+        </p>
+        <!-- get started modal -->
+        <button type="button" class="btn btn-primary mt-5" aria-haspopup="dialog" aria-expanded="false" aria-controls="slide-down-animated-modal" data-overlay="#slide-down-animated-modal">Get Started</button>
+
+        <div id="slide-down-animated-modal" class="overlay modal overlay-open:opacity-100 hidden" role="dialog" tabindex="-1">
+          <div class="modal-dialog overlay-open:mt-12 overlay-open:opacity-100 overlay-open:duration-500 transition-all ease-out" >
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3 class="modal-title">Welcome!</h3>
+                <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#slide-down-animated-modal">
+                  <span class="icon-[tabler--x] size-4"></span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <a href="{% url 'photographer' %}"  class="btn btn-primary">I'm a Photographer</a>
+                <a href="{% url 'account_login' %}"  class="btn btn-primary my-3 md:my-0 lg:my-0">I want to get my pictures</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3 justify-center">
+        <div class="mt-12 animate-fade-in-up animation-delay-600">
+            <img src="{% static 'images/selfie-example.webp' %}" alt="Selfie Examples" class="rounded-xl shadow-2xl mx-auto w-80 h-60 object-cover rotate-3" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
+        </div>
+        <div class="mt-12 animate-fade-in-up animation-delay-600">
+            <img src="{% static 'images/wedding-pic.jpeg' %}" alt="Selfie Examples" class="rounded-xl shadow-2xl mx-3 w-80 h-60 object-cover border border-black rotate-3" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
+        </div>
+    </div>
+    </div>
+</section>
+
+<section class="how-it-works relative z-10 py-20 backdrop-blur-sm">
+    <div class="container max-w-4xl mx-auto text-center px-6">
+        <h2 class="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white animate-on-scroll">How It Works</h2>
+        <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
+            <div class="card p-8 rounded-xl shadow-lg bg-white dark:bg-gray-900 transform transition-transform duration-500 hover:scale-105 animate-on-scroll animation-delay-100">
+                <div class="text-5xl animate-bounce-slow">📸</div>
+                <h3 class="text-xl font-semibold mt-4">Upload Selfie</h3>
+                <p class="text-gray-600 dark:text-gray-300 mt-2">Start by uploading your recent photo.</p>
+            </div>
+            <div class="card p-8 rounded-xl shadow-lg bg-white dark:bg-gray-900 transform transition-transform duration-500 hover:scale-105 animate-on-scroll animation-delay-200">
+                <div class="text-5xl animate-pulse">🔍</div>
+                <h3 class="text-xl font-semibold mt-4">AI Searches for Matches</h3>
+                <p class="text-gray-600 dark:text-gray-300 mt-2">Our AI finds your event photos.</p>
+            </div>
+            <div class="card p-8 rounded-xl shadow-lg bg-white dark:bg-gray-900 transform transition-transform duration-500 hover:scale-105 animate-on-scroll animation-delay-300">
+                <div class="text-5xl animate-bounce-slow">📥</div>
+                <h3 class="text-xl font-semibold mt-4">Download Your Pictures</h3>
+                <p class="text-gray-600 dark:text-gray-300 mt-2">View and download your memories.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features py-20 relative z-10">
+    <div class="container max-w-6xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="animate-on-scroll">
+                <div class="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl rotate-3 transform hover:rotate-0 transition-transform duration-500">
+                    <img src="{% static 'images/corporate-pic.jpg' %}" alt="App Screenshot" class="rounded-xl" >
+                </div>
+            </div>
+            <div class="animate-on-scroll animation-delay-200">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">Capture Every Moment</h2>
+                <p class="text-gray-700 dark:text-gray-300 text-lg mb-6">
+                    Never miss another photo from your favorite events. Our AI-powered platform connects you with all the pictures you appear in, even those taken by strangers.
+                </p>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <span class="text-primary text-xl mr-2">✓</span>
+                        <span class="text-gray-700 dark:text-gray-300">Works with concerts, festivals, weddings, and more</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-primary text-xl mr-2">✓</span>
+                        <span class="text-gray-700 dark:text-gray-300">Instant notifications when new photos are found</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-primary text-xl mr-2">✓</span>
+                        <span class="text-gray-700 dark:text-gray-300">High-resolution downloads available</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="why-use py-20 relative z-10">
+    <div class="container max-w-4xl mx-auto text-center px-6">
+        <h2 class="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white animate-on-scroll">Why Use This App?</h2>
+        <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
+            <div class="card p-8 rounded-xl shadow-lg bg-white/90 dark:bg-gray-900 backdrop-blur-sm transform transition-all duration-500 hover:shadow-2xl animate-on-scroll animation-delay-100">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold">Fast & Accurate Search</h3>
+                <p class="text-gray-600 dark:text-gray-300 mt-2">Find your photos in seconds with our advanced facial recognition.</p>
+            </div>
+            <div class="card p-8 rounded-xl shadow-lg bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm transform transition-all duration-500 hover:shadow-2xl animate-on-scroll animation-delay-200">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold">Privacy-Focused</h3>
+                <p class="text-gray-600 dark:text-gray-300 mt-2">We never store your photos and use end-to-end encryption.</p>
+            </div>
+            <div class="card p-8 rounded-xl shadow-lg bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm transform transition-all duration-500 hover:shadow-2xl animate-on-scroll animation-delay-300">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-500 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold">Easy to Use</h3>
+                <p class="text-gray-600 dark:text-gray-300 mt-2">Simple and intuitive design for all ages and tech levels.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta dark:bg-amber-700 relative z-10 text-center">
+    <div class="container max-w-3xl mx-auto px-6">
+        <div class="rounded-2xl shadow-lg p-12 animate-on-scroll">
+            <h2 class="text-3xl md:text-4xl font-bold dark:text-white mb-6">Ready to Find Your Photos?</h2>
+            <p class="dark:text-white/90 text-lg mb-8">Join thousands of users who have already discovered their event memories.</p>
+            <a href="{% url 'account_signup' %}" class="btn btn-primary shadow-lg">
+                Sign Up for Free
+            </a>
+        </div>
+    </div>
+</section>
+
+<footer class="py-10 mt-10 text-center bg-gray-900 rounded-2xl text-white relative z-10">
+    <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+                <h3 class="text-xl font-semibold mb-4">SelfieScan</h3>
+                <p class="text-gray-400">Making memories accessible to everyone.</p>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold mb-4">Quick Links</h3>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold mb-4">Connect With Us</h3>
+                <div class="flex justify-center space-x-4">
+                    <a href="/" class="text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="/" class="text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="/" class="text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <p class="text-gray-500">&copy; 2025 SelfieScan. All Rights Reserved.</p>
+    </div>
+</footer>
+
+<style>
+    /* Animation styles */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes float {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(5px, 15px) rotate(5deg); }
+        50% { transform: translate(10px, 5px) rotate(10deg); }
+        75% { transform: translate(5px, -5px) rotate(5deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+    }
+    
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    .animation-delay-100 { animation-delay: 0.1s; }
+    .animation-delay-200 { animation-delay: 0.2s; }
+    .animation-delay-300 { animation-delay: 0.3s; }
+    .animation-delay-400 { animation-delay: 0.4s; }
+    .animation-delay-500 { animation-delay: 0.5s; }
+    .animation-delay-600 { animation-delay: 0.6s; }
+    
+    .animate-bounce-slow {
+        animation: bounce 3s infinite;
+    }
+    
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    
+    .animate-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* Gradient background */
+    .gradient-background {
+        background: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #2dd4bf 100%);
+        opacity: 0.9;
+    }
+  
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation on scroll
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+    });
+</script>
+
+{% endblock %}

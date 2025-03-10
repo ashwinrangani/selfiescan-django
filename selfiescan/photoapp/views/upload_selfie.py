@@ -33,21 +33,29 @@ def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.6):
     matches = sorted(matches, key=lambda x: x[1])  # Sort by distance
     return matches  # Return a list of tuples (relative_path, distance)
 
-def upload_selfie(request):
+def upload_photos(request):
+    if request.method == 'POST':
+        upload_data = request.FILES.getlist('upload_data')
+        
+        if not upload_data:
+            return JsonResponse({"message": "No photos uploaded"}, status=400)
+        
+        fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'uploads'))
+        saved_data = []
+        for data in upload_data:
+            file_name = fs.save(data.name, data)
+            file_url = f"{settings.MEDIA_URL}uploads/{file_name}"
+            saved_data.append(file_url)
+        return JsonResponse({
+            "upload_success": True,
+            "uploaded_images": len(saved_data),
+            "files": saved_data
+            })
+    return render(request, 'upload_photos.html')
+
+def process_selfie(request):
     if request.method == 'POST':
         
-        upload_data = request.FILES.getlist('upload_data')
-        if upload_data:
-            fs = FileSystemStorage(location='media/uploads')
-            saved_data = []
-
-            for data in upload_data:
-                file_names = fs.save(data.name, data)
-                file_url = f"/media/uploads/{file_names}"
-                saved_data.append(file_url)
-        
-            return JsonResponse({"upload_success": True, "uploaded_images": len(saved_data)})
-
         selfie = request.FILES.get('selfie') or request.FILES.get('camera_selfie')
         if selfie:
             fs = FileSystemStorage()

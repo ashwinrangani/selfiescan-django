@@ -35,11 +35,9 @@ SECRET_KEY = 'django-insecure-bl75(lby!wu6q)dehh1h4j=lj4wsv)&bititpjuc8b22bjv@ov
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '2692-27-59-84-43.ngrok-free.app','648d-27-59-94-194.ngrok-free.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'baa4-106-221-64-44.ngrok-free.app',]
 CSRF_TRUSTED_ORIGINS = [
-    'https://2692-27-59-84-43.ngrok-free.app',
-    'https://cb7f-27-59-94-28.ngrok-free.app',
-    'https://648d-27-59-94-194.ngrok-free.app',
+    'https://baa4-106-221-64-44.ngrok-free.app',
 ]
 
 
@@ -135,15 +133,17 @@ AUTHENTICATION_BACKENDS = [
     
 ]
 # confirmation email verification locally(terminal)
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 # setup smtp server for email verification
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = "smtp.gmail.com"
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = "your-email@gmail.com"
-# EMAIL_HOST_PASSWORD = "your-app-password"  # Use an App Password if using Gmail
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # Use an App Password if using Gmail
 
 
 
