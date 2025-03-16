@@ -1,5 +1,144 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block content %}
-<h1>Photographer Section</h1>
+<h1 class="text-3xl font-serif mb-4">Your Dashboard</h1>
+
+<!-- Container Grid Layout -->
+<div class="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+
+    <!-- Create Event Form -->
+    <div class="p-6 rounded shadow-lg">
+        <h2 class="text-xl font-semibold mb-4 text-center md:text-left">Create New Event</h2>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <label for="name" class="block font-medium">Event Name</label>
+            <input type="text" name="name" class="w-full input p-2 border rounded" required>
+
+            <label for="date" class="block font-medium">Event Date</label>
+            <input type="date" name="date" class="w-full input p-2 border rounded" required>
+
+            <label for="location" class="block font-medium">Location</label>
+            <input type="text" name="location" class="w-full input p-2 border rounded" required>
+
+            <button type="submit" class="btn btn-primary px-4 py-2 w-full rounded">
+                Create Event
+            </button>
+        </form>
+    </div>
+<!-- Events Stats Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+
+    <!-- Total Events Card -->
+    <div class="card bg-blue-50 dark:bg-inherit dark:border-2 shadow-lg p-6 rounded-lg text-center">
+        <h1 class="card-header text-2xl font-semibold mb-2">Total Events</h1>
+        <p class="card-body text-4xl font-bold counter" data-target="{{ stats.total_events }}">0</p>
+    </div>
+
+    <!-- Total Uploads Card -->
+    <div class="card bg-green-500 dark:bg-inherit dark:border-2 shadow-lg p-4 rounded-lg text-center">
+        <h1 class="card-header text-2xl font-semibold mb-2">Total Uploads</h1>
+        <p class="card-body text-4xl font-bold counter" data-target="{{ stats.total_uploads }}">0</p>
+    </div>
+
+    <!-- Total Search Queries Card -->
+    <div class="card bg-purple-500 dark:bg-inherit dark:border-2 shadow-lg p-4 rounded-lg text-center">
+        <h1 class="card-header text-2xl font-semibold mb-2">Total Search Queries</h1>
+        <p class="card-body text-4xl font-bold counter" data-target="{{ stats.total_searches }}">0</p>
+    </div>
+
+    <!-- Placeholder (Customizable later) -->
+    <div class="card bg-gray-300 dark:bg-inherit dark:border-2 shadow-lg p-4 rounded-lg text-center">
+        <h1 class="card-header text-2xl font-semibold mb-2">📈 Placeholder</h1>
+        <p class="card-body text-gray-700 text-2xl font-semibold">Coming soon...</p>
+    </div>
+
+</div>
+
+
+
+   
+
+</div>
+ <!-- Photographer's Events Section -->
+ <div class="p-6 mt-4 w-full rounded shadow-lg">
+    <h2 class="text-2xl font-semibold mb-4 text-center md:text-left">Your Events</h2>
+
+    {% if events %}
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        {% for event in events %}
+        <div class="p-4 card shadow rounded-lg border">
+            <h3 class="text-2xl font-serif font-semibold ">{{ event.name }}</h3>
+            <ul class="space-y-3 text-sm mt-2">
+                <li class="flex items-center space-x-3 rtl:space-x-reverse">
+                  <span class="bg-primary/20 text-primary flex items-center justify-center rounded-full p-1">
+                    <span class="icon-[tabler--arrow-right] size-4 rtl:rotate-180"></span>
+                  </span>
+                  <span class="text-base-content/80">Date: {{ event.date}} </span>
+                </li>
+                <li class="flex items-center space-x-3 rtl:space-x-reverse">
+                  <span class="bg-primary/20 text-primary flex items-center justify-center rounded-full p-1">
+                    <span class="icon-[tabler--arrow-right] size-4 rtl:rotate-180"></span>
+                  </span>
+                  <span class="text-base-content/80">Location: {{ event.location }} </span>
+                </li>
+            </ul>
+            <!-- Show QR Code -->
+            {% if event.qr_code %}
+            <img src="{{ event.qr_code.url }}" alt="QR Code for {{ event.name }}" class="w-32 h-32 mx-auto my-2">
+            {% endif %}
+
+            <div class="flex justify-center gap-2 mt-2">
+                <a href="{% url 'download_qr' event.event_id %}" class="btn btn-outline btn-primary"><span class="icon-[tabler--download]"></span>Save QR code</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-gray-600">No events created yet.</p>
+    {% endif %}
+</div>
+
+<!-- Upload/Search Buttons (Centered under the grid) -->
+<div class="text-center mt-6 space-x-3">
+    <a href="{% url 'upload_photos' %}" class="btn btn-primary px-4 py-2 rounded">Upload Photos</a>
+    <a href="{% url 'process_selfie' %}" class="btn btn-primary px-4 py-2 rounded">Search Photos</a>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const counters = document.querySelectorAll(".counter");
+    
+        const startCounter = (counter) => {
+            const target = +counter.getAttribute("data-target");
+            let count = 0;
+            const increment = Math.ceil(target / 60);
+    
+            const updateCount = () => {
+                count += increment;
+                counter.innerText = count > target ? target : count;
+                if (count < target) requestAnimationFrame(updateCount);
+            };
+    
+            updateCount();
+        };
+    
+        const observeCounters = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        startCounter(entry.target);
+                        observeCounters.unobserve(entry.target); // Prevent re-trigger
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+    
+        counters.forEach((counter) => observeCounters.observe(counter));
+    });
+    
+</script>
 {% endblock %}

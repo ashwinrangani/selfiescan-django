@@ -9,29 +9,34 @@ from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
-def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.6):
-    selfie_image = face_recognition.load_image_file(selfie_path)
-    selfie_encoding = face_recognition.face_encodings(selfie_image)
 
-    if not selfie_encoding:
+def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.5):  # Lower threshold
+    selfie_image = face_recognition.load_image_file(selfie_path)
+    
+    # Get all detected faces    
+    selfie_encodings = face_recognition.face_encodings(selfie_image)
+
+    if not selfie_encodings:
         return []
     
-    selfie_encoding = selfie_encoding[0]
     with open(encodings_file, 'rb') as f:
         data = pickle.load(f)
         encodings = data['encodings']
         identities = data['identities']
     
-    matches = []
-    distances = face_recognition.face_distance(encodings, selfie_encoding)
-
-    for i, distance in enumerate(distances):
-        if distance <= threshold:  # Match Found
-            path = os.path.relpath(identities[i], settings.MEDIA_ROOT)
-            matches.append((path, distance))
+    matches = set()
     
-    matches = sorted(matches, key=lambda x: x[1])  # Sort by distance
-    return matches  # Return a list of tuples (relative_path, distance)
+    for selfie_encoding in selfie_encodings:  # Loop through detected faces
+        distances = face_recognition.face_distance(encodings, selfie_encoding)
+
+        for i, distance in enumerate(distances):
+            if distance <= threshold:
+                path = os.path.relpath(identities[i], settings.MEDIA_ROOT)
+                matches.add((path, distance))
+    
+    matches = sorted(matches, key=lambda x: x[1])  # sorted by the second element distance in matches tuple
+    return matches
+
 
 def upload_photos(request):
     if request.method == 'POST':
@@ -44,7 +49,7 @@ def upload_photos(request):
         saved_data = []
         for data in upload_data:
             file_name = fs.save(data.name, data)
-            file_url = f"{settings.MEDIA_URL}uploads/{file_name}"
+            file_url = f"{settings.MEDIA_URL}dataset/{file_name}"
             saved_data.append(file_url)
         return JsonResponse({
             "upload_success": True,
@@ -86,6 +91,3 @@ def process_selfie(request):
 
     # Render the template on GET request
     return render(request, 'upload_selfie.html')
-
-def generate_barcode():
-    pass
