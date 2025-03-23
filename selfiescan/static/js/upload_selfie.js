@@ -103,7 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .then((data) => {
                 loadingState.style.display = 'none';
                 
+                
                 if (data.matches) {
+                    console.log(data.matches)
                     const matchesContainer = document.querySelector('.matches-section');
                     matchesContainer.innerHTML = '';
                     data.matches.forEach((match) => {
@@ -115,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                     });
                 }
+
                 
             })
             .catch((error) => {

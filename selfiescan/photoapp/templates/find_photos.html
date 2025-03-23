@@ -9,7 +9,7 @@
 {% endif %}
 
 <div class="shadow-lg bg-inherit rounded-lg border border-blue-50 dark:border-none  p-6">
-  <form method="post" enctype="multipart/form-data" id="upload_selfie" class="space-y-6" action="{% url 'process_selfie' %}">
+  <form method="post" enctype="multipart/form-data" id="upload_selfie" class="space-y-6" action="{% url 'find_photos' %}">
     {% csrf_token %}
     <div class="flex items-center justify-center gap-2 lg:gap-6">
       
@@ -52,7 +52,7 @@
       <div id="image-preview-container" class="relative inline-block">
         <img
           id="image-preview"
-          class="hidden w-48 h-48 object-cover rounded shadow mx-auto"
+          class="hidden w-48 h-48 object-cover rounded-md shadow mx-auto"
           alt="Selected Image Preview"
         />
         <button
@@ -88,24 +88,34 @@
   <!-- Cards will be appended dynamically here -->
 </div>
 
-<!--FullScreen View-->
-<div id="fullscreen-view" class="hidden fixed inset-0 bg-black bg-opacity-80 items-center justify-center z-50">
-  <div class="relative w-full h-full flex items-center justify-center">
-    <img id="fullscreen-image" class="max-w-full max-h-full rounded shadow" />
-    <button
-      id="download-button"
-      class="absolute top-4 right-20 btn btn-primary btn-sm"
-    >
-      Download
+<div id="fullscreen-view" class="hidden fixed inset-0 bg-black bg-opacity-80 items-center justify-center">
+  <div id="fullscreen-image" class="relative w-full">
+    <div class="carousel">
+      <div class="carousel-body items-center justify-center">
+        <!-- Images will be inserted dynamically -->
+      </div>
+    </div>
+    <!-- Previous Slide -->
+    <button type="button" class="carousel-prev">
+      <span class="size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow">
+        <span class="icon-[tabler--chevron-left] size-5 cursor-pointer rtl:rotate-180"></span>
+      </span>
     </button>
-    <button
-      id="close-button"
-      class="absolute top-4 right-4 btn btn-secondary btn-sm"
-    >
-      Close
+    <!-- Next Slide -->
+    <button type="button" class="carousel-next">
+      <span class="size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow">
+        <span class="icon-[tabler--chevron-right] size-5 cursor-pointer rtl:rotate-180"></span>
+      </span>
     </button>
   </div>
+
+  <!-- Download Button -->
+  <button id="download-button" class="absolute top-4 right-20 mr-2 btn btn-primary btn-sm">Download</button>
+
+  <!-- Close Button -->
+  <button id="close-button" class="absolute top-4 right-4 btn btn-secondary btn-sm">Close</button>
 </div>
+
 {% endblock %}
 
 {% block scripts %}

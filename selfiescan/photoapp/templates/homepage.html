@@ -3,8 +3,8 @@
 {% block content %}
 
 <div class="relative">
-    <div class="absolute w-48 h-48 md:w-56 md:h-56 lg:w-60 lg:h-60 bg-indigo-500/30 opacity-40 rounded-full -top-7 left-0"></div>
-    <div class="absolute w-36 h-36 md:w-48 md:h-48 lg:w-48 lg:h-48 bg-teal-400/30 opacity-40 rounded-full top-60 md:top-72 lg:top-72 -left-5 "></div>
+    <div class="absolute w-48 h-48 md:w-56 md:h-56 lg:w-60 lg:h-60 bg-indigo-500/30 opacity-40 z-10 rounded-full mt-6 -left-4 lg:-top-3 lg:left-10"></div>
+    <div class="absolute w-32 h-36 md:w-48 md:h-48 lg:w-48 lg:h-48 bg-teal-400/30 opacity-40 rounded-full top-60 md:top-72 lg:top-72 -left-5 "></div>
     <div class="absolute w-40 h-40 bg-blue-500/30 opacity-40 rounded-full top-40 -right-5"></div>
 </div>
 
@@ -47,21 +47,21 @@
     </div>
 </section>
 
-<section class="how-it-works relative z-10 py-20 backdrop-blur-sm">
+<section class="how-it-works relative py-20 backdrop-blur-sm">
     <div class="container max-w-4xl mx-auto text-center px-6">
         <h2 class="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white animate-on-scroll">How It Works</h2>
         <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
-            <div class="card p-8 rounded-xl shadow-lg bg-white dark:bg-gray-900 transform transition-transform duration-500 hover:scale-105 animate-on-scroll animation-delay-100">
+            <div class="card p-8 rounded-xl shadow-lg shadow-gray-600 transform transition-transform duration-500 animate-on-scroll animation-delay-100">
                 <div class="text-5xl animate-bounce-slow">📸</div>
                 <h3 class="text-xl font-semibold mt-4">Upload Selfie</h3>
                 <p class="text-gray-600 dark:text-gray-300 mt-2">Start by uploading your recent photo.</p>
             </div>
-            <div class="card p-8 rounded-xl shadow-lg bg-white dark:bg-gray-900 transform transition-transform duration-500 hover:scale-105 animate-on-scroll animation-delay-200">
+            <div class="card p-8 rounded-xl shadow-lg shadow-gray-600  transform transition-transform duration-500 animate-on-scroll animation-delay-200">
                 <div class="text-5xl animate-pulse">🔍</div>
                 <h3 class="text-xl font-semibold mt-4">AI Searches for Matches</h3>
                 <p class="text-gray-600 dark:text-gray-300 mt-2">Our AI finds your event photos.</p>
             </div>
-            <div class="card p-8 rounded-xl shadow-lg bg-white dark:bg-gray-900 transform transition-transform duration-500 hover:scale-105 animate-on-scroll animation-delay-300">
+            <div class="card p-8 rounded-xl shadow-lg shadow-gray-600 transform transition-transform duration-500 animate-on-scroll animation-delay-300">
                 <div class="text-5xl animate-bounce-slow">📥</div>
                 <h3 class="text-xl font-semibold mt-4">Download Your Pictures</h3>
                 <p class="text-gray-600 dark:text-gray-300 mt-2">View and download your memories.</p>
@@ -70,11 +70,11 @@
     </div>
 </section>
 
-<section class="features py-20 relative z-10">
+<section class="features py-20 relative">
     <div class="container max-w-6xl mx-auto px-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div class="animate-on-scroll">
-                <div class="p-2 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl rotate-3 transform hover:rotate-0 transition-transform duration-500">
+                <div class="p-2 rounded-2xl shadow-2xl rotate-3 transform hover:rotate-0 transition-transform duration-500">
                     <img src="{% static 'images/corporate-pic.jpg' %}" alt="App Screenshot" class="rounded-xl" >
                 </div>
             </div>
@@ -102,11 +102,11 @@
     </div>
 </section>
 
-<section class="why-use py-20 relative z-10">
+<section class="why-use py-20 relative">
     <div class="container max-w-4xl mx-auto text-center px-6">
         <h2 class="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white animate-on-scroll">Why Use This App?</h2>
         <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
-            <div class="card p-8 rounded-xl shadow-lg bg-white/90 dark:bg-gray-900 backdrop-blur-sm transform transition-all duration-500 hover:shadow-2xl animate-on-scroll animation-delay-100">
+            <div class="card p-8 rounded-xl shadow-lg shadow-gray-600 transform transition-all duration-500 animate-on-scroll animation-delay-100">
                 <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -115,7 +115,7 @@
                 <h3 class="text-xl font-semibold">Fast & Accurate Search</h3>
                 <p class="text-gray-600 dark:text-gray-300 mt-2">Find your photos in seconds with our advanced facial recognition.</p>
             </div>
-            <div class="card p-8 rounded-xl shadow-lg bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm transform transition-all duration-500 hover:shadow-2xl animate-on-scroll animation-delay-200">
+            <div class="card p-8 rounded-xl shadow-lg  shadow-gray-600 transform transition-all duration-500 animate-on-scroll animation-delay-200">
                 <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -124,7 +124,7 @@
                 <h3 class="text-xl font-semibold">Privacy-Focused</h3>
                 <p class="text-gray-600 dark:text-gray-300 mt-2">We never store your photos and use end-to-end encryption.</p>
             </div>
-            <div class="card p-8 rounded-xl shadow-lg bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm transform transition-all duration-500 hover:shadow-2xl animate-on-scroll animation-delay-300">
+            <div class="card p-8 rounded-xl shadow-lg shadow-gray-600 transform transition-all duration-500 animate-on-scroll animation-delay-300">
                 <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-500 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
@@ -137,7 +137,7 @@
     </div>
 </section>
 
-<section class="cta relative z-10 text-center">
+<section class="cta relative text-center">
     <div class="container max-w-3xl mx-auto px-6">
         <div class="rounded-2xl shadow-lg p-12 animate-on-scroll">
             <h2 class="text-3xl md:text-4xl font-bold dark:text-white mb-6">Ready to Find Your Photos?</h2>
@@ -149,7 +149,7 @@
     </div>
 </section>
 
-<footer class="py-10 mt-10 text-center bg-gray-900 rounded-2xl text-white relative z-10">
+<footer class="py-10 mt-10 text-center bg-gray-900 rounded-2xl text-white relative">
     <div class="container mx-auto px-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-12 mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+
+    <!-- Left Section: Event Form -->
+    <div class="md:col-span-2 bg-white dark:bg-inherit shadow-lg p-6 rounded-lg">
+        <h1 class="text-3xl font-semibold mb-4">Edit Event</h1>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <label for="name" class="block font-medium">Event Name</label>
+            <input type="text" name="name" value="{{ event.name }}" class="input input-primary w-full" required>
+
+            <label for="date" class="block font-medium">Event Date</label>
+            <input type="date" name="date" value="{{ event.date|date:'Y-m-d' }}" class="input input-primary w-full" required>
+
+            <label for="location" class="block font-medium">Location</label>
+            <input type="text" name="location" value="{{ event.location }}" class="input input-primary w-full" required>
+
+            <button type="submit" class="btn btn-primary w-full">Save Changes</button>
+        </form>
+    </div>
+
+    <!-- Right Section: Photographer Info & Actions -->
+    <div class="bg-white dark:bg-inherit shadow-lg p-6 rounded-lg flex flex-col items-center justify-center space-y-4">
+        <h2 class="text-2xl font-semibold mb-2">{{ photographer.name }}</h2>
+        <p class="text-gray-600">Total photos uploaded: <strong>{{ num_photos }}</strong></p>
+
+        <a href="{% url 'upload_photos' event.event_id %}" class="btn btn-primary px-6 py-2 rounded">
+            Upload More Photos
+        </a>
+
+        <a href="{% url 'photographer' %}" class="text-blue-500 hover:underline mt-4">⬅️ Back to Dashboard</a>
+    </div>
+
+</div>
+<!-- Photos Section -->
+<h3 class="text-xl font-semibold mt-6 mb-2">Event Photos</h3>
+
+{% if photos %}
+<div class="photo-grid">
+    {% for photo in photos %}
+    <img src="{{ photo.image.url }}" alt="Event Photo" class="w-32 h-32 object-cover" />
+    {% endfor %}
+</div>
+
+<!-- Pagination Controls -->
+<div class="pagination mt-4 flex gap-2 justify-center">
+    {% if photos.has_previous %}
+    <a href="?page=1" class="btn btn-secondary">First</a>
+    <a href="?page={{ photos.previous_page_number }}" class="btn btn-secondary">&laquo; Previous</a>
+    {% endif %}
+
+    <span class="p-2">Page {{ photos.number }} of {{ photos.paginator.num_pages }}</span>
+
+    {% if photos.has_next %}
+    <a href="?page={{ photos.next_page_number }}" class="btn btn-secondary">Next &raquo;</a>
+    <a href="?page={{ photos.paginator.num_pages }}" class="btn btn-secondary">Last</a>
+    {% endif %}
+</div>
+
+{% else %}
+<p class="text-red-500">No photos uploaded for this event yet.</p>
+{% endif %}
+
+{% endblock %}

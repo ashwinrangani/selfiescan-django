@@ -26,7 +26,7 @@ def profile(request):
             return JsonResponse(response_data)
 
         else:
-            return JsonResponse({"success": False, "errors": form_user.errors}, status=400)  # ✅ Fixed return
+            return JsonResponse({"success": False, "errors": form_user.errors}, status=400)
 
     else:
         form_user = updateUserForm(instance=request.user)

@@ -1,4 +1,4 @@
-<nav class="navbar rounded-box justify-between gap-4 shadow">
+<nav id="navbar" class="navbar rounded-box fixed top-0 z-10 backdrop-blur-md bg-opacity-90 bg-base-100 shadow transition-transform duration-300">
   <div class="navbar-start">
     <div class="dropdown relative inline-flex [--auto-close:inside] [--offset:9]">
       <button id="dropdown-name" type="button" class="dropdown-toggle btn btn-text btn-circle dropdown-open:bg-base-content/10 dropdown-open:text-base-content" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
@@ -122,3 +122,27 @@
     </div>
   </div>
 </nav>
+<script>
+  let lastScroll = 0;
+
+window.addEventListener("scroll", () => {
+  const navbar = document.getElementById("navbar");
+  const currentScroll = window.scrollY;
+
+  if (currentScroll <= navbar.offsetHeight) {
+    // Reset to default position if at the top of the page
+    navbar.classList.remove("translate-y-[-100%]");
+    return;
+  }
+
+  if (currentScroll > lastScroll) {
+    // Scrolling down: hide the navbar
+    navbar.classList.add("translate-y-[-100%]");
+  } else {
+    // Scrolling up: show the navbar
+    navbar.classList.remove("translate-y-[-100%]");
+  }
+
+  lastScroll = currentScroll;
+});
+</script>

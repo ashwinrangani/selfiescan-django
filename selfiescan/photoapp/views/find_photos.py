@@ -38,25 +38,6 @@ def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.5):  #
     return matches
 
 
-def upload_photos(request):
-    if request.method == 'POST':
-        upload_data = request.FILES.getlist('upload_data')
-        
-        if not upload_data:
-            return JsonResponse({"message": "No photos uploaded"}, status=400)
-        
-        fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'uploads'))
-        saved_data = []
-        for data in upload_data:
-            file_name = fs.save(data.name, data)
-            file_url = f"{settings.MEDIA_URL}dataset/{file_name}"
-            saved_data.append(file_url)
-        return JsonResponse({
-            "upload_success": True,
-            "uploaded_images": len(saved_data),
-            "files": saved_data
-            })
-    return render(request, 'upload_photos.html')
 
 def process_selfie(request):
     if request.method == 'POST':
@@ -90,4 +71,4 @@ def process_selfie(request):
         return JsonResponse({'message': 'No file uploaded'}, status=400)
 
     # Render the template on GET request
-    return render(request, 'upload_selfie.html')
+    return render(request, 'find_photos.html')

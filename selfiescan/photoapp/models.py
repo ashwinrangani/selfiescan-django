@@ -23,11 +23,17 @@ class Event(models.Model):
         super().save(*args, **kwargs)
 
 
+def event_photo_path(instance, filename):
+    """Generate file path for new photo, organized by event name."""
+    safe_event_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in instance.event.name)
+    return f"photos/{safe_event_name}/{filename}"
+
 class Photo(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to="photos/")
-    face_embedding = models.JSONField()
+    image = models.ImageField(upload_to=event_photo_path)
+    face_embedding = models.JSONField(null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
