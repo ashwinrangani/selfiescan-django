@@ -1,0 +1,39 @@
+<div class="pagination mt-2 flex-shrink-0 p-2 md:flex lg:flex justify-center items-center gap-1">
+    <!-- First & Previous Buttons -->
+    {% if photos.has_previous %}
+        <button class="page-link btn btn-primary btn-sm mb-1" data-page="1">« First</button>
+        <button class="page-link btn btn-primary btn-sm mb-1" data-page="{{ photos.previous_page_number }}">Previous</button>
+    {% endif %}
+
+    <!-- Show first page and '...' if needed -->
+    {% if photos.number > 4 %}
+        <button class="page-link btn btn-text btn-square" data-page="1">1</button>
+        <span class="btn btn-text btn-square pointer-events-none select-none">...</span>
+    {% endif %}
+
+    <!-- Show current page and nearby pages -->
+    {% for num in photos.paginator.page_range %}
+        {% if num >= photos.number|add:'-2' and num <= photos.number|add:'2' %}
+            <button 
+                class="page-link btn btn-text btn-sm btn-square aria-[current='page']:text-bg-primary"
+                {% if photos.number == num %}
+                    aria-current="page"
+                {% endif %}
+                data-page="{{ num }}">
+                {{ num }}
+            </button>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Show '...' and last page if needed -->
+    {% if photos.number < photos.paginator.num_pages|add:'-3' %}
+        <span class="btn btn-text btn-square pointer-events-none select-none">...</span>
+        <button class="page-link btn btn-text btn-square" data-page="{{ photos.paginator.num_pages }}">{{ photos.paginator.num_pages }}</button>
+    {% endif %}
+
+    <!-- Next & Last Buttons -->
+    {% if photos.has_next %}
+        <button class="page-link btn btn-primary btn-sm" data-page="{{ photos.next_page_number }}">Next</button>
+        <button class="page-link btn btn-primary btn-sm" data-page="{{ photos.paginator.num_pages }}">Last »</button>
+    {% endif %}
+</div>
