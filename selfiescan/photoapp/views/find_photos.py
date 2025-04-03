@@ -1,74 +1,73 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 import os
-import pickle
 import face_recognition
-import logging
+import numpy as np
 from django.http import JsonResponse
+from ..models import FaceEncoding,Event
+import logging
 
 logger = logging.getLogger(__name__)
 
-
-def find_matches(selfie_path, encodings_file='encodings.pkl', threshold=0.5):  # Lower threshold
+def find_matches(selfie_path,event_id, threshold=0.5):
     selfie_image = face_recognition.load_image_file(selfie_path)
-    
-    # Get all detected faces    
     selfie_encodings = face_recognition.face_encodings(selfie_image)
-
+    
     if not selfie_encodings:
+        logger.warning("No face detected in uploaded selfie")
+        return []
+
+    target_encoding = selfie_encodings[0]  
+    
+    all_face_encodings = FaceEncoding.objects.filter(photo__event__event_id=event_id)
+
+    if not all_face_encodings.exists():
+        logger.info(f"No encodings found for event {event_id}")
         return []
     
-    with open(encodings_file, 'rb') as f:
-        data = pickle.load(f)
-        encodings = data['encodings']
-        identities = data['identities']
-    
-    matches = set()
-    
-    for selfie_encoding in selfie_encodings:  # Loop through detected faces
-        distances = face_recognition.face_distance(encodings, selfie_encoding)
+    matched_photos = set()
 
-        for i, distance in enumerate(distances):
-            if distance <= threshold:
-                path = os.path.relpath(identities[i], settings.MEDIA_ROOT)
-                matches.add((path, distance))
-    
-    matches = sorted(matches, key=lambda x: x[1])  # sorted by the second element distance in matches tuple
-    return matches
-
-
-
-def process_selfie(request):
-    if request.method == 'POST':
+    for embedding in all_face_encodings:
+        stored_encoding = np.frombuffer(embedding.encoding, dtype=np.float64)
+        distance = face_recognition.face_distance([stored_encoding], target_encoding)
         
+        # Extract the scalar value from the distance array
+        distance_scalar = float(distance[0])  # Convert NumPy array to a single float
+        
+        if distance_scalar <= threshold:
+            matched_photos.add((embedding.photo.image.url, distance_scalar))  # Use scalar value
+
+    # Sort by best match (lower distance = better match)
+    return sorted(matched_photos, key=lambda x: x[1])
+
+def process_selfie(request, event_id):
+    event = get_object_or_404(Event, event_id=event_id)
+    
+    if request.method == 'POST':
         selfie = request.FILES.get('selfie') or request.FILES.get('camera_selfie')
         if selfie:
             fs = FileSystemStorage()
             filename = fs.save(selfie.name, selfie)
             selfie_path = fs.path(filename)
-            print(selfie_path)
 
             try:
-                encodings_file = str(settings.BASE_DIR) + '/photoapp/encodings.pkl'
-               
-                matching_images = find_matches(selfie_path, encodings_file)
-
+                matching_images = find_matches(selfie_path,event_id)
+                if matching_images is None:  # Handle case where no faces are detected
+                    matching_images = []
+                
                 return JsonResponse({
                     'message': 'Matching photos found' if matching_images else 'Matching photos not found',
-                    'matches': [{'path': settings.MEDIA_URL + match[0], 'distance': match[1]} for match in matching_images]
+                    'matches': [{'path': match[0], 'distance': float(match[1])} for match in matching_images]
                 })
 
             except Exception as e:
-                logger.error(f"Error in upload_selfie: {e}")
+                logger.error(f"Error in process_selfie: {e}")
                 return JsonResponse({'message': f'Error: {str(e)}'}, status=500)
             finally:
                 if os.path.exists(selfie_path):
                     os.remove(selfie_path)
-                    print(f"Deleted temporary selfie file: {selfie_path}")
-                    
 
         return JsonResponse({'message': 'No file uploaded'}, status=400)
 
-    # Render the template on GET request
-    return render(request, 'find_photos.html')
+    return render(request, 'find_photos.html',{'event': event})

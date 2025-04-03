@@ -35,11 +35,15 @@ SECRET_KEY = 'django-insecure-bl75(lby!wu6q)dehh1h4j=lj4wsv)&bititpjuc8b22bjv@ov
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '4162-27-59-85-49.ngrok-free.app',]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'fcad-27-59-85-21.ngrok-free.app',]
 CSRF_TRUSTED_ORIGINS = [
-    'https://4162-27-59-85-49.ngrok-free.app',
+    'https://fcad-27-59-85-21.ngrok-free.app',
 ]
 
+# message broker
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
 
 # Application definition
 

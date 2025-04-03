@@ -29,3 +29,4 @@ with open(encodings_file, 'wb') as f:
     pickle.dump({'encodings': encodings, 'identities': identities}, f)
 
 print("Encodings saved to", encodings_file)
+

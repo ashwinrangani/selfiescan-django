@@ -14,7 +14,7 @@ def upload_photos(request, event_id):
         saved_data = []
         for data in upload_data:
             photo = Photo(event=event, image=data)
-            photo.save()
+            photo.save()  # `post_save` will trigger Celery task
             saved_data.append(photo.image.url)
 
         return JsonResponse({

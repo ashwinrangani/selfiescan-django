@@ -4,12 +4,9 @@
 
 {% block content %}
 
-{% if message %}
-<div class="bg-green-100 text-green-800 p-4 rounded mb-6">{{ message }}</div>
-{% endif %}
-
-<div class="shadow-lg bg-inherit rounded-lg border border-blue-50 dark:border-none  p-6">
-  <form method="post" enctype="multipart/form-data" id="upload_selfie" class="space-y-6" action="{% url 'find_photos' %}">
+<div class="shadow-lg bg-inherit rounded-lg border border-blue-50 dark:border-none mt-12 shadow-gray-600 p-6">
+  <h1 class="text-center text-primary">Get your <span class="font-bold underline">{{event.name}}</span>'s photos by submitting your photo!</h1>
+  <form method="post" enctype="multipart/form-data" id="upload_selfie" class="space-y-6" action="{% url 'find_photos' event_id=event.event_id %}">
     {% csrf_token %}
     <div class="flex items-center justify-center gap-2 lg:gap-6">
       
@@ -25,7 +22,7 @@
         for="selfie"
         class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
       >
-        Select a Selfie
+        From the Gallery
       </label>
 
       <span class="text-gray-600 font-semibold">OR</span>
@@ -43,7 +40,7 @@
         for="camera_selfie"
         class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
       >
-        Capture a Selfie
+        Take a photo
       </label>
     </div>
 

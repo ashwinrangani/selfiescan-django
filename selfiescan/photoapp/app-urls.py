@@ -11,8 +11,8 @@ from .views.event_delete import event_delete,delete_event_photos
 
 urlpatterns = [
     path("", homepage, name='homepage'),
-    path("upload/photos/<uuid:event_id>/", upload_photos, name='upload_photos'),
-    path("find/photos", process_selfie, name='find_photos'),
+    path("upload/photos/<uuid:event_id>/", upload_photos, name="upload_photos"),
+    path("find/photos/<uuid:event_id>/", process_selfie, name='find_photos'),
     path("photographer/", create_event,name="photographer"),
     path("event/<uuid:event_id>/",event_detail, name="event_detail"),
     path("event/<uuid:event_id>/photos/", load_photos, name="load_photos"),

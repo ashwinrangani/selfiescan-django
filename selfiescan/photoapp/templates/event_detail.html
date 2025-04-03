@@ -3,163 +3,212 @@
 
 {% block content %}
 <section>
-<div class="container mt-12 mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+  <div class="container mt-12 mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
 
     <!-- Left Section: Event Form -->
-    <div class=" shadow-lg p-6 rounded-lg">
-        <h1 class="text-3xl font-semibold mb-4">Edit Event</h1>
+    <div class="shadow-lg shadow-gray-600 p-6 rounded-lg">
+      <div class="flex flex-col">
+        <h1 class="text-xl font-semibold">Edit Event</h1>
+        <span class="w-12 h-1 bg-primary mb-3 mt-2"></span>
+      </div>
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <label for="name" class="block font-medium">Event Name</label>
+        <input type="text" name="name" value="{{ event.name }}" class="input input-primary w-full" required>
 
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
-            <label for="name" class="block font-medium">Event Name</label>
-            <input type="text" name="name" value="{{ event.name }}" class="input input-primary w-full" required>
+        <label for="date" class="block font-medium">Event Date</label>
+        <input type="date" name="date" value="{{ event.date|date:'Y-m-d' }}" class="input input-primary w-full"
+          required>
 
-            <label for="date" class="block font-medium">Event Date</label>
-            <input type="date" name="date" value="{{ event.date|date:'Y-m-d' }}" class="input input-primary w-full" required>
+        <label for="location" class="block font-medium">Location</label>
+        <input type="text" name="location" value="{{ event.location }}" class="input input-primary w-full" required>
 
-            <label for="location" class="block font-medium">Location</label>
-            <input type="text" name="location" value="{{ event.location }}" class="input input-primary w-full" required>
-
-            <button type="submit" class="btn btn-primary w-full">Save Changes</button>
-        </form>
+        <button type="submit" class="btn btn-primary w-full">Save Changes</button>
+      </form>
     </div>
 
     <!-- Right Section: Photographer Info & Actions -->
-    <div class=" shadow-lg p-6 rounded-lg flex flex-col items-center justify-center space-y-4">
-        <h2 class="text-2xl font-semibold mb-2">Photographer : {{ event.photographer.username }}</h2>
-        <p class="text-gray-600">Total photos uploaded: <strong>{{ num_photos }}</strong></p>
+    <div class="shadow-lg shadow-gray-600 p-6 rounded-lg flex flex-col">
+      {% if event.photographer.first_name %}
+      <h2 class="text-xl font-semibold mb-2">Photographer : {{ event.photographer.first_name }} {{event.photographer.last_name }}</h2>
+      {% else %}
+      <h2 class="text-xl font-semibold mb-2">Photographer : {{ event.photographer.username }}</h2>
+      {% endif %}
 
-        <a href="{% url 'upload_photos' event.event_id %}" class="btn btn-primary px-6 py-2 rounded">
-            Upload More Photos
-        </a>
+      <span class="w-12 h-1 bg-primary mb-6"></span>
 
-        <a href="{% url 'photographer' %}" class="text-blue-500 hover:underline mt-4">⬅️ Back to Dashboard</a>
-    </div>
-    <!-- delete event -->
- <div>
-    <form action="{% url 'event_delete' event_id=event.event_id %}" method="post">
-        {% csrf_token %}
-        <button type="button" class="btn btn-error rounded-md" aria-haspopup="dialog" aria-expanded="false" aria-controls="slide-up-animated-modal" data-overlay="#slide-up-animated-modal">Delete Event and Photos</button>
+      <p class="mb-6">Total photos uploaded: <strong>{{ num_photos }}</strong></p>
 
-<div id="slide-up-animated-modal" class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 hidden" role="dialog" tabindex="-1">
-  <div class="overlay-animation-target modal-dialog overlay-open:mt-4 overlay-open:opacity-100 overlay-open:duration-300 mt-12 transition-all ease-out" >
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Are you sure?</h3>
-        <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#slide-up-animated-modal">
-          <span class="icon-[tabler--x] size-4"></span>
-        </button>
-      </div>
-      <div class="modal-body">
-        This action cannot be undone! The event and all the associated photos will be deleted permanently.
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-soft btn-secondary" data-overlay="#slide-up-animated-modal">
-          Close
-        </button>
-        <button type="submit" class="btn btn-primary">Confirm</button>
-      </div>
+
+      {% include 'upload_photos.html' %}
+
+
     </div>
   </div>
-</div>
+  <!-- delete event -->
+  <div class="shadow-lg shadow-gray-600 flex flex-col p-6 rounded-md">
+
+    <h1 class="text-xl font-semibold">Danger Zone</h1>
+    <span class="w-12 h-1 bg-primary mt-1.5 mb-6 "></span>
+    <form action="{% url 'event_delete' event_id=event.event_id %}" method="post">
+      {% csrf_token %}
+      <button type="button" class="btn btn-error text-sm rounded-md" aria-haspopup="dialog" aria-expanded="false"
+        aria-controls="slide-up-animated-modal" data-overlay="#slide-up-animated-modal">Delete Event and Photos</button>
+
+      <div id="slide-up-animated-modal" class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 hidden"
+        role="dialog" tabindex="-1">
+        <div
+          class="overlay-animation-target modal-dialog overlay-open:mt-4 overlay-open:opacity-100 overlay-open:duration-300 mt-12 transition-all ease-out">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title">Are you sure?</h3>
+              <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close"
+                data-overlay="#slide-up-animated-modal">
+                <span class="icon-[tabler--x] size-4"></span>
+              </button>
+            </div>
+            <div class="modal-body">
+              This action cannot be undone! The event and all the associated photos will be deleted permanently.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-soft btn-secondary" data-overlay="#slide-up-animated-modal">
+                Close
+              </button>
+              <button type="submit" class="btn btn-primary">Confirm</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </form>
     <!-- delete event photos -->
     <form action="{% url 'delete_event_photos' event_id=event.event_id %}" method="post" class="mt-4">
       {% csrf_token %}
 
-<button type="button" class="btn btn-error rounded-md" aria-haspopup="dialog" aria-expanded="false" aria-controls="middle-center-modal" data-overlay="#middle-center-modal">Delete Event Photos Only</button>
+      <button type="button" class="btn btn-error text-sm rounded-md" aria-haspopup="dialog" aria-expanded="false"
+        aria-controls="middle-center-modal" data-overlay="#middle-center-modal">Delete Event Photos Only</button>
 
-<div id="middle-center-modal" class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 middle-center-modal hidden" role="dialog" tabindex="-1">
-<div class="modal-dialog overlay-open:opacity-100 overlay-open:duration-300">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3 class="modal-title">Are you sure?</h3>
-      <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#middle-center-modal">
-        <span class="icon-[tabler--x] size-4"></span>
-      </button>
+      <div id="middle-center-modal"
+        class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 middle-center-modal hidden"
+        role="dialog" tabindex="-1">
+        <div class="modal-dialog overlay-open:opacity-100 overlay-open:duration-300">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title">Are you sure?</h3>
+              <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close"
+                data-overlay="#middle-center-modal">
+                <span class="icon-[tabler--x] size-4"></span>
+              </button>
+            </div>
+            <div class="modal-body">
+              This action can not be undone! All the photos of this event will be deleted permanently.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-soft btn-secondary"
+                data-overlay="#middle-center-modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Confirm</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="bottom-0 left-0 w-fit mr-auto">
+      <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block">
+        <span class="text-primary flex items-center justify-center p-2">Find photos
+          <span class="icon-[tabler--arrow-right] size-4 rtl:rotate-180"></span>
+        </span>
+      </a>
     </div>
-    <div class="modal-body">
-      This action can not be undone! All the photos of this event will be deleted permanently.
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-soft btn-secondary" data-overlay="#middle-center-modal">Cancel</button>
-      <button type="submit" class="btn btn-primary">Confirm</button>
-    </div>
+
   </div>
-</div>
-</div>
-  </form>
- </div>
- 
- <div>
-    
- </div>
-</div>
+
+
+  </div>
+  <div class="bottom-0 right-0 w-fit ml-auto p-4">
+   
+    <a href="{% url 'photographer' %}" class="text-primary hover:underline block">
+      <span class="text-primary flex items-center justify-center p-2">
+        <span class="icon-[tabler--arrow-left] size-4 rtl:rotate-180"></span>Back to Dashboard
+      </span>
+    </a>
+  </div>
+
 
 </section>
 <!-- Photos Section -->
- <section>
-<h3 class="text-xl font-semibold mt-6 mb-2">Event Photos</h3>
-<div class="flex justify-center">
+<section>
+  {% if num_photos > 0%}
+  <div class="divider divider-secondary">
+    <button id="show-photo" class="btn btn-sm btn-outline">Show Photos</button>
+  </div>
+  {% else %}
+  <p class="divider divider-secondary">No photos uploaded for this event yet.</p>
+  {% endif %}
+  <div class="flex justify-center">
     <span class="loading hidden loading-ring loading-lg"></span>
   </div>
-  {% if num_photos > 0 %}
+
   <!-- Include the photo grid -->
-  <div id="photo-grid">
-      {% include 'partials/photo_grid.html' %}
+
+  <div id="photo-grid" class="hidden">
+    {% include 'partials/photo_grid.html' %}
   </div>
 
   <!-- Include the pagination controls -->
-  <div id="pagination-controls">
-      {% include 'partials/pagination_controls.html' %}
+  <div id="pagination-controls" class="hidden">
+    {% include 'partials/pagination_controls.html' %}
   </div>
-{% else %}
-  <p class="text-center text-gray-500 mt-4">No photos uploaded for this event yet.</p>
-{% endif %}
-
 </section>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const eventId = "{{ event.event_id }}";
-        const photoGrid = document.getElementById("photo-grid");
-        const paginationControls = document.getElementById("pagination-controls");
-        const loadingState = document.querySelector('.loading');
-    
-        if (!photoGrid || !paginationControls) {
-            console.error("Error: photo-grid or pagination-controls not found!");
-            return;
-        }
-       
-        paginationControls.addEventListener("click", (e) => {
-            if (e.target.classList.contains("page-link")) {
-                const page = e.target.getAttribute("data-page");
-                loadingState.style.display = "block"
+  document.addEventListener("DOMContentLoaded", () => {
+    const eventId = "{{ event.event_id }}";
+    const photoGrid = document.getElementById("photo-grid");
+    const paginationControls = document.getElementById("pagination-controls");
+    const loadingState = document.querySelector('.loading');
+    const showPhotos = document.getElementById("show-photo")
 
-                fetch(`/event/${eventId}/photos/?page=${page}`)
-                    .then((response) => {
-                        if (!response.ok) throw new Error(`Failed to load page ${page}`);
-                        return response.json();
-                    })
-                    .then((data) => {
-                        loadingState.style.display = 'none';
+    if (!photoGrid || !paginationControls) {
+      console.error("Error: photo-grid or pagination-controls not found!");
+      return;
+    }
+    if (showPhotos) {
+      showPhotos.addEventListener('click', () => {
+        photoGrid.style.display = 'block'
+        paginationControls.style.display = 'block'
+      })
 
-                        if (data.html && data.pagination_html) {
-                            photoGrid.innerHTML = data.html;
-                            paginationControls.innerHTML = data.pagination_html;
-                            window.scrollTo({ top: photoGrid.offsetTop - 100, behavior: "smooth" });
-                        } else {
-                            console.error("Error: Incomplete data received", data);
-                        }
-                    })
-                    .catch((error) => console.error("Error loading photos:", error));
+    }
+
+
+    paginationControls.addEventListener("click", (e) => {
+      if (e.target.classList.contains("page-link")) {
+        const page = e.target.getAttribute("data-page");
+        loadingState.style.display = "block"
+
+        fetch(`/event/${eventId}/photos/?page=${page}`)
+          .then((response) => {
+            if (!response.ok) throw new Error(`Failed to load page ${page}`);
+            return response.json();
+          })
+          .then((data) => {
+            loadingState.style.display = 'none';
+
+            if (data.html && data.pagination_html) {
+              photoGrid.innerHTML = data.html;
+              paginationControls.innerHTML = data.pagination_html;
+              window.scrollTo({ top: photoGrid.offsetTop - 100, behavior: "smooth" });
+            } else {
+              console.error("Error: Incomplete data received", data);
             }
-        });
+          })
+          .catch((error) => console.error("Error loading photos:", error));
+      }
     });
-    
-    
-    </script>
+  });
+
+
+</script>
 {% endblock %}

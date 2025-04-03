@@ -1,30 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
     const uploadedPhotos = document.getElementById('upload_data');
     const uploadForm = document.getElementById('upload_photos');
-    const uploadBtn = document.getElementById('btn');
+    const selectedPhotos = document.getElementById('selected-photos');
     const progressBarContainer = document.getElementById('progressBarContainer');
     const progressBar = document.getElementById('progressBar');
     const uploadSuccess = document.getElementById('uploadSuccess');
 
     var notyf = new Notyf({ duration: 5000 });
 
-    // function validate_input(input) {
-    //     const allowed_types = ['image/jpeg', 'image/png', 'image/psd', 'image/jpg', 'image/webp'];
-    //     const files = input.files;
+    function validate_input(input) {
+        const allowed_types = ['image/jpeg', 'image/png', 'image/psd', 'image/jpg', 'image/webp'];
+        const files = input.files;
+        selectedPhotos.textContent = "Photos Selected: " + files.length;
 
-    //     for (let index = 0; index < files.length; index++) {
-    //         if (!allowed_types.includes(files[index].type)) {
-    //             notyf.error("Invalid file type! Please upload only images.");
-    //             input.value = '';
-    //         }
-    //     }
-    // }
+        for (let index = 0; index < files.length; index++) {
+            if (!allowed_types.includes(files[index].type)) {
+                notyf.error("Invalid file type! Please upload only images.");
+                input.value = '';
+                
+            }
+        }
+    }
 
-    // if (uploadedPhotos) {
-    //     uploadedPhotos.addEventListener('change', (e) => {
-    //         validate_input(e.target);
-    //     });
-    // }
+    if (uploadedPhotos) {
+        uploadedPhotos.addEventListener('change', (e) => {
+            validate_input(e.target);
+            
+        });
+    }
 
     if (uploadForm) {
         uploadForm.addEventListener('submit', (e) => {

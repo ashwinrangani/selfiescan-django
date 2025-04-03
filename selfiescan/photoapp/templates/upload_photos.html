@@ -1,8 +1,8 @@
-{% extends "base.html" %}
+
 {% load static %}
-{% block content %}
-<div class="shadow-lg mt-12 bg-inherit rounded-lg border border-blue-50 dark:border-none  p-6">
-  <h1 class="text-3xl font-serif text-center">{{ event.name }}</h1>
+
+
+  <h1 class="text-2xl font-serif text-center">{{ event.name }}</h1>
     <form method="post" enctype="multipart/form-data" id="upload_photos" class="space-y-6" action="{% url 'upload_photos' event_id=event.event_id %}">
       {% csrf_token %}
       <div class="flex flex-col items-center justify-center gap-2 lg:gap-6">
@@ -17,25 +17,24 @@
         />
         <label
           for="upload_data"
-          class="cursor-pointer btn btn-gradient btn-primary btn-lg p-2"
+          class="cursor-pointer btn btn-primary w-full"
         >
           Select Photos
+          <span class="icon-[tabler--select] size-4"></span>
         </label>
       
       <div class="flex w-full items-center justify-center pb-3">
         <button
           type="submit" id="btn"
-          class="cursor-pointer btn btn-gradient btn-primary btn-lg btn-wide p-2"
+          class="cursor-pointer btn btn-primary w-full"
         >
           Upload
+          <span class="icon-[tabler--cloud-up] size-4"></span>
         </button>
       </div>
-  
-      <!-- Loading Spinner -->
-      <!-- <div class="flex justify-center">
-        <span class="loading hidden loading-ring loading-lg"></span>
-      </div> -->
-    
+      
+  <span id="selected-photos"></span>
+          
       <div id="progressBarContainer" class="progress h-6 hidden w-full">
         <div id="progressBar" class="progress-bar w-0 font-light">0%</div>
     </div>
@@ -43,8 +42,6 @@
     <!-- Success Notification -->
     <p id="uploadSuccess" class="hidden text-green-500">Upload Successful!</p>
     </form>
-  </div>
-{% endblock %}
-{% block scripts %}
+
+
 <script src="{% static 'js/upload_photos.js' %}"></script>
-{% endblock %}
