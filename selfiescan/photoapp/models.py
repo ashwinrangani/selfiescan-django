@@ -1,3 +1,4 @@
+from re import I
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
@@ -7,6 +8,7 @@ from django.core.files.base import ContentFile
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .tasks import process_photo
+
 
 
 
@@ -39,6 +41,10 @@ class Photo(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     image = models.ImageField(upload_to=event_photo_path)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_processed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Photo {self.id} for Event {self.event.name}"
 
 class FaceEncoding(models.Model):
     photo = models.ForeignKey(Photo, on_delete=models.CASCADE, related_name="encodings")

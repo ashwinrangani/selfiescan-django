@@ -37,7 +37,7 @@ def event_detail(request, event_id):
     photos_list = Photo.objects.filter(event=event).order_by('-id')  # Adjust ordering as needed
     photos_count = photos_list.count()
     
-    # Set up pagination - 12 photos per page is typical for a grid
+    # Set up pagination - 12 photos
     paginator = Paginator(photos_list, 12)
     page = request.GET.get('page', 1)
     photos = paginator.get_page(page)

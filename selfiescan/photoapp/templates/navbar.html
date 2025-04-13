@@ -4,10 +4,10 @@
       <button id="dropdown-name" type="button" class="dropdown-toggle btn btn-text btn-circle dropdown-open:bg-base-content/10 dropdown-open:text-base-content" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
         <span class="icon-[tabler--menu-2] size-5"></span>
       </button>
-      <ul class="dropdown-menu dropdown-open:opacity-100 hidden" role="menu" aria-orientation="vertical" aria-labelledby="dropdown-name">
-        <li><a class="dropdown-item" href="#">Link 1</a></li>
-        <li><a class="dropdown-item" href="#">Link 2</a></li>
-        <li><a class="dropdown-item" href="#">Link 3</a></li>
+      <ul class="dropdown-menu dropdown-open:opacity-100 z-10 hidden" role="menu" aria-orientation="vertical" aria-labelledby="dropdown-name">
+        <li><a class="dropdown-item" href="{% url 'photographer' %}">Dashboard</a></li>
+        <li><a class="dropdown-item" href="">Link 2</a></li>
+        <li><a class="dropdown-item z-10" href="#">Link 3</a></li>
         <hr class="border-base-content/25 -mx-2 my-3" />
         <li><a class="dropdown-item" href="#">Link 4</a></li>
       </ul>

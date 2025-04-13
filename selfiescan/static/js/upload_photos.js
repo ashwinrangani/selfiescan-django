@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     progressBar.style.width = "100%";
                     progressBar.textContent = "100%";
                     uploadSuccess.classList.remove("hidden");
+                    notyf.info("Processing of the photos are started in the background..")
                 } else {
                     notyf.error("Upload failed");
                     progressBarContainer.classList.add("hidden");

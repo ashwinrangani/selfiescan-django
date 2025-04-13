@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="relative">
-    <div class="absolute w-48 h-48 md:w-56 md:h-56 lg:w-60 lg:h-60 bg-indigo-500/30 opacity-40 z-10 rounded-full mt-6 -left-4 lg:-top-3 lg:left-10"></div>
+    <div class="absolute w-48 h-48 md:w-56 md:h-56 lg:w-60 lg:h-60 bg-indigo-500/30 opacity-40 rounded-full mt-6 -left-4 lg:-top-3 lg:left-10"></div>
     <div class="absolute w-32 h-36 md:w-48 md:h-48 lg:w-48 lg:h-48 bg-teal-400/30 opacity-40 rounded-full top-60 md:top-72 lg:top-72 -left-5 "></div>
     <div class="absolute w-40 h-40 bg-blue-500/30 opacity-40 rounded-full top-40 -right-5"></div>
 </div>
@@ -11,13 +11,13 @@
 <section class="hero py-20 text-center">
     <div class="container w-full">
         <h1 class="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white leading-tight animate-fade-in-up">
-            Find Your Photos with Ease!
+            Empower Your Photography Workflow!
         </h1>
         <p class="mt-4 text-lg md:text-xl text-gray-700 dark:text-gray-200 animate-fade-in-up animation-delay-200">
-            Upload your selfie and instantly retrieve your event photos.
+            Share galleries effortlessly and let guests find their moments with our cutting edge AI technology.
         </p>
         <!-- get started modal -->
-        <button type="button" class="btn btn-primary mt-5" aria-haspopup="dialog" aria-expanded="false" aria-controls="slide-down-animated-modal" data-overlay="#slide-down-animated-modal">Get Started</button>
+        <button type="button" class="btn btn-primary shadow-lg hover:shadow-gold-500/50 mt-5" aria-haspopup="dialog" aria-expanded="false" aria-controls="slide-down-animated-modal" data-overlay="#slide-down-animated-modal">Get Started</button>
 
         <div id="slide-down-animated-modal" class="overlay modal overlay-open:opacity-100 hidden" role="dialog" tabindex="-1">
           <div class="modal-dialog overlay-open:mt-12 overlay-open:opacity-100 overlay-open:duration-500 transition-all ease-out" >
@@ -38,7 +38,7 @@
 
         <div class="flex gap-3 justify-center">
         <div class="mt-12 animate-fade-in-up animation-delay-600">
-            <img src="{% static 'images/selfie-example.webp' %}" alt="Selfie Examples" class="rounded-xl shadow-2xl mx-auto w-80 h-60 object-cover rotate-3" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
+            <img src="{% static 'images/selfie-example.webp' %}" alt="Selfie Examples" class="rounded-xl shadow-2xl mx-auto w-80 h-60 object-fit rotate-3" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
         </div>
         <div class="mt-12 animate-fade-in-up animation-delay-600">
             <img src="{% static 'images/wedding-pic.jpeg' %}" alt="Selfie Examples" class="rounded-xl shadow-2xl mx-3 w-80 h-60 object-cover border border-black rotate-3" onerror="this.src='/api/placeholder/600/400';this.onerror='';">

@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="shadow-lg bg-inherit rounded-lg border border-blue-50 dark:border-none mt-12 shadow-gray-600 p-6">
-  <h1 class="text-center text-primary">Get your <span class="font-bold underline">{{event.name}}</span>'s photos by submitting your photo!</h1>
+  <h1 class="text-center text-primary text-xl">Get your <span class="font-bold underline">{{event.name}}</span>'s photos by submitting your photo!</h1>
   <form method="post" enctype="multipart/form-data" id="upload_selfie" class="space-y-6" action="{% url 'find_photos' event_id=event.event_id %}">
     {% csrf_token %}
     <div class="flex items-center justify-center gap-2 lg:gap-6">
@@ -25,7 +25,7 @@
         From the Gallery
       </label>
 
-      <span class="text-gray-600 font-semibold">OR</span>
+      <span class="font-semibold">OR</span>
 
       <!-- Camera Capture -->
       <input
@@ -79,7 +79,7 @@
     </div>
   </form>
 </div>
-
+<p class="messages text-center text-primary mt-6"></p>
 <!-- Matches Section -->
 <div class="matches-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6 p-4 md:p-8 lg:p-12">
   <!-- Cards will be appended dynamically here -->
@@ -107,10 +107,10 @@
   </div>
 
   <!-- Download Button -->
-  <button id="download-button" class="absolute top-4 right-20 mr-2 btn btn-primary btn-sm">Download</button>
+  <button id="download-button" class="absolute top-4 mt-12 md:mt-1 right-20 mr-2 btn btn-primary btn-sm">Download</button>
 
   <!-- Close Button -->
-  <button id="close-button" class="absolute top-4 right-4 btn btn-secondary btn-sm">Close</button>
+  <button id="close-button" class="absolute top-4 mt-12 md:mt-1 right-4 btn btn-secondary btn-sm">Close</button>
 </div>
 
 {% endblock %}

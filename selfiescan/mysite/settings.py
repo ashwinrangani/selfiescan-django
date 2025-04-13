@@ -35,9 +35,9 @@ SECRET_KEY = 'django-insecure-bl75(lby!wu6q)dehh1h4j=lj4wsv)&bititpjuc8b22bjv@ov
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'fcad-27-59-85-21.ngrok-free.app',]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '24da-106-216-89-148.ngrok-free.app',]
 CSRF_TRUSTED_ORIGINS = [
-    'https://fcad-27-59-85-21.ngrok-free.app',
+    'https://24da-106-216-89-148.ngrok-free.app',
 ]
 
 # message broker

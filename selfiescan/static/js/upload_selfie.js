@@ -106,6 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (data.matches) {
                     console.log(data.matches)
+                    matchesCount = data.matches.length
+                    const messages = document.querySelector('.messages')
+                    if  (matchesCount > 0 ) {
+                        messages.textContent = `${matchesCount}` +  ` ${data.message}`
+                    } else {
+                        messages.textContent =  ` ${data.message}`
+                    }
+                    
+
                     const matchesContainer = document.querySelector('.matches-section');
                     matchesContainer.innerHTML = '';
                     data.matches.forEach((match) => {

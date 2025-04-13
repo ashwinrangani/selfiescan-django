@@ -35,13 +35,13 @@
     </div>
 
     <!-- Total Uploads-->
-    <div class="card bg-green-500 dark:bg-inherit p-8 shadow-lg shadow-gray-600 rounded-lg text-center">
+    <div class="card bg-green-200 dark:bg-inherit p-8 shadow-lg shadow-gray-600 rounded-lg text-center">
       <h1 class="card-header text-2xl font-semibold mb-2">Total Uploads</h1>
       <p class="card-body text-4xl font-bold counter" data-target="{{ stats.total_uploads }}">0</p>
     </div>
 
     <!-- Total Search Queries-->
-    <div class="card bg-purple-500 dark:bg-inherit p-8 shadow-lg shadow-gray-600 rounded-lg text-center">
+    <div class="card bg-purple-200 dark:bg-inherit p-8 shadow-lg shadow-gray-600 rounded-lg text-center">
       <h1 class="card-header text-2xl font-semibold mb-2">Total Search Queries</h1>
       <p class="card-body text-4xl font-bold counter" data-target="{{ stats.total_searches }}">0</p>
     </div>
@@ -61,7 +61,7 @@
     {% if events %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {% for event in events %}
-      <div class="p-4  rounded-lg shadow-md border-t-4 border-t-gray-400 shadow-gray-600">
+      <div class="p-4  rounded-lg shadow-md border-t-4 border-t-primary shadow-primary">
         <h3 class="text-2xl font-serif font-semibold">{{ event.name }}</h3>
         <ul class="space-y-3 text-sm mt-2">
           <li class="flex items-center space-x-3 rtl:space-x-reverse">
