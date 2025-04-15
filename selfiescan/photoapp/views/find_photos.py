@@ -7,62 +7,75 @@ import numpy as np
 from PIL import Image
 from ..models import FaceEncoding, Event, Photo
 import logging
+import cv2
+
+def resize_image_for_processing(image, max_width=800):
+    height, width = image.shape[:2]
+    if width > max_width:
+        scaling_factor = max_width / width
+        new_size = (int(width * scaling_factor), int(height * scaling_factor))
+        image = cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
+    return image
 
 logger = logging.getLogger(__name__)
 
-def find_matches(selfie_path, event_id, tolerance=0.45):
+def find_matches(selfie_path, event_id, tolerance=0.465):
     # Load and process selfie
-    pil_image = Image.open(selfie_path).convert('RGB')
-    image = np.array(pil_image)
+    image = cv2.imread(selfie_path)
     
-    # Step 1: Find selfie faces
+    if image is None:
+            return f"Failed to load image for photo {selfie_path}"
+   
+    resized_image = resize_image_for_processing(image)
+    image = np.array(resized_image)
+    # Step 1: Detect faces in selfie
     selfie_locations = face_recognition.face_locations(image, number_of_times_to_upsample=2)
-    logger.info(f"Selfie face locations: {selfie_locations}")
-    
+    logger.info(f"Detected {len(selfie_locations)} face locations: {selfie_locations}")
+
     if not selfie_locations:
         logger.warning("No face detected in uploaded selfie")
         return []
 
-    # Step 2: Estimate selfie landmarks (for logging/debugging)
-    selfie_landmarks = face_recognition.face_landmarks(image, selfie_locations)
-    if not selfie_landmarks:
-        logger.warning("No face landmarks detected for selfie")
-    else:
-        logger.info(f"Selfie landmarks detected for {len(selfie_landmarks)} faces")
-
-    # Step 3: Encode selfie
+    # Step 2: Encode all faces from the selfie
     selfie_encodings = []
     for idx, loc in enumerate(selfie_locations):
         encoding = face_recognition.face_encodings(image, [loc])[0]
         selfie_encodings.append(encoding)
-        logger.info(f"Selfie encoding sample: {encoding[:5]}...")
-    
+        logger.info(f"Selfie encoding {idx} sample: {encoding[:5]}...")
+
     if not selfie_encodings:
         logger.warning("No face encoding generated for selfie")
         return []
-    
-    selfie_encoding = selfie_encodings[0]
 
-    # Get known encodings
+    # Step 3: Fetch known encodings from DB
     all_face_encodings = FaceEncoding.objects.filter(photo__event__event_id=event_id)
-    known_encodings = [np.frombuffer(encoding.encoding, dtype=np.float64) for encoding in all_face_encodings]
-    known_photos = [encoding.photo.image.url for encoding in all_face_encodings]
+    known_encodings = [np.frombuffer(enc.encoding, dtype=np.float64) for enc in all_face_encodings]
+    known_photos = [enc.photo.image.url for enc in all_face_encodings]
 
     if not known_encodings:
         logger.warning(f"No known face encodings found for event {event_id}")
         return []
 
-    # Step 4: Compare with distances
-    distances = face_recognition.face_distance(known_encodings, selfie_encoding)
-    logger.info(f"Face distances: {distances}")
-    
-    # Determine matches based on tolerance
-    matched_photos = []
-    for idx, distance in enumerate(distances):
-        if distance <= tolerance:
-            matched_photos.append((known_photos[idx], float(distance)))
+    known_encodings_np = np.array(known_encodings)
+    logger.info(f"Comparing {len(selfie_encodings)} selfie encodings to {len(known_encodings_np)} known encodings")
 
+    # Step 4: Match each selfie encoding
+    best_matches = {}
+    for selfie_encoding in selfie_encodings:
+        distances = np.linalg.norm(known_encodings_np - selfie_encoding, axis=1)
+        for idx, distance in enumerate(distances):
+            if distance <= tolerance:
+                url = known_photos[idx]
+                if url not in best_matches or distance < best_matches[url]:
+                    best_matches[url] = float(distance)
+
+    # Step 5: Return as list of (photo_url, distance)
+    matched_photos = [(url, dist) for url, dist in best_matches.items()]
+    matched_photos.sort(key=lambda x: x[1])  # Sort by distance (lower = better match)
+    logger.info(f"Total matched photos: {len(matched_photos)}")
     return matched_photos
+
+
 
 def process_selfie(request, event_id):
     
@@ -98,6 +111,7 @@ def process_selfie(request, event_id):
             finally:
                 if os.path.exists(selfie_path):
                     os.remove(selfie_path)
+                    
 
         return JsonResponse({'message': 'No file uploaded'}, status=400)
 

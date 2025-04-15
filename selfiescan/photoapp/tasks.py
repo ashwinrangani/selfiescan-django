@@ -4,8 +4,18 @@ import numpy as np
 from PIL import Image, ImageDraw
 import os
 import logging
+import cv2
 
 logger = logging.getLogger(__name__)
+
+def resize_image_for_processing(image, max_width=800):
+    height, width = image.shape[:2]
+    if width > max_width:
+        scaling_factor = max_width / width
+        new_size = (int(width * scaling_factor), int(height * scaling_factor))
+        image = cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
+    return image
+
 
 @shared_task
 def process_photo(photo_id):
@@ -15,13 +25,14 @@ def process_photo(photo_id):
         photo = Photo.objects.get(id=photo_id)
         image_path = photo.image.path
         
-        pil_image = Image.open(image_path).convert('RGB')
-        image = np.array(pil_image)
+        image = cv2.imread(image_path)
         
         if image is None:
             return f"Failed to load image for photo {photo_id}"
 
-        face_locations = face_recognition.face_locations(image, number_of_times_to_upsample=1)
+        image = resize_image_for_processing(image)
+
+        face_locations = face_recognition.face_locations(image, number_of_times_to_upsample=2)
         logger.info(f"Detected {len(face_locations)} face locations: {face_locations}")
         
         if not face_locations:
