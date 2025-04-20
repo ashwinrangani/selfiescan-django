@@ -6,7 +6,7 @@ from .views.profile import profile
 from .views.acc_settings import settings, update_username, delete_account
 from .views.homepage import homepage
 from .views.photographer import create_event, download_qr
-from .views.event_detail import event_detail, load_photos
+from .views.event_detail import event_detail, load_photos, create_branding,remove_branding_logo
 from .views.event_delete import event_delete,delete_event_photos
 
 urlpatterns = [
@@ -19,6 +19,8 @@ urlpatterns = [
     path("event/<uuid:event_id>/delete_event", event_delete, name="event_delete"),
     path('event/<uuid:event_id>/delete_photos/', delete_event_photos, name='delete_event_photos'),
     path("event/<uuid:event_id>/download_qr/", download_qr,name="download_qr"),
+    path("event/<uuid:event_id>/branding/", create_branding, name="branding"),
+    path("event/<uuid:event_id>/branding/remove-logo/", remove_branding_logo, name="remove_branding_logo"),
     path('signin/', sign_in, name='signin'),
     path('signout/', sign_out, name='signout'),
     path('signup/', sign_up, name='signup'),

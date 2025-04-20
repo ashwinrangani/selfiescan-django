@@ -87,3 +87,48 @@ def load_photos(request, event_id):
         'html': html,
         'pagination_html': pagination_html
     })
+
+def create_branding(request, event_id):
+    if request.method == "POST":
+        event = Event.objects.get(event_id=event_id, photographer=request.user)
+
+        branding_enabled = request.POST.get("branding_enabled") in ["true", "on", "1"]
+        branding_text = request.POST.get("branding_text", "").strip()
+        branding_image = request.FILES.get('branding_image')
+
+        if branding_enabled:
+            event.branding_enabled = True
+
+            # Always update branding_text, even if it's empty
+            event.branding_text = branding_text
+            
+            # Update branding_image only if a new image is uploaded
+            if branding_image:
+                event.branding_image = branding_image
+
+        else:
+            # Branding is turned off, clear everything
+            event.branding_enabled = False
+            event.branding_text = ""
+            event.branding_image = None
+
+        event.save()
+
+        return JsonResponse({
+            "success": True,
+            "logo_url": event.branding_image.url if event.branding_image else ""
+        })
+
+    return JsonResponse({"success": False}, status=400)
+
+def remove_branding_logo(request, event_id):
+    if request.method == "POST" and request.user.is_authenticated:
+        try:
+            event = Event.objects.get(event_id=event_id, photographer=request.user)
+            event.branding_image = None
+            event.save()
+            return JsonResponse({"success": True})
+        except Event.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Event not found"}, status=404)
+
+    return JsonResponse({"success": False}, status=400)

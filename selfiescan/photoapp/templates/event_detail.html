@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<section>
+<section id="event-section" data-event-id="{{ event.event_id }}"> <!-- exporting event_id to external js -->
   <div class="container mt-12 mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
 
     <!-- Left Section: Event Form -->
@@ -28,7 +28,8 @@
     </div>
 
     <!-- Right Section: Photographer Info & Actions -->
-    <div class="shadow-lg shadow-gray-600 p-6 rounded-lg flex flex-col">
+    <div>
+      <div class="shadow-lg shadow-gray-600 p-6 rounded-lg flex flex-col">
       {% if event.photographer.first_name %}
       <h2 class="text-xl font-semibold mb-2">Photographer : {{ event.photographer.first_name }} {{event.photographer.last_name }}</h2>
       {% else %}
@@ -42,12 +43,22 @@
 
       {% include 'upload_photos.html' %}
 
-
+      </div>
     </div>
-  </div>
-  <!-- delete event -->
-  <div class="shadow-lg shadow-gray-600 flex flex-col p-6 rounded-md">
+  <!-- find photos -->
 
+  <div class="mt-5 shadow-lg shadow-gray-600 rounded-md">
+    <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block">
+      <span class="text-primary flex items-center justify-center p-2">Find photos
+        <span class="icon-[tabler--arrow-right] size-4 rtl:rotate-180"></span>
+      </span>
+    </a>
+  </div>
+</div>
+  
+  <!-- delete event -->
+  <div >
+    <div class="shadow-lg shadow-gray-600 flex flex-col p-6 rounded-md">
     <h1 class="text-xl font-semibold">Danger Zone</h1>
     <span class="w-12 h-1 bg-primary mt-1.5 mb-6 "></span>
     <form action="{% url 'event_delete' event_id=event.event_id %}" method="post">
@@ -112,14 +123,76 @@
         </div>
       </div>
     </form>
-    <div class="bottom-0 left-0 w-fit mr-auto">
-      <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block">
-        <span class="text-primary flex items-center justify-center p-2">Find photos
-          <span class="icon-[tabler--arrow-right] size-4 rtl:rotate-180"></span>
-        </span>
-      </a>
+    
+  </div>
+    <!-- Branding Settings -->
+<div class="mt-4 shadow-lg shadow-gray-600 flex flex-col gap-4 p-6 rounded-md">
+  <h2 class="text-xl font-semibold mb-2">Branding on Photographs</h2>
+
+  <form method="post" id="branding-form" class="flex flex-col gap-4">
+    {% csrf_token %}
+
+    <div class="flex items-center justify-between">
+      <label for="brandingSwitch" class="text-base font-medium">
+        Enable Branding on Matching Photos
+      </label>
+      <input 
+        name="branding_enabled"
+        type="checkbox"
+        id="brandingSwitch"
+        class="switch switch-outline switch-primary"
+        {% if event.branding_enabled %}checked{% endif %}
+      />
     </div>
 
+    <div class="form-control">
+      <label for="studioNameInput" class="label">
+        <span class="label-text">Studio Name / Company Name</span>
+      </label>
+      <input 
+        type="text"
+        name="branding_text"
+        id="studioNameInput"
+        value="{{ event.branding_text|default:'' }}"
+        class="input input-bordered input-primary w-full"
+        placeholder="e.g. Shree Krishna Studio"
+        {% if not event.branding_enabled %}disabled{% endif %}
+      />
+    </div>
+    <div class="form-control">
+      <label for="brandingImage" class="label">
+        <span class="label-text">Branding Logo (optional)</span>
+      </label>
+    
+      {% if event.branding_image %}
+      <img src="{{ event.branding_image.url }}" alt="Brand Logo" class="h-20 w-20 object-cover mb-2 rounded" id="branding-logo-preview">
+      <button type="button" id="remove-branding-logo-btn" class="btn btn-sm btn-error w-fit mb-2 {% if not event.branding_image %}hidden{% endif %}">
+        Remove Logo
+      </button>
+      
+      {% else %}
+        <img src="" alt="" class="h-20 w-20 object-cover hidden" id="branding-logo-preview">
+        <button type="button" id="remove-branding-logo-btn" class="btn btn-sm btn-error w-fit mb-2 hidden">
+          Remove Logo
+        </button>
+      {% endif %}
+      
+      <input
+        type="file"
+        name="branding_image"
+        id="brandingImage"
+        accept="image/*"
+        class="file-input file-input-bordered w-full"
+        {% if not event.branding_enabled %}disabled{% endif %}
+      />
+    </div>
+    
+
+    <button id="branding-btn" type="submit" class="btn btn-primary text-sm md:text-lg lg:text-lg btn-xs md:btn-lg lg:btn-lg">
+      Save Branding Settings
+    </button>
+  </form>
+</div>
   </div>
 
 
@@ -137,7 +210,7 @@
 </section>
 <!-- Photos Section -->
 <section>
-  {% if num_photos > 0%}
+  {% if num_photos > 0 %}
   <div class="divider divider-secondary">
     <button id="show-photo" class="btn btn-sm btn-outline">Show Photos</button>
   </div>
@@ -162,53 +235,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const eventId = "{{ event.event_id }}";
-    const photoGrid = document.getElementById("photo-grid");
-    const paginationControls = document.getElementById("pagination-controls");
-    const loadingState = document.querySelector('.loading');
-    const showPhotos = document.getElementById("show-photo")
-
-    if (!photoGrid || !paginationControls) {
-      console.error("Error: photo-grid or pagination-controls not found!");
-      return;
-    }
-    if (showPhotos) {
-      showPhotos.addEventListener('click', () => {
-        photoGrid.style.display = 'block'
-        paginationControls.style.display = 'block'
-      })
-
-    }
-
-
-    paginationControls.addEventListener("click", (e) => {
-      if (e.target.classList.contains("page-link")) {
-        const page = e.target.getAttribute("data-page");
-        loadingState.style.display = "block"
-
-        fetch(`/event/${eventId}/photos/?page=${page}`)
-          .then((response) => {
-            if (!response.ok) throw new Error(`Failed to load page ${page}`);
-            return response.json();
-          })
-          .then((data) => {
-            loadingState.style.display = 'none';
-
-            if (data.html && data.pagination_html) {
-              photoGrid.innerHTML = data.html;
-              paginationControls.innerHTML = data.pagination_html;
-              window.scrollTo({ top: photoGrid.offsetTop - 100, behavior: "smooth" });
-            } else {
-              console.error("Error: Incomplete data received", data);
-            }
-          })
-          .catch((error) => console.error("Error loading photos:", error));
-      }
-    });
-  });
-
-
-</script>
+<script src="{% static 'js/event_detail.js' %}"></script>
 {% endblock %}

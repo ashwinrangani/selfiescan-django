@@ -1,8 +1,8 @@
-<div class="photo-grid grid grid-cols-3 md:grid-cols-8 lg:grid-cols-10 gap-2 opacity-100 transition-opacity duration-400 ease-in-out">
+<div class="photo-grid grid grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 opacity-100 transition-opacity duration-400 ease-in-out">
     {% for photo in photos %}
     
         <div class="photo-item">
-            <img src="{{ photo.image.url }}" alt="Event photo" class="h-44 w-auto object-cover rounded-md" loading="lazy" />
+            <img src="{{ photo.image.url }}" alt="Event photo" class="max-w-[600px] w-full h-auto object-cover rounded-lg shadow-md transition-transform" loading="lazy" />
         </div>
     {% endfor %}
 </div>

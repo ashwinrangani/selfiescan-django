@@ -20,6 +20,10 @@ class Event(models.Model):
     location = models.CharField(max_length=255, blank=True, null=True)
     event_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     qr_code = models.ImageField(upload_to='qrcodes/', blank=True)
+    branding_enabled = models.BooleanField(default=False)
+    branding_image = models.ImageField(upload_to='branding/', null=True, blank=True)
+    branding_text = models.CharField(max_length=100, blank=True, null=True)
+
 
     def save(self, *args, **kwargs):
         if not self.qr_code:

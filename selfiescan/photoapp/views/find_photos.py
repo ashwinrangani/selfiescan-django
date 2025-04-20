@@ -4,7 +4,6 @@ from django.http import JsonResponse
 import os
 import face_recognition
 import numpy as np
-from PIL import Image
 from ..models import FaceEncoding, Event, Photo
 import logging
 import cv2
