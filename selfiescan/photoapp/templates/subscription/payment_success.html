@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Success</title>
+</head>
+<body>
+    <h1>Payment Successful!</h1>
+    <p>Payment ID: {{ payment_id }}</p>
+    <p>Order ID: {{ order_id }}</p>
+    <p>Subscription: {{ subscription_type }}</p>
+    <a href="{% url 'billing_dashboard' %}">Return to Billing</a>
+</body>
+</html>

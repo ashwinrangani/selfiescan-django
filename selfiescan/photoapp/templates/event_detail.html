@@ -40,7 +40,7 @@
 
       <p class="mb-6">Total photos uploaded: <strong>{{ num_photos }}</strong></p>
 
-
+    <!-- upload photos -->
       {% include 'upload_photos.html' %}
 
       </div>
@@ -126,8 +126,9 @@
     
   </div>
     <!-- Branding Settings -->
-<div class="mt-4 shadow-lg shadow-gray-600 flex flex-col gap-4 p-6 rounded-md">
-  <h2 class="text-xl font-semibold mb-2">Branding on Photographs</h2>
+<div class="mt-4 w-full shadow-lg shadow-gray-600 flex flex-col gap-4 p-6 rounded-md">
+  <h2 class="text-xl font-semibold ">Branding on Photographs</h2>
+  <span class="w-12 h-1 bg-primary -mt-2 mb-6 "></span>
 
   <form method="post" id="branding-form" class="flex flex-col gap-4">
     {% csrf_token %}
@@ -145,6 +146,24 @@
       />
     </div>
 
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1">
+        <input type="radio" name="branding_type" class="radio radio-xs radio-info" id="brandingTypeLogo" 
+        {% if event.branding_enabled and not event.branding_text %}checked{% endif %}
+        {% if not event.branding_enabled %}disabled{% endif %} />
+        <label class="label-text text-base" for="brandingTypeLogo">Brand Logo </label>
+      </div>
+      <div class="flex items-center gap-1">
+        <input type="radio" name="branding_type" class="radio radio-xs radio-info" id="brandingTypeText"
+        {% if event.branding_enabled and event.branding_text %}checked{% endif %}
+        {% if not event.branding_enabled %}disabled{% endif %}
+        />
+        <label class="label-text text-base" for="brandingTypeText">Branding Text </label>
+      </div>
+      
+    </div>
+    
+
     <div class="form-control">
       <label for="studioNameInput" class="label">
         <span class="label-text">Studio Name / Company Name</span>
@@ -156,7 +175,7 @@
         value="{{ event.branding_text|default:'' }}"
         class="input input-bordered input-primary w-full"
         placeholder="e.g. Shree Krishna Studio"
-        {% if not event.branding_enabled %}disabled{% endif %}
+        {% if not event.branding_enabled or not event.branding_text %}disabled{% endif %}
       />
     </div>
     <div class="form-control">
@@ -166,13 +185,13 @@
     
       {% if event.branding_image %}
       <img src="{{ event.branding_image.url }}" alt="Brand Logo" class="h-20 w-20 object-cover mb-2 rounded" id="branding-logo-preview">
-      <button type="button" id="remove-branding-logo-btn" class="btn btn-sm btn-error w-fit mb-2 {% if not event.branding_image %}hidden{% endif %}">
+      <button type="button" id="remove-branding-logo-btn" class="btn btn-xs btn-error w-fit mb-2 {% if not event.branding_image %}hidden{% endif %}">
         Remove Logo
       </button>
       
       {% else %}
         <img src="" alt="" class="h-20 w-20 object-cover hidden" id="branding-logo-preview">
-        <button type="button" id="remove-branding-logo-btn" class="btn btn-sm btn-error w-fit mb-2 hidden">
+        <button type="button" id="remove-branding-logo-btn" class="btn btn-xs btn-error w-fit mb-2 hidden">
           Remove Logo
         </button>
       {% endif %}
@@ -182,14 +201,14 @@
         name="branding_image"
         id="brandingImage"
         accept="image/*"
-        class="file-input file-input-bordered w-full"
-        {% if not event.branding_enabled %}disabled{% endif %}
+        class="input input-sm" aria-label="file-input"
+        {% if not event.branding_enabled or event.branding_text %}disabled{% endif %}
       />
     </div>
     
 
-    <button id="branding-btn" type="submit" class="btn btn-primary text-sm md:text-lg lg:text-lg btn-xs md:btn-lg lg:btn-lg">
-      Save Branding Settings
+    <button id="branding-btn" type="submit" class="btn btn-primary text-md md:text-md lg:text-lg">
+      Save Setting
     </button>
   </form>
 </div>

@@ -8,6 +8,11 @@ from .views.homepage import homepage
 from .views.photographer import create_event, download_qr
 from .views.event_detail import event_detail, load_photos, create_branding,remove_branding_logo
 from .views.event_delete import event_delete,delete_event_photos
+from .views.branded_photos import serve_branded_photo
+from .views.unsubscribe_email import unsubscribe_reminders
+from .views.payments.billing_dashboard import billing_dashboard
+from .views.payments.payment_webhook import payment_success, payment_webhook
+from .views.payments.subscribe import subscribe
 
 urlpatterns = [
     path("", homepage, name='homepage'),
@@ -21,6 +26,7 @@ urlpatterns = [
     path("event/<uuid:event_id>/download_qr/", download_qr,name="download_qr"),
     path("event/<uuid:event_id>/branding/", create_branding, name="branding"),
     path("event/<uuid:event_id>/branding/remove-logo/", remove_branding_logo, name="remove_branding_logo"),
+    path('branded_photo/<int:photo_id>/', serve_branded_photo, name='serve_branded_photo'),
     path('signin/', sign_in, name='signin'),
     path('signout/', sign_out, name='signout'),
     path('signup/', sign_up, name='signup'),
@@ -29,5 +35,12 @@ urlpatterns = [
     path('settings/', settings, name='settings'),
     path('settings/update-username/', update_username, name='update_username'),
     path('settings/delete-account/', delete_account, name='delete_account'),
+    path('subscribe/', subscribe, name='subscribe'),  # For billing dashboard (no event_id)
+    # path('subscribe/<str:event_id>/', subscribe, name='subscribe_with_event'),  # For event-specific uploads
+    path('payment/webhook/', payment_webhook, name='payment_webhook'),
+    path('payment/success/', payment_success, name='payment_success'),
+    path('billing/', billing_dashboard, name='billing_dashboard'),
+    path("unsubscribe/<int:user_id>/", unsubscribe_reminders, name="unsubscribe"),
+
 ]
 

@@ -2,11 +2,12 @@ import os
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from ..models import Event, Photo
+from ..models import Event, Photo, Subscription
 from django.contrib import messages
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.utils import timezone
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event, event_id=event_id)
@@ -41,11 +42,22 @@ def event_detail(request, event_id):
     paginator = Paginator(photos_list, 12)
     page = request.GET.get('page', 1)
     photos = paginator.get_page(page)
+
+    # total photos uploaded by photographer(all events)
+    total_photographers_upload = Photo.objects.filter(event__photographer=request.user).count()
+    subscription = Subscription.objects.filter(photographer=request.user).first()
+    
+    is_unlimited_upload = False
+    if subscription and subscription.subscription_type in ["MONTHLY", "YEARLY"] and subscription.end_date > timezone.now():
+        is_unlimited_upload = True
     
     return render(request, "event_detail.html", {
         "event": event, 
         "num_photos": photos_count,
-        "photos": photos
+        "photos": photos,
+        "total_photographers_upload": total_photographers_upload,
+        "is_unlimited_upload": is_unlimited_upload,
+        "billing_redirect_url": "/billing/",
     })
 
 def rename_event_directory(photographer_username, old_name, new_name):
@@ -88,38 +100,45 @@ def load_photos(request, event_id):
         'pagination_html': pagination_html
     })
 
+
 def create_branding(request, event_id):
     if request.method == "POST":
-        event = Event.objects.get(event_id=event_id, photographer=request.user)
+        try:
+            event = Event.objects.get(event_id=event_id, photographer=request.user)
+            branding_enabled = request.POST.get("branding_enabled") in ["true", "on", "1"]
+            branding_type = request.POST.get("branding_type", "").strip()
+            branding_text = request.POST.get("branding_text", "").strip()
+            branding_image = request.FILES.get("branding_image")
 
-        branding_enabled = request.POST.get("branding_enabled") in ["true", "on", "1"]
-        branding_text = request.POST.get("branding_text", "").strip()
-        branding_image = request.FILES.get('branding_image')
+            if branding_enabled and branding_type in ["logo", "text"]:
+                event.branding_enabled = True
+                if branding_type == "text" and branding_text:
+                    event.branding_text = branding_text
+                    event.branding_image = None  # Clear logo
+                elif branding_type == "logo":
+                    event.branding_text = ""  # Clear text
+                    if branding_image:
+                        event.branding_image = branding_image
+                    # Note: If no branding_image is uploaded, keep existing branding_image (if any)
+            else:
+                # Branding disabled or invalid type, clear all branding fields
+                event.branding_enabled = False
+                event.branding_text = ""
+                event.branding_image = None
 
-        if branding_enabled:
-            event.branding_enabled = True
+            event.save()
 
-            # Always update branding_text, even if it's empty
-            event.branding_text = branding_text
-            
-            # Update branding_image only if a new image is uploaded
-            if branding_image:
-                event.branding_image = branding_image
+            return JsonResponse({
+                "success": True,
+                "logo_url": event.branding_image.url if event.branding_image else "",
+                "branding_text": event.branding_text
+            })
+        except Event.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Event not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
 
-        else:
-            # Branding is turned off, clear everything
-            event.branding_enabled = False
-            event.branding_text = ""
-            event.branding_image = None
-
-        event.save()
-
-        return JsonResponse({
-            "success": True,
-            "logo_url": event.branding_image.url if event.branding_image else ""
-        })
-
-    return JsonResponse({"success": False}, status=400)
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
 
 def remove_branding_logo(request, event_id):
     if request.method == "POST" and request.user.is_authenticated:
@@ -127,7 +146,10 @@ def remove_branding_logo(request, event_id):
             event = Event.objects.get(event_id=event_id, photographer=request.user)
             event.branding_image = None
             event.save()
-            return JsonResponse({"success": True})
+            return JsonResponse({
+                "success": True,
+                "branding_text": event.branding_text
+                })
         except Event.DoesNotExist:
             return JsonResponse({"success": False, "error": "Event not found"}, status=404)
 

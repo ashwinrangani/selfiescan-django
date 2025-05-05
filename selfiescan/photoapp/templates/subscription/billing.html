@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto p-6 mt-12">
+    <h1 class="text-4xl font-bold mb-8 text-left">Billing Dashboard</h1>
+    <!-- Current Billing Cycle -->
+    <div class="bg-white dark:bg-gray-900 shadow-xl rounded-2xl p-6 mb-10 border border-gray-200 dark:border-gray-700 transition">
+        <h2 class="text-2xl font-semibold mb-4">Current Billing Cycle</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-700 dark:text-gray-300">
+            <div><span class="font-semibold">Status:</span> 
+                <span class="ml-1
+                inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                {% if current_cycle.status == 'Active' %}
+                    badge badge-outline badge-info
+                {% else %}
+                    badge badge-outline badge-error
+                {% endif %}
+            ">
+                {{ current_cycle.status }}
+            </span>
+            </div>
+            <div><span class="font-semibold">Subscription:</span> {{ subscription.subscription_type }}</div>
+            {% if subscription.subscription_type != "FREE" %}
+            <div><span class="font-semibold">Period:</span> {{ current_cycle.start|date:'d-m-Y' }} to {{ current_cycle.end|date:'d-m-Y' }}</div>
+            {% else %}
+            <div><span class="font-semibold">Period:</span> Unlimited</div>
+            {% endif %}
+            <div><span class="font-semibold">Remaining Photos:</span> {{ current_cycle.remaining_photos }}</div>
+        </div>
+    </div>
+
+    <!-- Subscription Plans -->
+    <h2 class="text-2xl font-semibold mb-6 text-center mt-12">Choose a Plan</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        {% for plan in plans %}
+        <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 shadow-md hover:shadow-lg transition transform hover:scale-105">
+            <h3 class="text-2xl font-bold mb-2 text-center">{{ plan.name }}</h3>
+            <p class="text-3xl font-extrabold text-center text-indigo-600 dark:text-indigo-400 mb-4">{{ plan.price }}</p>
+            <p class="text-center mb-4 text-gray-700 dark:text-gray-300"><strong>Limit:</strong> {{ plan.limit }}</p>
+            <ul class="text-gray-600 dark:text-gray-400 space-y-2 mb-6">
+                {% for feature in plan.features %}
+                <li class="flex items-center gap-2">
+                    <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {{ feature }}
+                </li>
+                {% endfor %}
+            </ul>
+            <form method="POST" action="{% url 'subscribe' %}" class="flex justify-center">
+                {% csrf_token %}
+                <input type="hidden" name="plan" value="{{ plan.name }}">
+                <button type="submit"
+                        class="btn btn-primary w-full {% if plan.name == 'Free' or current_cycle.status == 'Active' %}opacity-50 cursor-not-allowed{% endif %}"
+                        {% if plan.name == 'Free' or current_cycle.status == 'Active' %}disabled{% endif %}>
+                    {% if plan.name == 'Free' or current_cycle.status == 'Active' %}
+                        Already Subscribed
+                    {% else %}
+                        Subscribe
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Payment History -->
+    <h2 class="text-2xl font-semibold mb-6 text-left mt-12">Payment History</h2>
+    <div class="overflow-x-auto bg-white dark:bg-gray-900 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
+        {% if payments %}
+        <table class="min-w-full text-left table">
+            <thead class="bg-gray-100 dark:bg-gray-800">
+                <tr>
+                    <th class="p-4 font-semibold">Date</th>
+                    <th class="p-4 font-semibold">Amount</th>
+                    <th class="p-4 font-semibold">Type</th>
+                    <th class="p-4 font-semibold">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% for payment in payments %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td class="p-4">{{ payment.created_at|date:'d-m-Y' }}</td>
+                    <td class="p-4">₹{{ payment.amount }}</td>
+                    <td class="p-4">{{ payment.payment_type }}</td>
+                    <td class="p-4">
+                        <span class="{% if payment.status == 'COMPLETED' %}badge badge-soft badge-success{% else %}badge badge-soft badge-error{% endif %}">
+                            {{ payment.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="p-6 text-center text-gray-500">No payment history yet.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

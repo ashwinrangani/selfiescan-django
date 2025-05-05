@@ -3,7 +3,16 @@
 
 
   <h1 class="text-2xl font-serif text-center">{{ event.name }}</h1>
-    <form method="post" enctype="multipart/form-data" id="upload_photos" class="space-y-6" action="{% url 'upload_photos' event_id=event.event_id %}">
+  
+
+    <form method="post" 
+        enctype="multipart/form-data"
+        id="upload_photos"
+        class="space-y-6"
+        data-upload-count="{{ total_photographers_upload }}"
+        data-unlimited-upload="{{ is_unlimited_upload|yesno:'true,false'}}"
+        data-billing-url="{{ billing_redirect_url }}"
+        action="{% url 'upload_photos' event_id=event.event_id %}">
       {% csrf_token %}
       <div class="flex flex-col items-center justify-center gap-2 lg:gap-6">
         <!-- Upload data-->
@@ -43,5 +52,27 @@
     <p id="uploadSuccess" class="hidden text-green-500">Upload Successful!</p>
     </form>
 
+<!-- modal for upload limit reach and redirect to billing -->
+<button id="open-subscription-modal" type="button" class="hidden" aria-haspopup="dialog" aria-expanded="false" aria-controls="subscription-modal" data-overlay="#subscription-modal"></button>
+
+<div id="subscription-modal" class="overlay modal overlay-open:opacity-100 hidden overlay-open:duration-300" role="dialog" tabindex="-1">
+  <div class="modal-dialog overlay-open:opacity-100 overlay-open:duration-300">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Subscription Limit Reached</h3>
+        <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#subscription-modal">
+          <span class="icon-[tabler--x] size-4"></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Your photo upload limit has been reached under the current plan. Please upgrade your subscription to continue uploading photos.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-soft btn-secondary" data-overlay="#subscription-modal">Close</button>
+        <button id="upgrade-plan-btn" type="button" class="btn btn-primary">Upgrade Plan</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="{% static 'js/upload_photos.js' %}"></script>

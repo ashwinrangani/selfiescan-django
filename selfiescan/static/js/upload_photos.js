@@ -6,7 +6,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progressBar');
     const uploadSuccess = document.getElementById('uploadSuccess');
 
-    var notyf = new Notyf({ duration: 5000 });
+    let total_upload_count = parseInt(uploadForm.dataset.uploadCount) || 0
+    const isUnlimited = uploadForm.dataset.unlimitedUpload === 'true';
+    const billingURL = uploadForm.dataset.billingUrl;
+
+    document.getElementById("upgrade-plan-btn").onclick = function () {
+        if (billingURL) {
+            window.location.href = billingURL;
+        }
+    };
+    
+
+    var notyf = new Notyf({ duration: 20000 ,dismissible: true });
 
     function validate_input(input) {
         const allowed_types = ['image/jpeg', 'image/png', 'image/psd', 'image/jpg', 'image/webp'];
@@ -41,6 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const totalCount = total_upload_count + uploadedPhotos.files.length;
+            
+            
+            if (!isUnlimited && totalCount > 100) {
+                document.getElementById("open-subscription-modal").click();
+                return; // stop before uploading
+            }
+
             // Show Progress Bar
             progressBarContainer.classList.remove("hidden");
             progressBar.style.width = "0%";
@@ -60,17 +79,50 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             xhr.onload = function () {
-                if (xhr.status === 200) {
-                    progressBar.style.width = "100%";
-                    progressBar.textContent = "100%";
-                    uploadSuccess.classList.remove("hidden");
-                    notyf.info("Processing of the photos are started in the background..")
-                } else {
-                    notyf.error("Upload failed");
+                try {
+                    const response = JSON.parse(xhr.responseText);
+            
+                    if (xhr.status === 200) {
+                        progressBar.style.width = "100%";
+                        progressBar.textContent = "100%";
+                        uploadSuccess.classList.remove("hidden");
+            
+                        if (response.upload_success) {
+                            total_upload_count += response.uploaded_images;
+                            uploadForm.dataset.uploadCount = total_upload_count; // update the data attribute too
+                            notyf.success(`Successfully uploaded ${response.uploaded_images} photo(s). Processing started.`);
+                        } else if (response.message) {
+                            notyf.success(response.message);
+                        }
+                    } else {
+                        handleUploadError(response, xhr.status);
+                    }
+                } catch (error) {
+                    notyf.error("An unexpected error occurred.");
                     progressBarContainer.classList.add("hidden");
                 }
             };
-
+            
+            function handleUploadError(response, statusCode) {
+                const message = response.message || "Upload failed";
+                            
+                if (statusCode === 403 && response.redirect) {
+                    // Open the modal via trigger
+                    document.getElementById("open-subscription-modal").click();
+            
+                    // Upgrade button click => redirect
+                    document.getElementById("upgrade-plan-btn").onclick = function () {
+                        window.location.href = response.redirect;
+                    };
+                } else {
+                    notyf.error(message);
+                }
+            
+                progressBarContainer.classList.add("hidden");
+            }
+            
+            
+            
             xhr.onerror = function () {
                 notyf.error("Upload error");
                 progressBarContainer.classList.add("hidden");

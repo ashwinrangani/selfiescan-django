@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .map(
             (src, index) => `
               <div class="carousel-slide flex items-center justify-center ${index === currentIndex ? "active" : "hidden"}">
-                <img src="${src}" class="max-h-[90vh] max-w-full object-contain rounded-lg shadow-lg" />
+                <img src="${src}" class="max-h-[90vh] max-w-[600px] w-full h-auto object-contain rounded-lg shadow-lg" loading="lazy"/>
               </div>`
           )
           .join("");

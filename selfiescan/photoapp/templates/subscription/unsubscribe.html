@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<p>Hi {{ username }},</p>
+
+    <p>Your {{ plan }} plan has expired. To continue enjoying our service, please renew your subscription.</p>
+
+    <p><a href="{{ url 'billing' }}">Renew Subscription</a></p>
+
+    <p style="font-size: 0.9em; color: gray;">
+        If you no longer wish to receive subscription reminder emails, you can 
+        <a href="{{ url 'unsubscribe' }}">unsubscribe</a>.
+    </p>
+{% endblock content %}

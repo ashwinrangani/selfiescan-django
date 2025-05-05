@@ -68,7 +68,7 @@ def process_photo(self, photo_id):
 
         image = resize_image_for_processing(image)
 
-        face_locations = face_recognition.face_locations(image, number_of_times_to_upsample=2)
+        face_locations = face_recognition.face_locations(image, number_of_times_to_upsample=3)
         logger.info(f"Detected {len(face_locations)} face locations: {face_locations}")
         
         if not face_locations:
@@ -113,3 +113,53 @@ def process_photo(self, photo_id):
     except Exception as e:
         logger.error(f"Error processing photo {photo_id}: {str(e)}")
         raise self.retry(exc=e)
+
+
+
+# e-mail notification exoired subscription
+
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+from django.urls import reverse
+from django.conf import settings
+from django.template.loader import render_to_string
+
+@shared_task
+def notify_expired_subscriptions():
+    from .models import Subscription
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.db.models import Q
+
+    now = timezone.now()
+    fifteen_days_ago = now - timedelta(days=15)
+
+    expired_subs = Subscription.objects.filter(
+        Q(last_notified__lt=fifteen_days_ago) | Q(last_notified__isnull=True),
+        end_date__lt=now,
+        unsubscribed=False,
+        subscription_type__in=['MONTHLY', 'YEARLY'],
+    )
+
+    for sub in expired_subs:
+        user = sub.photographer
+
+        html_message = render_to_string("emails/subscription_expired.html", {
+    "username": user.username,
+    "plan_type": sub.subscription_type.title(),
+    "end_date": sub.end_date.date(),
+    "renew_link": "http://127.0.0.1:8000/billing/",
+    "unsubscribe_link": f"http://127.0.0.1:8000/unsubscribe/{user.id}/",
+    "year": timezone.now().year,
+})
+        email = EmailMultiAlternatives(
+        subject="Reminder: Your Subscription has Expired",
+        body="This is an HTML-only email. Please view it in an HTML-compatible client.",
+        from_email="noreply@selfiescan.com",
+        to=[user.email],
+)
+        email.attach_alternative(html_message, "text/html")
+        email.send()
+        print("email sent")
+        sub.last_notified = now
+        sub.save(update_fields=["last_notified"])

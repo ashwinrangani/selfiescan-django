@@ -34,16 +34,19 @@ SECRET_KEY = 'django-insecure-bl75(lby!wu6q)dehh1h4j=lj4wsv)&bititpjuc8b22bjv@ov
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '6ad9-27-59-87-208.ngrok-free.app',]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'f33b-27-59-85-155.ngrok-free.app',]
 CSRF_TRUSTED_ORIGINS = [
-    'https://6ad9-27-59-87-208.ngrok-free.app',
+    'https://f33b-27-59-85-155.ngrok-free.app',
 ]
 
 # message broker
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
+
+DATA_UPLOAD_MAX_NUMBER_FILES = 200
 
 # Application definition
 
@@ -108,6 +111,9 @@ SOCIALACCOUNT_PROVIDERS = {
     },
     
 }
+
+RAZORPAY_KEY_ID = "rzp_test_in0Ik9ppHr9Jvx"
+RAZORPAY_KEY_SECRET = "M2s6PMy86xWLgyGR4sHUJ1Ip"
 
 ROOT_URLCONF = 'mysite.urls'
 
@@ -189,7 +195,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 

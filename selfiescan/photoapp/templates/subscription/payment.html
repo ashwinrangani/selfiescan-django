@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <h1>Complete Your Payment</h1>
+    <p>Amount: ₹{{ amount|floatformat:2 }}</p>
+    <button id="rzr-pay-btn">Proceed to payment</button>
+    <script>
+        var options = {
+            "key": "{{ key_id }}",
+            "amount": "{{ amount }}",
+            "currency": "INR",
+            "order_id": "{{ order_id }}",
+            "handler": function (response) {
+                console.log(response)
+                //local testing
+                window.location.href = `http://127.0.0.1:8000/payment/success/?payment_id=${response.razorpay_payment_id}&order_id=${response.razorpay_order_id}`
+                //in production
+                // window.location.href = `http://127.0.0.1:8000/payment/success/
+
+            },
+            "prefill": {
+                "name": "{{ request.user.username }}",
+                "email": "{{ request.user.email }}"
+            },
+            
+        };
+        var rzp = new Razorpay(options);
+        document.getElementById("rzr-pay-btn").onclick = function(e){
+            e.preventDefault();
+            rzp.open();
+        }
+        
+    </script>
+</body>
+</html>
+
+<!-- "notes": {
+    "event_id": "{{ event_id }}"
+} -->

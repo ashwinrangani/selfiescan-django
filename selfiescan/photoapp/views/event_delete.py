@@ -2,7 +2,7 @@ from django.conf import settings
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
-from ..models import Event, Photo
+from ..models import Event, Photo, Subscription
 import os
 
 # delete event with all photos
@@ -42,7 +42,14 @@ def delete_event_photos(request, event_id):
             if photo.image:
                 photo.image.delete(save=False)
         
+        subscription = Subscription.objects.get(photographer=request.user)
+
+        subscription.photo_count = max(subscription.photo_count - photos.count(), 0)
+        subscription.save()
+
         photos.delete()  # Delete DB entries
+        
+
         messages.success(request, "All photos of the event have been deleted successfully!")
         return redirect(reverse("event_detail", kwargs={"event_id": event.event_id}))
 

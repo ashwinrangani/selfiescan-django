@@ -12,64 +12,117 @@ document.addEventListener("DOMContentLoaded", () => {
     const eventId = eventSection.dataset.eventId; //data-event-id converts to eventId camelcase in js 
     const preview = document.getElementById("branding-logo-preview");
     const removeBtn = document.getElementById("remove-branding-logo-btn");
-
+    const brandingTypeLogo = document.getElementById("brandingTypeLogo");
+    const brandingTypeText = document.getElementById("brandingTypeText");
+    
     let notyf = new Notyf({ duration: 5000 });
 
-    // enable or disable branding 
-    brandingSwitch.addEventListener("change", () => {
-      if (brandingSwitch.checked) {
-        studioNameInput.disabled = false;
-        brandingImageInput.disabled = false
-      } else {
-        studioNameInput.value = "";
-        studioNameInput.disabled = true;
+    // Enable or disable branding
+brandingSwitch.addEventListener("change", () => {
+  if (brandingSwitch.checked) {
+    // Ensure logo is selected by default when enabling branding
+    brandingTypeLogo.checked = true;
+    brandingTypeText.disabled = false;
+    brandingTypeLogo.disabled = false;
+    toggleBrandingInputs(); // Sync input states based on selected radio button
+  } else {
+    studioNameInput.value = "";
+    studioNameInput.disabled = true;
+    brandingImageInput.value = "";
+    brandingImageInput.disabled = true;
+    brandingTypeText.disabled = true;
+    brandingTypeLogo.disabled = true;
+    preview.src = "";
+    preview.classList.add("hidden");
+    removeBtn.classList.add("hidden");
+  }
+});
+
+// Selection of branding type, logo or text
+function toggleBrandingInputs() {
+  if (brandingTypeLogo.checked) {
+    studioNameInput.disabled = true;
+    studioNameInput.value = "";
+    brandingImageInput.disabled = false;
+  } else if (brandingTypeText.checked) {
+    studioNameInput.disabled = false;
+    brandingImageInput.disabled = true;
+    brandingImageInput.value = "";
+    preview.src = "";
+    
+  }
+}
+
+// Initialize input states based on current event data
+function initializeBrandingInputs() {
+  if (brandingSwitch.checked) {
+    brandingTypeText.disabled = false;
+    brandingTypeLogo.disabled = false;
+    toggleBrandingInputs(); // Set input states based on selected radio button
+  } else {
+    studioNameInput.disabled = true;
+    brandingImageInput.disabled = true;
+    brandingTypeText.disabled = true;
+    brandingTypeLogo.disabled = true;
+    preview.classList.add("hidden");
+    removeBtn.classList.add("hidden");
+  }
+}
+
+// Run initialization
+initializeBrandingInputs();
+
+// Add event listeners for radio buttons
+brandingTypeLogo.addEventListener("change", toggleBrandingInputs);
+brandingTypeText.addEventListener("change", toggleBrandingInputs);
+
+
+  brandingForm.addEventListener("submit", function (e) {
+  e.preventDefault();  
+  const formData = new FormData(brandingForm);
+  formData.set("branding_enabled", brandingSwitch.checked);
+  formData.set("branding_type", brandingTypeLogo.checked? "logo" : "text");
+
+  if (brandingTypeLogo.checked && brandingImageInput.files.length > 0) {
+    formData.append("branding_image", brandingImageInput.files[0]);
+  } else if(brandingTypeText.checked){
+    formData.set("branding_text", studioNameInput.value)
+  }
+
+  fetch(`/event/${eventId}/branding/`, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+    },
+    body: formData,
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Update preview and remove button visibility
+      if (data.logo_url && data.logo_url !== "") {            
+        preview.src = data.logo_url;
+        preview.classList.remove("hidden");
+        removeBtn.classList.remove("hidden");
         brandingImageInput.value = "";
-        brandingImageInput.disabled = true
+        brandingTypeLogo.checked = true;
+      } else {
+        preview.src = "";
+        preview.classList.add("hidden");
+        removeBtn.classList.add("hidden");
+        brandingTypeText.checked = true;// Hide remove button if no logo
       }
-    });
-
-    brandingForm.addEventListener("submit", function (e) {
-      e.preventDefault();  
-      const formData = new FormData(brandingForm);
-      formData.set("branding_enabled", brandingSwitch.checked);
-
-
-      if (brandingImageInput.files.length > 0) {
-        formData.append("branding_image", brandingImageInput.files[0]);
-      }
-
-      fetch(`/event/${eventId}/branding/`, {
-        method: "POST",
-        headers: {
-          "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
-        },
-        body: formData,
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-            // Optional: update preview
-            if (data.logo_url) {
-            
-            preview.src = data.logo_url;
-            preview.classList.remove("hidden");
-            brandingImageInput.value = "";
-                    
-          } 
-          if (removeBtn) {
-            removeBtn.classList.remove("hidden");
-           }
-          notyf.success("Branding updated successfully!");
-        } else {
-          notyf.error("Something went wrong while updating branding.");
-        }
-      })
-      .catch(error => {
-        console.error("AJAX Branding Error:", error);
-        notyf.error("An error occurred.");
-      });
-    });
-
+      toggleBrandingInputs();
+      notyf.success("Branding updated successfully!");
+    } else {
+      notyf.error("Something went wrong while updating branding.");
+    }
+  })
+  .catch(error => {
+    console.error("AJAX Branding Error:", error);
+    notyf.error("An error occurred.");
+  });
+});
   // remove logo
   const removeLogoBtn = document.getElementById("remove-branding-logo-btn");
 
@@ -84,17 +137,14 @@ if (removeLogoBtn) {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        notyf.success("Branding logo removed!");
-        
-      
-        preview.src = "";
-        preview.classList.add("hidden");
-    
-
-    
-        removeLogoBtn.classList.add("hidden");
-    
-
+      notyf.success("Branding logo removed!");
+      preview.src = "";
+      preview.classList.add("hidden");
+      removeBtn.classList.add("hidden");
+      // Update radio based on branding_text
+      brandingTypeText.checked = data.branding_text ? true : false;
+      brandingTypeLogo.checked = !data.branding_text;
+      toggleBrandingInputs(); // Sync input states
       } else {
         notyf.error("Failed to remove branding logo.");
       }
@@ -119,7 +169,6 @@ if (removeLogoBtn) {
       })
 
     }
-
 
     paginationControls.addEventListener("click", (e) => {
       if (e.target.classList.contains("page-link")) {

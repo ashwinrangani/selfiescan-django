@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Subscription Expired</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0;">
+    <table width="100%" cellspacing="0" cellpadding="0" bgcolor="#f9f9f9">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="20" cellspacing="0" bgcolor="#ffffff" style="margin-top: 40px; border-radius: 8px; border: 1px solid #ddd;">
+            <tr>
+              <td align="center" style="font-size: 24px; font-weight: bold; color: #333;">
+                SelfieScan – Subscription Expired
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 16px; color: #444;">
+                <p>Hi {{ username }},</p>
+
+                <p>Your <strong>{{ plan_type }}</strong> subscription expired on <strong>{{ end_date }}</strong>.</p>
+
+                <p>We’d love to have you back! To renew your subscription and continue enjoying premium features like unlimited event uploads,face recognition and analytics, click the button below:</p>
+
+                <p style="text-align: center;">
+                  <a href="{{ renew_link }}" style="display: inline-block; background-color: #4f46e5; color: #ffffff; padding: 12px 20px; border-radius: 4px; text-decoration: none; font-weight: bold;">Renew Now</a>
+                </p>
+
+                <p>If you no longer want to receive these reminders, you can <a href="{{ unsubscribe_link }}" style="color: #dc2626;">unsubscribe here</a>.</p>
+
+                <p>Thanks,<br>The SelfieScan Team</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="font-size: 12px; color: #aaa;">
+                © {{ year }} SelfieScan. All rights reserved.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

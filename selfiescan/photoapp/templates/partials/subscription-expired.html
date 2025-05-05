@@ -1,0 +1,36 @@
+{% if request.user.is_authenticated and subscription.end_date and subscription.end_date < now and subscription.subscription_type != "FREE" and not subscription.unsubscribed %}
+  <!-- Hidden trigger button -->
+  <button id="modal-btn" type="button" class="hidden" aria-haspopup="dialog" aria-expanded="false" aria-controls="bottom-end-modal" data-overlay="#bottom-end-modal">
+    Trigger Modal
+  </button>
+
+  <!-- Modal -->
+  <div id="bottom-end-modal" class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 modal-bottom-end hidden" role="dialog" tabindex="-1">
+    <div class="modal-dialog overlay-open:opacity-100 overlay-open:duration-300">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Subscription Expired</h3>
+          <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#bottom-end-modal">
+            <span class="icon-[tabler--x] size-4"></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Your <strong>{{ subscription.subscription_type }}</strong> subscription expired on <strong>{{ subscription.end_date|date:"F j, Y" }}</strong>.<br>
+          Please <a href="{% url 'billing_dashboard' %}" class="underline text-blue-600">renew now</a> to continue enjoying premium features.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-soft btn-primary" data-overlay="#bottom-end-modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const btn = document.getElementById('modal-btn');
+      setTimeout(() => {
+        if (btn) btn.click();
+      }, 5000);
+    });
+  </script>
+{% endif %}
