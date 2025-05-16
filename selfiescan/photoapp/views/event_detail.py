@@ -8,6 +8,7 @@ from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.utils import timezone
+from ..tasks import branded_photo
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event, event_id=event_id)
@@ -109,7 +110,30 @@ def create_branding(request, event_id):
             branding_type = request.POST.get("branding_type", "").strip()
             branding_text = request.POST.get("branding_text", "").strip()
             branding_image = request.FILES.get("branding_image")
+            
+            # if branding settings have changed or branding is being disabled
+            branding_changed = (
+                # Case 1: Branding is enabled and settings have changed
+                (branding_enabled and (
+                    event.branding_text != branding_text or
+                    (branding_image is not None and event.branding_image != branding_image) or
+                    (branding_type == "text" and event.branding_image) or
+                    (branding_type == "logo" and event.branding_text)
+                )) or
+                # Case 2: Branding is being disabled (was enabled, now disabled)
+                (event.branding_enabled and not branding_enabled)
+            )
 
+            if branding_changed:
+                # Reset branding status and clear old branded images
+                photos = Photo.objects.filter(event=event)
+                for photo in photos:
+                    if photo.branded_image:
+                        photo.branded_image.delete(save=False)  # Delete from storage
+                        photo.branded_image = None  # Explicitly clear the field
+                    photo.is_branded = False
+                    photo.save(update_fields=['branded_image', 'is_branded'])
+                
             if branding_enabled and branding_type in ["logo", "text"]:
                 event.branding_enabled = True
                 if branding_type == "text" and branding_text:
@@ -154,3 +178,38 @@ def remove_branding_logo(request, event_id):
             return JsonResponse({"success": False, "error": "Event not found"}, status=404)
 
     return JsonResponse({"success": False}, status=400)
+
+
+def start_branding(request, event_id):
+    if request.method == "POST" and request.user.is_authenticated:
+        try:
+            event = Event.objects.get(event_id=event_id, photographer=request.user)
+            if not event.branding_enabled:
+                return JsonResponse({"success": False, "message": "Branding is not enabled for this event."}, status=400)
+
+            photos = Photo.objects.filter(event=event)
+            if not photos.exists():
+                return JsonResponse({"success": False, "message": "No photos to brand."}, status=400)
+
+            unprocessed_photos = photos.filter(is_processed=False).count()
+            if unprocessed_photos > 0:
+                return JsonResponse({
+                    "success": False,
+                    "message": f"Cannot start branding: {unprocessed_photos} photos are still processing."
+                }, status=400)
+
+            # Trigger branding task for each photo
+            for photo in photos:
+                if not photo.is_branded:  # Skip already branded photos
+                    branded_photo.delay(photo.id)
+                
+                
+
+            return JsonResponse({"success": True, "message": "Branding started for event photos."}, status=200)
+
+        except Event.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Event not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)

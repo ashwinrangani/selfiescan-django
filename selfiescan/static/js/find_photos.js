@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(clearPreviewButton){
         clearPreviewButton.addEventListener('click', clearPreview);
     }
-
+    
     
     if (uploadForm) {
         uploadForm.addEventListener('submit', (e) => {
@@ -91,6 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return; // Stop form submission
     } 
     loadingState.style.display = 'block';
+            
+
+
 
             fetch(uploadForm.action, {
                 method: 'POST',
@@ -103,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then((data) => {
                 loadingState.style.display = 'none';
                 
-                
+            
                 if (data.matches) {
                     console.log(data.matches)
                     matchesCount = data.matches.length
@@ -116,15 +119,48 @@ document.addEventListener('DOMContentLoaded', () => {
                     
 
                     const matchesContainer = document.querySelector('.matches-section');
-                    matchesContainer.innerHTML = '';
+                    // After appending all images
+                    matchesContainer.innerHTML = ''; // reset container
+
                     data.matches.forEach((match) => {
                         matchesContainer.innerHTML += `
-                        <div class="card group hover:shadow sm:max-w-sm">
-                                <img src="${match.path}" alt="Match" class="transition-transform max-w-[300px] w-full h-auto object-cover duration-500 rounded-md group-hover:scale-110" loading="lazy"/>
-                                <p>Distance: ${match.distance}</p>
-                            </div>
+                            <p>Distance: ${match.distance}</p>
+                            <a
+                                href="${match.path}"
+                                data-lg-download="${match.path}"
+                                class=""
+                            >
+                                <img
+                                    class="rounded shadow hover:scale-105 transition overflow-hidden duration-300"
+                                    src="${match.path}"
+                                    alt="Matched photo"
+                                />
+                            </a>
                         `;
                     });
+
+                    // Initialize lightGallery AFTER images are added
+                    const lgEl = document.getElementById("lightgallery");
+                    if (lgEl.lgInitialized) {
+                    lgEl.lgDestroy(true); // destroy existing gallery
+                    }
+
+                    lightGallery(lgEl, {
+                        plugins: [lgZoom,lgFullscreen],
+                        selector: 'a',
+                        speed: 400,
+                        licenseKey: '0000-0000-000-0000',
+                        download: true,
+                        numberOfSlideItemsInDom: 10,
+
+                        mobileSettings: {
+                        controls: true,
+                        showCloseIcon: true,
+                        download: true,
+                        closeOnTap: false,
+                        },
+                    });
+
                 }
 
                 

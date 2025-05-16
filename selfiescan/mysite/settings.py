@@ -36,9 +36,9 @@ DEBUG = True
 
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'f33b-27-59-85-155.ngrok-free.app',]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '6f73-27-60-23-162.ngrok-free.app',]
 CSRF_TRUSTED_ORIGINS = [
-    'https://f33b-27-59-85-155.ngrok-free.app',
+    'https://6f73-27-60-23-162.ngrok-free.app',
 ]
 
 # message broker

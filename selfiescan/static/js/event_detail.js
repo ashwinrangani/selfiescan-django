@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const removeBtn = document.getElementById("remove-branding-logo-btn");
     const brandingTypeLogo = document.getElementById("brandingTypeLogo");
     const brandingTypeText = document.getElementById("brandingTypeText");
+    const startBrandingBtn = document.getElementById("start-branding-btn");
     
     let notyf = new Notyf({ duration: 5000 });
 
@@ -25,6 +26,7 @@ brandingSwitch.addEventListener("change", () => {
     brandingTypeText.disabled = false;
     brandingTypeLogo.disabled = false;
     toggleBrandingInputs(); // Sync input states based on selected radio button
+    
   } else {
     studioNameInput.value = "";
     studioNameInput.disabled = true;
@@ -35,6 +37,7 @@ brandingSwitch.addEventListener("change", () => {
     preview.src = "";
     preview.classList.add("hidden");
     removeBtn.classList.add("hidden");
+    
   }
 });
 
@@ -76,6 +79,32 @@ initializeBrandingInputs();
 brandingTypeLogo.addEventListener("change", toggleBrandingInputs);
 brandingTypeText.addEventListener("change", toggleBrandingInputs);
 
+// Start branding
+startBrandingBtn.addEventListener("click", () => {
+  startBrandingBtn.disabled = true;
+
+  fetch(`/event/${eventId}/start-branding/`, {
+      method: "POST",
+      headers: {
+          "X-CSRFToken": document.querySelector("input[name='csrfmiddlewaretoken']").value,
+      },
+  })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              notyf.success(data.message);
+              startBrandingBtn.disabled = false;
+          } else {
+              notyf.error(data.message || "Failed to start branding.");
+              startBrandingBtn.disabled = false;
+          }
+      })
+      .catch(error => {
+          console.error("Error starting branding:", error);
+          notyf.error("Error starting branding.");
+          startBrandingBtn.disabled = false;
+      });
+});
 
   brandingForm.addEventListener("submit", function (e) {
   e.preventDefault();  
@@ -158,41 +187,42 @@ if (removeLogoBtn) {
 
     
 // photo grid of the event photos
-    if (!photoGrid || !paginationControls) {
-      console.error("Error: photo-grid or pagination-controls not found!");
-      return;
-    }
-    if (showPhotos) {
-      showPhotos.addEventListener('click', () => {
-        photoGrid.style.display = 'block'
-        paginationControls.style.display = 'block'
-      })
+    
+  if (!photoGrid || !paginationControls) {
+    console.error("Error: photo-grid or pagination-controls not found!");
+    return;
+  }
 
-    }
-
-    paginationControls.addEventListener("click", (e) => {
-      if (e.target.classList.contains("page-link")) {
-        const page = e.target.getAttribute("data-page");
-        loadingState.style.display = "block"
-
-        fetch(`/event/${eventId}/photos/?page=${page}`)
-          .then((response) => {
-            if (!response.ok) throw new Error(`Failed to load page ${page}`);
-            return response.json();
-          })
-          .then((data) => {
-            loadingState.style.display = 'none';
-
-            if (data.html && data.pagination_html) {
-              photoGrid.innerHTML = data.html;
-              paginationControls.innerHTML = data.pagination_html;
-              window.scrollTo({ top: photoGrid.offsetTop - 100, behavior: "smooth" });
-            } else {
-              console.error("Error: Incomplete data received", data);
-            }
-          })
-          .catch((error) => console.error("Error loading photos:", error));
-      }
+  if (showPhotos) {
+    showPhotos.addEventListener('click', () => {
+      photoGrid.style.display = 'block';
+      paginationControls.style.display = 'block';
+      
     });
-  });
+  }
 
+  paginationControls.addEventListener("click", (e) => {
+    if (e.target.classList.contains("page-link")) {
+      const page = e.target.getAttribute("data-page");
+      loadingState.style.display = "block";
+
+      fetch(`/event/${eventId}/photos/?page=${page}`)
+        .then((response) => {
+          if (!response.ok) throw new Error(`Failed to load page ${page}`);
+          return response.json();
+        })
+        .then((data) => {
+          loadingState.style.display = "none";
+
+          if (data.html && data.pagination_html) {
+            photoGrid.innerHTML = data.html;
+            paginationControls.innerHTML = data.pagination_html;
+            window.scrollTo({ top: photoGrid.offsetTop - 100, behavior: "smooth" });
+          } else {
+            console.error("Error: Incomplete data received", data);
+          }
+        })
+        .catch((error) => console.error("Error loading photos:", error));
+    }
+  });
+});

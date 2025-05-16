@@ -5,6 +5,13 @@
 {% block content %}
 
 <div class="shadow-lg bg-inherit rounded-lg border border-blue-50 dark:border-none mt-12 shadow-gray-600 p-6">
+  {% if message %}
+  <p id="info" class="text-center font-semibold text-primary" >{{message}}</p>
+   <!-- Countdown Notice -->
+   <p id="countdown" class="text-sm text-gray-500 mt-2 text-center">
+    This page will refresh in <span id="timer">30</span> seconds to check for updates.
+  </p>
+ {% else %}
   <h1 class="text-center text-primary text-xl">Get your <span class="font-bold underline">{{event.name}}</span>'s photos by submitting your photo!</h1>
   <form method="post" enctype="multipart/form-data" id="upload_selfie" class="space-y-6" action="{% url 'find_photos' event_id=event.event_id %}">
     {% csrf_token %}
@@ -72,7 +79,7 @@
         Search
       </button>
     </div>
-
+    {% endif %}
     <!-- Loading Spinner -->
     <div class="flex justify-center">
       <span class="loading hidden loading-ring loading-lg"></span>
@@ -81,42 +88,42 @@
 </div>
 <p class="messages text-center text-primary mt-6"></p>
 <!-- Matches Section -->
-<div class="matches-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6 p-4 md:p-8 lg:p-8 items-stretch">
+<div id="lightgallery" class="matches-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6 p-4 md:p-8 lg:p-8 items-stretch">
   <!-- Cards will be appended dynamically here -->
 </div>
 
-<div id="fullscreen-view" class="hidden fixed inset-0 bg-black bg-opacity-80 items-center justify-center">
-  <div id="fullscreen-image" class="relative mt-12 w-full max-w-7xl mx-auto px-4">
-    <div class="carousel">
-      <div class="carousel-body flex items-center justify-center h-full min-h-[60vh]">
-        <!-- Images will be inserted dynamically -->
-      </div>
-    </div>
-    <!-- Previous Slide -->
-    <button type="button" class="carousel-prev">
-      <span class="size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow">
-        <span class="icon-[tabler--chevron-left] size-5 cursor-pointer rtl:rotate-180"></span>
-      </span>
-    </button>
-    <!-- Next Slide -->
-    <button type="button" class="carousel-next">
-      <span class="size-9.5 bg-base-100 flex items-center justify-center rounded-full shadow">
-        <span class="icon-[tabler--chevron-right] size-5 cursor-pointer rtl:rotate-180"></span>
-      </span>
-    </button>
-  </div>
 
-  <!-- Download Button -->
-  <button id="download-button" class="absolute top-4 mt-12 md:mt-1 right-20 mr-2 btn btn-primary btn-sm">Download</button>
 
-  <!-- Close Button -->
-  <button id="close-button" class="absolute top-4 mt-12 md:mt-1 right-4 btn btn-secondary btn-sm">Close</button>
-</div>
+  
 
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/upload_selfie.js' %}"></script>
-<script src="{% static 'js/download-img.js' %}"></script>
+<script src="{% static 'js/find_photos.js' %}"></script>
+<!-- <script src="{% static 'js/download-img.js' %}"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/fullscreen/lg-fullscreen.min.js"></script>
+{% if message %}
+<script>
+  // Auto-refresh the page after 30 seconds
+  setTimeout(() => {
+    window.location.reload();
+  }, 30000);
+
+  // Countdown display
+  let seconds = 30;
+  const timerSpan = document.getElementById('timer');
+  const interval = setInterval(() => {
+    seconds--;
+    if (seconds <= 0) {
+      clearInterval(interval);
+    } else {
+      timerSpan.textContent = seconds;
+    }
+  }, 1000);
+</script>
+{% endif %}
 {% endblock %}
 

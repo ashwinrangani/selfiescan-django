@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let images = [];
   let currentIndex = 0;
-
+  
   // Show carousel when an image is clicked
   if (matchesContainer) {
     matchesContainer.addEventListener("click", (event) => {

@@ -1002,18 +1002,6 @@ html {
   color: var(--fallback-bc,oklch(var(--bc)/0.9));
 }
 
-.alert {
-  position: relative;
-  width: 100%;
-  padding: 1rem;
-  font-size: 1rem;
-  line-height: 1.375rem;
-  border-radius: var(--rounded-box, 0.5rem);
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-bg-opacity, 1)));
-  color: var(--fallback-bc,oklch(var(--bc)/0.8));
-}
-
 .avatar {
   position: relative;
   display: inline-flex;
@@ -2275,24 +2263,6 @@ select.is-invalid + .advance-select-toggle:focus,
   display: block;
 }
 
-.alert-error {
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-er,oklch(var(--er)/var(--tw-bg-opacity, 1)));
-  --tw-text-opacity: 1;
-  color: var(--fallback-erc,oklch(var(--erc)/var(--tw-text-opacity, 1)));
-}
-
-.alert-soft.alert-error {
-  background-color: var(--fallback-er,oklch(var(--er)/0.2));
-  --tw-text-opacity: 1;
-  color: var(--fallback-er,oklch(var(--er)/var(--tw-text-opacity, 1)));
-}
-
-.alert-outline.alert-error {
-  --tw-text-opacity: 1;
-  color: var(--fallback-er,oklch(var(--er)/var(--tw-text-opacity, 1)));
-}
-
 .avatar-group :where(.avatar) img {
   height: 100%;
   width: 100%;
@@ -2473,6 +2443,10 @@ select.is-invalid + .advance-select-toggle:focus,
 
   .btn-secondary {
     --btn-color: var(--fallback-s);
+  }
+
+  .btn-success {
+    --btn-color: var(--fallback-su);
   }
 
   .btn-error {
@@ -2701,6 +2675,10 @@ select.is-invalid + .advance-select-toggle:focus,
     --btn-color: var(--s);
   }
 
+  .btn-success {
+    --btn-color: var(--su);
+  }
+
   .btn-error {
     --btn-color: var(--er);
   }
@@ -2738,6 +2716,12 @@ select.is-invalid + .advance-select-toggle:focus,
   --tw-text-opacity: 1;
   color: var(--fallback-sc,oklch(var(--sc)/var(--tw-text-opacity, 1)));
   outline-color: var(--fallback-s,oklch(var(--s)/0.3));
+}
+
+.btn-success {
+  --tw-text-opacity: 1;
+  color: var(--fallback-suc,oklch(var(--suc)/var(--tw-text-opacity, 1)));
+  outline-color: var(--fallback-su,oklch(var(--su)/0.3));
 }
 
 .btn-error {
@@ -6483,10 +6467,6 @@ textarea:focus-visible {
   z-index: 10;
 }
 
-.z-50 {
-  z-index: 50;
-}
-
 .-mx-2 {
   margin-left: -0.5rem;
   margin-right: -0.5rem;
@@ -6612,24 +6592,12 @@ textarea:focus-visible {
   margin-top: 2rem;
 }
 
-.mt-14 {
-  margin-top: 3.5rem;
-}
-
-.mt-16 {
-  margin-top: 4rem;
-}
-
 .block {
   display: block;
 }
 
 .inline-block {
   display: inline-block;
-}
-
-.inline {
-  display: inline;
 }
 
 .flex {
@@ -6650,6 +6618,10 @@ textarea:focus-visible {
 
 .hidden {
   display: none;
+}
+
+.aspect-\[4\/3\] {
+  aspect-ratio: 4/3;
 }
 
 .size-4 {
@@ -7171,11 +7143,6 @@ textarea:focus-visible {
   border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity, 1)));
 }
 
-.border-red-400 {
-  --tw-border-opacity: 1;
-  border-color: rgb(248 113 113 / var(--tw-border-opacity, 1));
-}
-
 .border-t-primary {
   --tw-border-opacity: 1;
   border-top-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity, 1)));
@@ -7396,11 +7363,6 @@ textarea:focus-visible {
   padding-bottom: 5rem;
 }
 
-.py-3 {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-
 .pb-3 {
   padding-bottom: 0.75rem;
 }
@@ -7600,11 +7562,6 @@ textarea:focus-visible {
 .text-red-600 {
   --tw-text-opacity: 1;
   color: rgb(220 38 38 / var(--tw-text-opacity, 1));
-}
-
-.text-red-700 {
-  --tw-text-opacity: 1;
-  color: rgb(185 28 28 / var(--tw-text-opacity, 1));
 }
 
 .text-white {
@@ -7971,6 +7928,11 @@ textarea:focus-visible {
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
+.hover\:text-base-shadow:hover {
+  --tw-text-opacity: 1;
+  color: var(--fallback-bs,oklch(var(--bs)/var(--tw-text-opacity, 1)));
+}
+
 .hover\:underline:hover {
   text-decoration-line: underline;
 }
@@ -7978,6 +7940,12 @@ textarea:focus-visible {
 .hover\:shadow:hover {
   --tw-shadow: 0 2px 4px 0 var(--fallback-bs,oklch(var(--bs)/0.26));
   --tw-shadow-colored: 0 2px 4px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.hover\:shadow-2xl:hover {
+  --tw-shadow: 0 16px 30px -6px var(--fallback-bs,oklch(var(--bs)/0.42));
+  --tw-shadow-colored: 0 16px 30px -6px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 

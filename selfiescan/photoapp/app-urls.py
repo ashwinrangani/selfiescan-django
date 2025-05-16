@@ -6,9 +6,9 @@ from .views.profile import profile
 from .views.acc_settings import settings, update_username, delete_account
 from .views.homepage import homepage
 from .views.photographer import create_event, download_qr
-from .views.event_detail import event_detail, load_photos, create_branding,remove_branding_logo
+from .views.event_detail import event_detail, load_photos, create_branding,remove_branding_logo,start_branding
 from .views.event_delete import event_delete,delete_event_photos
-from .views.branded_photos import serve_branded_photo
+
 from .views.unsubscribe_email import unsubscribe_reminders
 from .views.payments.billing_dashboard import billing_dashboard
 from .views.payments.payment_webhook import payment_success, payment_webhook
@@ -26,7 +26,7 @@ urlpatterns = [
     path("event/<uuid:event_id>/download_qr/", download_qr,name="download_qr"),
     path("event/<uuid:event_id>/branding/", create_branding, name="branding"),
     path("event/<uuid:event_id>/branding/remove-logo/", remove_branding_logo, name="remove_branding_logo"),
-    path('branded_photo/<int:photo_id>/', serve_branded_photo, name='serve_branded_photo'),
+    path('event/<uuid:event_id>/start-branding/', start_branding, name='start_branding'),
     path('signin/', sign_in, name='signin'),
     path('signout/', sign_out, name='signout'),
     path('signup/', sign_up, name='signup'),

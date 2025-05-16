@@ -7,7 +7,7 @@ import numpy as np
 from ..models import FaceEncoding, Event, Photo
 import logging
 import cv2
-from django.urls import reverse
+
 
 def resize_image_for_processing(image, max_width=800):
     height, width = image.shape[:2]
@@ -19,7 +19,7 @@ def resize_image_for_processing(image, max_width=800):
 
 logger = logging.getLogger(__name__)
 
-def find_matches(selfie_path, event_id, tolerance=0.465):
+def find_matches(selfie_path, event_id, tolerance=0.5):
     # Load and process selfie
     image = cv2.imread(selfie_path)
     
@@ -49,6 +49,7 @@ def find_matches(selfie_path, event_id, tolerance=0.465):
 
     # Step 3: Fetch known encodings from DB
     all_face_encodings = FaceEncoding.objects.filter(photo__event__event_id=event_id)
+
     known_encodings = [np.frombuffer(enc.encoding, dtype=np.float64) for enc in all_face_encodings]
     known_photo_ids = [enc.photo.id for enc in all_face_encodings]
 
@@ -79,17 +80,33 @@ def find_matches(selfie_path, event_id, tolerance=0.465):
 def process_selfie(request, event_id):
     
     event = get_object_or_404(Event, event_id=event_id)
+    
     unprocessed_photos = Photo.objects.filter(event__event_id=event_id, is_processed = False)
     
     if unprocessed_photos.exists():
-        return JsonResponse({
+        return render(request, 'find_photos.html', {
             'message': f'Kindly wait for some time, {unprocessed_photos.count()} photos are still being processed.',
-            'pending_count': unprocessed_photos.count()
+            'pending_count': unprocessed_photos.count(),
+            'event':event
         }, status=202)
     
+    # Check for unbranded photos if branding is enabled
+    if event.branding_enabled:
+        unbranded_photos = Photo.objects.filter(event__event_id=event_id, is_branded=False)
+        if unbranded_photos.exists():
+            return render(request, 'find_photos.html',{
+                'message': f'Kindly wait for some time, {unbranded_photos.count()} photos are still being branded.',
+                'pending_count': unbranded_photos.count()
+            }, status=202)
+        
     if request.method == 'POST':
         selfie = request.FILES.get('selfie') or request.FILES.get('camera_selfie')
         if selfie:
+            if not selfie.content_type.startswith('image/'):
+                return JsonResponse({'message': 'Invalid file type'}, status=400)
+            if selfie.size > 10 * 1024 * 1024:
+                return JsonResponse({'message': 'File too large'}, status=400)
+            
             fs = FileSystemStorage()
             filename = fs.save(selfie.name, selfie)
             selfie_path = fs.path(filename)
@@ -98,27 +115,23 @@ def process_selfie(request, event_id):
                 matching_images = find_matches(selfie_path, event_id)
                 if matching_images is None:
                     matching_images = []
-                
+                matches = []   
+                for photo_id, distance in matching_images:
+                    photo = Photo.objects.get(id=photo_id)
+                    # Serve branded photo if branding is enabled and available, otherwise original
+                    photo_url = photo.branded_image.url if event.branding_enabled and photo.is_branded and photo.branded_image else photo.image.url
+                    matches.append({"path": photo_url, "distance": distance})
+
                 return JsonResponse({
                     'message': 'Matching photos found' if matching_images else 'Matching photos not found',
-                    'matches': [
-                        {
-                            'path': reverse('serve_branded_photo', args=[photo_id]) if event.branding_enabled 
-                                    else Photo.objects.get(id=photo_id).image.url,
-                            'distance': distance
-                        }
-                        for photo_id, distance in matching_images
-                    ]
+                    'matches': matches
                 })
-
-
             except Exception as e:
                 logger.error(f"Error in process_selfie: {e}")
                 return JsonResponse({'message': f'Error: {str(e)}'}, status=500)
             finally:
                 if os.path.exists(selfie_path):
                     os.remove(selfie_path)
-                    
 
         return JsonResponse({'message': 'No file uploaded'}, status=400)
 
