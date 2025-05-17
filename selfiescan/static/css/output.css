@@ -651,14 +651,6 @@ html {
   --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m5 12l5 5L20 7'/%3E%3C/svg%3E");
 }
 
-.icon-\[tabler--chevron-left\] {
-  --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m15 6l-6 6l6 6'/%3E%3C/svg%3E");
-}
-
-.icon-\[tabler--chevron-right\] {
-  --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m9 6l6 6l-6 6'/%3E%3C/svg%3E");
-}
-
 .icon-\[tabler--cloud-up\] {
   --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 18.004H6.657C4.085 18 2 15.993 2 13.517c0-2.475 2.085-4.482 4.657-4.482c.393-1.762 1.794-3.2 3.675-3.773c1.88-.572 3.956-.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99c1.38 0 2.57.811 3.128 1.986M19 22v-6m3 3l-3-3l-3 3'/%3E%3C/svg%3E");
 }
@@ -4294,6 +4286,29 @@ input:focus-visible {
   opacity: 0.5;
 }
 
+.mockup-phone .camera {
+  border-radius: 9999px;
+  position: relative;
+  top: 1%;
+  left: 0px;
+  background: #000;
+  height: 25px;
+  width: 33%;
+  margin: 0 auto;
+  z-index: 11;
+}
+
+.mockup-phone .camera:after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  right: 8%;
+  width: 12px;
+  height: 12px;
+  border-radius: 5px;
+  background-color: #2a292d;
+}
+
 .mockup-phone .display {
   overflow: hidden;
   border-radius: 40px;
@@ -6431,24 +6446,12 @@ textarea:focus-visible {
   right: 0px;
 }
 
-.right-20 {
-  right: 5rem;
-}
-
-.right-4 {
-  right: 1rem;
-}
-
 .top-0 {
   top: 0px;
 }
 
 .top-3 {
   top: 0.75rem;
-}
-
-.top-4 {
-  top: 1rem;
 }
 
 .top-40 {
@@ -6706,16 +6709,8 @@ textarea:focus-visible {
   height: auto;
 }
 
-.h-full {
-  height: 100%;
-}
-
 .max-h-\[90vh\] {
   max-height: 90vh;
-}
-
-.min-h-\[60vh\] {
-  min-height: 60vh;
 }
 
 .min-h-\[80vh\] {
@@ -6819,14 +6814,6 @@ textarea:focus-visible {
   max-width: 72rem;
 }
 
-.max-w-7xl {
-  max-width: 80rem;
-}
-
-.max-w-\[300px\] {
-  max-width: 300px;
-}
-
 .max-w-\[600px\] {
   max-width: 600px;
 }
@@ -6907,6 +6894,11 @@ textarea:focus-visible {
   resize: both;
 }
 
+.columns-2 {
+  -moz-columns: 2;
+       columns: 2;
+}
+
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
@@ -6929,10 +6921,6 @@ textarea:focus-visible {
 
 .items-center {
   align-items: center;
-}
-
-.items-stretch {
-  align-items: stretch;
 }
 
 .justify-center {
@@ -7038,6 +7026,10 @@ textarea:focus-visible {
 .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-opacity: 1;
   border-color: rgb(229 231 235 / var(--tw-divide-opacity, 1));
+}
+
+.overflow-hidden {
+  overflow: hidden;
 }
 
 .overflow-x-auto {
@@ -7157,11 +7149,6 @@ textarea:focus-visible {
   background-color: var(--fallback-bs,oklch(var(--bs)/0.7));
 }
 
-.bg-black {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
-}
-
 .bg-blue-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(219 234 254 / var(--tw-bg-opacity, 1));
@@ -7255,10 +7242,6 @@ textarea:focus-visible {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
-}
-
-.bg-opacity-80 {
-  --tw-bg-opacity: 0.8;
 }
 
 .bg-opacity-90 {
@@ -7361,6 +7344,16 @@ textarea:focus-visible {
 .py-20 {
   padding-top: 5rem;
   padding-bottom: 5rem;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
 .pb-3 {
@@ -7928,25 +7921,8 @@ textarea:focus-visible {
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
 }
 
-.hover\:text-base-shadow:hover {
-  --tw-text-opacity: 1;
-  color: var(--fallback-bs,oklch(var(--bs)/var(--tw-text-opacity, 1)));
-}
-
 .hover\:underline:hover {
   text-decoration-line: underline;
-}
-
-.hover\:shadow:hover {
-  --tw-shadow: 0 2px 4px 0 var(--fallback-bs,oklch(var(--bs)/0.26));
-  --tw-shadow-colored: 0 2px 4px 0 var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
-.hover\:shadow-2xl:hover {
-  --tw-shadow: 0 16px 30px -6px var(--fallback-bs,oklch(var(--bs)/0.42));
-  --tw-shadow-colored: 0 16px 30px -6px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
 .hover\:shadow-lg:hover {
@@ -7986,12 +7962,6 @@ textarea:focus-visible {
 .focus\:ring-primary:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: var(--fallback-p,oklch(var(--p)/var(--tw-ring-opacity, 1)));
-}
-
-.group:hover .group-hover\:scale-110 {
-  --tw-scale-x: 1.1;
-  --tw-scale-y: 1.1;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .dropdown.open > .dropdown-open\:bg-base-content\/10 {
@@ -8205,14 +8175,6 @@ textarea:focus-visible {
 }
 
 @media (min-width: 640px) {
-  .sm\:max-w-sm {
-    max-width: 24rem;
-  }
-
-  .sm\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .sm\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -8241,10 +8203,6 @@ textarea:focus-visible {
     margin-right: 0px;
   }
 
-  .md\:mt-1 {
-    margin-top: 0.25rem;
-  }
-
   .md\:flex {
     display: flex;
   }
@@ -8269,6 +8227,11 @@ textarea:focus-visible {
     width: 14rem;
   }
 
+  .md\:columns-4 {
+    -moz-columns: 4;
+         columns: 4;
+  }
+
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -8287,10 +8250,6 @@ textarea:focus-visible {
 
   .md\:p-4 {
     padding: 1rem;
-  }
-
-  .md\:p-8 {
-    padding: 2rem;
   }
 
   .md\:text-left {
@@ -8384,10 +8343,6 @@ textarea:focus-visible {
     padding: 1.25rem;
   }
 
-  .lg\:p-8 {
-    padding: 2rem;
-  }
-
   .lg\:text-base {
     font-size: 1rem;
     line-height: 1.375rem;
@@ -8396,12 +8351,6 @@ textarea:focus-visible {
   .lg\:text-lg {
     font-size: 1.125rem;
     line-height: 1.5rem;
-  }
-}
-
-@media (min-width: 1280px) {
-  .xl\:grid-cols-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

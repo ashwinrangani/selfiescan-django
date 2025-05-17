@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (!hasFiles) {
-        notyf.error("Please select or upload files");
+        notyf.error("Please select image or take a photo");
         loadingState.style.display = 'none';
         return; // Stop form submission
     } 
@@ -118,26 +118,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     
 
-                    const matchesContainer = document.querySelector('.matches-section');
-                    // After appending all images
-                    matchesContainer.innerHTML = ''; // reset container
+                    const matchesContainer = document.getElementById("lightgallery");
+                    matchesContainer.innerHTML = ''; // Reset once, outside loop
 
                     data.matches.forEach((match) => {
-                        matchesContainer.innerHTML += `
-                            <p>Distance: ${match.distance}</p>
-                            <a
-                                href="${match.path}"
-                                data-lg-download="${match.path}"
-                                class=""
-                            >
-                                <img
-                                    class="rounded shadow hover:scale-105 transition overflow-hidden duration-300"
-                                    src="${match.path}"
-                                    alt="Matched photo"
-                                />
-                            </a>
-                        `;
+                        const container = document.createElement('div')
+                        container.className = "overflow-hidden rounded-lg"
+                        const anchor = document.createElement('a');
+                        anchor.href = match.path;
+                        anchor.setAttribute('data-lg-download', match.path);
+                        anchor.className = "block mb-4";
+
+                        const img = document.createElement('img');
+                        img.src = match.path;
+                        img.alt = "Matched photo";
+                        img.className = "w-full h-auto rounded-lg object-cover shadow-md shadow-gray-600 hover:scale-105 transition duration-300";
+                        img.setAttribute("oncontextmenu", "return false;");
+                        img.setAttribute("draggable", "false");
+
+                        
+                        anchor.appendChild(img);
+                        container.appendChild(anchor);
+                        matchesContainer.appendChild(container)
                     });
+
 
                     // Initialize lightGallery AFTER images are added
                     const lgEl = document.getElementById("lightgallery");

@@ -5,13 +5,18 @@ from django.urls import reverse
 from ..models import Event, Photo, Subscription
 from django.contrib import messages
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.utils import timezone
 from ..tasks import branded_photo
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def event_detail(request, event_id):
     event = get_object_or_404(Event, event_id=event_id)
+    
+    if event.photographer != request.user:
+        return HttpResponse("<h3>you are prohibited to visit this page!</h3>")
     
     old_folder_name = event.name
     # Handle event updates (POST)
