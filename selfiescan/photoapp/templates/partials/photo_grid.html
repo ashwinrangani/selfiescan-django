@@ -1,9 +1,19 @@
-<div class="photo-grid grid grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 opacity-100 transition-opacity duration-400 ease-in-out">
-   
+<div id="lightgallery" class="photo-grid columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 mt-2">
   {% for photo in photos %}
-      <img src="{{ photo.image.url }}" alt="Event photo" class="w-full aspect-[4/3] object-cover rounded">
-  </a>
+  <div class="overflow-hidden">
+  <a href="{{ photo.image.url}}" data-lg-download="{{photo.image.url}}">
+    <img 
+      src="{{ photo.image.url }}" 
+      alt="Event photo" 
+      class="event-image transition transform duration-500 hover:scale-105 object-cover rounded-lg w-full" 
+    />
+    </a>
+    </div>
   {% endfor %}
-</div>
 
 </div>
+
+<script>
+
+
+</script>

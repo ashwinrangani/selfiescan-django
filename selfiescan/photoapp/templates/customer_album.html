@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="container mx-auto px-4 max-w-6xl">
+    <!-- Event Title -->
+    <h1 class="text-3xl font-bold mb-6">{{ event.name }}</h1>
+
+    <!-- Instructions -->
+    <p class="mb-6">Please select the photos you’d like to include in the album. Once you're done, click <strong>Submit Selection</strong>.</p>
+
+    <form method="POST" id="photo-selection-form">
+        {% csrf_token %}
+
+        <!-- Photo Grid -->
+        <div id="photo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for photo in photos %}
+                <label class="relative block cursor-pointer rounded-lg overflow-hidden shadow-sm border border-gray-200 transition-all duration-200 hover:shadow-md {% if photo.customer_selected %}ring-2 ring-green-500{% endif %}">
+                    <!-- Display Number Badge -->
+                    <div class="absolute top-2 left-2 bg-primary bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        {{ photo.display_number|default:"" }}
+                    </div>
+
+                    <!-- Image -->
+                    <img src="{{ photo.image.url }}" alt="Photo" class="w-full h-auto">
+
+                    <!-- Checkbox -->
+                    <input type="checkbox" name="selected_photos" value="{{ photo.id }}" {% if photo.customer_selected %}checked{% endif %} class="absolute checkbox bottom-2 right-2 w-5 h-5 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500">
+                </label>
+            {% endfor %}
+        </div>
+
+        <!-- Load More Button and Loading Icon -->
+        <div class="mt-6 text-center">
+            <button type="button" id="loadMoreBtn" class="btn btn-secondary px-6 py-2 text-white font-semibold rounded shadow hover:bg-secondary-dark transition" 
+                    data-total-photos="{{ total_photos }}" 
+                    data-loaded-photos="{{ photos|length }}"
+                    {% if total_photos <= photos|length %}style="display: none;"{% endif %}>
+                Load More Photos
+            </button>
+            <div id="loading-icon" class="mt-4 hidden">
+                <span class="loading loading-dots loading-xl"></span>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="mt-8 text-center">
+            <button type="submit" id="submit-btn" class="btn btn-primary px-6 py-2 text-white font-semibold rounded shadow hover:bg-primary-dark transition">
+                Submit Selection
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+let offset = parseInt("{{ photos|length }}");
+const limit = 20;
+const grid = document.getElementById("photo-grid");
+const loadMoreBtn = document.getElementById("loadMoreBtn");
+const loadingIcon = document.getElementById("loading-icon");
+const form = document.getElementById("photo-selection-form");
+const submitBtn = document.getElementById("submit-btn");
+
+var notyf = new Notyf({
+    duration: 10000,
+    position: { x: 'right', y: 'top' },  
+    ripple: true, 
+    dismissible: true 
+});
+
+// Load More Photos
+if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", async () => {
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.innerText = "Loading...";
+        loadingIcon.classList.remove("hidden");  
+
+        const res = await fetch(`?offset=${offset}&limit=${limit}`, {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+
+        const data = await res.json();
+
+        data.photos.forEach(photo => {
+            const label = document.createElement("label");
+            label.className = `relative block cursor-pointer rounded-lg overflow-hidden shadow-sm border border-gray-200 transition-all duration-200 hover:shadow-md ${photo.selected ? "ring-2 ring-green-500" : ""}`;
+            label.innerHTML = `
+                <div class="absolute top-2 left-2 bg-primary bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                    ${photo.display_number || ""}
+                </div>
+                <img src="${photo.image_url}" alt="Photo" class="w-full h-auto">
+                <input type="checkbox" name="selected_photos" value="${photo.id}" ${photo.selected ? "checked" : ""} class="absolute checkbox bottom-2 right-2 w-5 h-5 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500">
+            `;
+            grid.appendChild(label);
+        });
+
+        offset = data.loaded_photos;  // Update offset based on total loaded photos
+
+        // Hide Load More button if all photos are loaded
+        if (data.loaded_photos >= data.total_photos) {
+            loadMoreBtn.style.display = "none";
+        } else {
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.innerText = "Load More Photos";
+        }
+        loadingIcon.classList.add("hidden");  
+    });
+}
+
+
+if (form) {
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();  
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Submitting...";
+
+        const formData = new FormData(form);
+        const res = await fetch(form.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (res.ok) {
+            // Update the UI to reflect the new selection state
+            const checkboxes = grid.querySelectorAll('input[name="selected_photos"]');
+            checkboxes.forEach(checkbox => {
+                const label = checkbox.closest("label");
+                if (checkbox.checked) {
+                    label.classList.add("ring-2", "ring-green-500");
+                } else {
+                    label.classList.remove("ring-2", "ring-green-500");
+                }
+            });
+            
+          
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Submit Selection";
+            notyf.success("Your selected choices have been submitted. You can keep selecting and continue submission!");
+
+        } else {
+            console.error("Error submitting selection:", res.statusText);
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Submit Selection";
+        }
+    });
+}
+</script>
+{% endblock %}

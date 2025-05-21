@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
 
                     const matchesContainer = document.getElementById("lightgallery");
-                    matchesContainer.innerHTML = ''; // Reset once, outside loop
+                    matchesContainer.innerHTML = '';
 
                     data.matches.forEach((match) => {
                         const container = document.createElement('div')

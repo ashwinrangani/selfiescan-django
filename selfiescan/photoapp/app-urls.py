@@ -13,6 +13,9 @@ from .views.unsubscribe_email import unsubscribe_reminders
 from .views.payments.billing_dashboard import billing_dashboard
 from .views.payments.payment_webhook import payment_success, payment_webhook
 from .views.payments.subscribe import subscribe
+from .views.customer_views import customer_album_view
+from .views.share_album import share_album
+from .views.download_selected import download_selected_photos
 
 urlpatterns = [
     path("", homepage, name='homepage'),
@@ -41,6 +44,9 @@ urlpatterns = [
     path('payment/success/', payment_success, name='payment_success'),
     path('billing/', billing_dashboard, name='billing_dashboard'),
     path("unsubscribe/<int:user_id>/", unsubscribe_reminders, name="unsubscribe"),
+    path('event/<uuid:event_id>/share/', share_album, name='share_album'),
+    path('share/<uuid:token>/', customer_album_view,name='customer_album_view'),
+    path('share/<uuid:event_id>/download-selected/',download_selected_photos, name='download_selected_photos'),
 
 ]
 

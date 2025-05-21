@@ -2,7 +2,7 @@ import os
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from ..models import Event, Photo, Subscription
+from ..models import Event, Photo, Subscription,EventShare
 from django.contrib import messages
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
 from django.http import JsonResponse, HttpResponse
@@ -57,6 +57,10 @@ def event_detail(request, event_id):
     if subscription and subscription.subscription_type in ["MONTHLY", "YEARLY"] and subscription.end_date > timezone.now():
         is_unlimited_upload = True
     
+    event_share = EventShare.objects.filter(event=event, is_active=True).first()
+    share_url = None
+    if event_share:
+        share_url = request.build_absolute_uri(reverse("customer_album_view", kwargs={"token": str(event_share.token)}))
     return render(request, "event_detail.html", {
         "event": event, 
         "num_photos": photos_count,
@@ -64,6 +68,7 @@ def event_detail(request, event_id):
         "total_photographers_upload": total_photographers_upload,
         "is_unlimited_upload": is_unlimited_upload,
         "billing_redirect_url": "/billing/",
+        'share_url': share_url,
     })
 
 def rename_event_directory(photographer_username, old_name, new_name):
@@ -218,3 +223,4 @@ def start_branding(request, event_id):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
+

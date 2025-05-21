@@ -185,9 +185,29 @@ if (removeLogoBtn) {
   });
 }
 
-    
+  
 // photo grid of the event photos
-    
+  function initLightGallery() {
+  const lightGalleryElement = document.getElementById('lightgallery');
+  if (lightGalleryElement) {
+    lightGallery(lightGalleryElement, {
+      plugins: [lgZoom,lgFullscreen],
+      selector: 'a',
+      speed: 400,
+      licenseKey: '0000-0000-000-0000',
+      download: true,
+      numberOfSlideItemsInDom: 12,
+
+      mobileSettings: {
+      controls: true,
+      showCloseIcon: true,
+      download: true,
+      closeOnTap: false,
+      },
+    });
+  }
+}
+initLightGallery()
   if (!photoGrid || !paginationControls) {
     console.error("Error: photo-grid or pagination-controls not found!");
     return;
@@ -217,6 +237,7 @@ if (removeLogoBtn) {
           if (data.html && data.pagination_html) {
             photoGrid.innerHTML = data.html;
             paginationControls.innerHTML = data.pagination_html;
+            initLightGallery()
             window.scrollTo({ top: photoGrid.offsetTop - 100, behavior: "smooth" });
           } else {
             console.error("Error: Incomplete data received", data);

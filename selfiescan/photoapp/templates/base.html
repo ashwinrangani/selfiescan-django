@@ -25,7 +25,10 @@
   <title>{% block title %}SelfieScan{% endblock %}</title>
 </head>
 <body>
+    {% if not hide_navbar %}
     {% include "navbar.html" %}
+    {% endif %}
+    
     {% if messages %}
     <script id="messages-data" type="application/json">
         [{% for message in messages %}

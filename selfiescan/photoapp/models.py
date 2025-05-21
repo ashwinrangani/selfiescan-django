@@ -40,6 +40,15 @@ class Event(models.Model):
             self.qr_code.save(f"{self.event_id}.png", ContentFile(qr_io.getvalue()), save=False)
         super().save(*args, **kwargs)
 
+class EventShare(models.Model):
+    event = models.ForeignKey(Event,on_delete=models.CASCADE,related_name = 'shares')
+    token = models.UUIDField(default=uuid.uuid4, editable=False,unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Share for {self.event.name} (Token: {self.token})"
+
 
 def event_photo_path(instance, filename):
     """Generate file path for new photo, organized by photographer and event name."""
@@ -60,9 +69,20 @@ class Photo(models.Model):
     is_processed = models.BooleanField(default=False)
     branded_image = models.ImageField(upload_to=event_photo_branded_path, null=True, blank=True)
     is_branded = models.BooleanField(default=False) 
+    customer_selected = models.BooleanField(default=False)
+    display_number = models.PositiveIntegerField(null=True, blank=True)
+
+    def save(self,*args, **kwargs):
+        #assign a display number if not set
+        if self.display_number is None:
+            existing_photos = Photo.objects.filter(event=self.event).exclude(id=self.id)
+            max_number = existing_photos.aggregate(models.Max('display_number'))['display_number__max']
+            self.display_number = (max_number or 0) + 1
+        super().save(*args,**kwargs)
+
 
     def __str__(self):
-        return f"Photo {self.id} for Event {self.event.name}"
+        return f"Photo {self.id} for Event {self.event.name} and Photo {self.display_number} for {self.event.name}"
 
 class FaceEncoding(models.Model):
     photo = models.ForeignKey(Photo, on_delete=models.CASCADE, related_name="encodings")
