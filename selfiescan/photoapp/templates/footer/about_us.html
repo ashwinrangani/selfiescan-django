@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About Us - PhotoApp{% endblock %}
+
+{% block content %}
+<section class="container mx-auto px-6 py-16 rounded-xl shadow-xl">
+    <!-- Header Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center mb-16">
+        <!-- Text -->
+        <div class="text-center md:text-left space-y-4">
+            <h1 class="text-5xl font-bold font-serif">About SelfieScan</h1>
+            <p class="text-lg">
+                Empowering photographers to share, manage, and deliver stunning photos to their clients — beautifully and effortlessly.
+            </p>
+        </div>
+
+        <!-- Image -->
+        <div class="flex justify-center">
+            <img src="{% static 'images/wedding-photo.png' %}" alt="Wedding Photo"
+                 class="rounded-xl shadow-lg w-full h-72 md:h-80 object-cover">
+        </div>
+    </div>
+
+    <!-- Mission -->
+    <div class="p-10 rounded-lg shadow-md mb-16 border border-gray-200">
+        <h2 class="text-3xl font-semibold text-center mb-4">Our Mission</h2>
+        <p class="leading-relaxed text-center max-w-3xl mx-auto">
+            At PhotoApp, we believe photography is about capturing life's most meaningful moments. Our mission is to simplify
+            the behind-the-scenes work so photographers can focus on their craft. Whether you're a wedding photographer,
+            a portrait artist, or an event expert — PhotoApp lets you upload, brand, and share your work with ease and elegance.
+        </p>
+    </div>
+
+    <!-- Features -->
+    <div class="mb-20">
+        <h2 class="text-3xl font-semibold text-center mb-10">What We Offer</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+           
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all bg-white dark:bg-gray-900">
+                <span class="icon-[tabler--cloud-upload] size-6 rtl:rotate-180 inline-block p-4 bg-primary"></span>
+                <h3 class="font-semibold text-lg mb-1">Seamless Photo Uploads</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Upload photos easily with support for large files, and organize them into events</p>
+                </div>
+            
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all bg-white dark:bg-gray-900">
+                <span class="icon-[tabler--brush] size-6 rtl:rotate-180 inline-block p-4 bg-primary"></span>
+                <h3 class="font-semibold text-lg mb-1">Branded Photos</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Protect your work with professional watermarking on all images.</p>
+                </div>
+            
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all bg-white dark:bg-gray-900">
+                <span class="icon-[tabler--lock] size-6 rtl:rotate-180 inline-block p-4 bg-primary"></span>
+                <h3 class="font-semibold text-lg mb-1">Secure Album Sharing</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Share albums securely via token-based links — no login required.</p>
+                </div>
+           
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all bg-white dark:bg-gray-900 ">
+                <span class="icon-[tabler--photo-check] size-6 rtl:rotate-180 inline-block  p-4 bg-primary"></span>
+                <h3 class="font-semibold text-lg mb-1">Client Photo Selection</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Clients can pick favorites in a sleek, full-screen interface.</p>
+                </div>
+           
+        </div>
+    </div>
+
+    <!-- Vision Section -->
+    <div class="text-center max-w-3xl mx-auto">
+        <h2 class=" divider text-3xl font-semibold mb-4">Our Vision</h2>
+        <p class="leading-relaxed">
+            We are a passionate team of photographers and tech lovers building tools to make your creative life easier. 
+            We're committed to helping photographers build stronger connections with their clients through powerful, intuitive technology.
+        </p>
+    </div>
+</section>
+{% endblock %}

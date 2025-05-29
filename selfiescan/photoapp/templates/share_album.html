@@ -9,15 +9,16 @@
     <!-- Share Album Section -->
     <div class="shadow rounded-lg p-6 mb-8 border dark:border-0.5">
         <h2 class="text-2xl font-semibold mb-4 ">Share Album</h2>
+        <div class="w-12 h-1 bg-primary -mt-1.5 mb-6"></div>
         {% if share_url %}
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-                <div class="font-medium">Shareable Link:</div>
+                <div class="font-medium">Album Selection Link:</div>
                 <div class="flex-1 break-all">
                     <a href="{{ share_url }}" target="_blank" class="text-blue-600 hover:underline">{{ share_url }}</a>
                 </div>
                 <button class="btn btn-primary btn-sm copy-button" onclick="copyShareUrl('{{ share_url }}')">Copy Link</button>
             </div>
-            <p class="text-sm mt-1">Send this link to your customer via WhatsApp, SMS, or email.</p>
+            <p class="text-sm mt-1">Share this link to your customer for photo selection.</p>
         {% else %}
             <form method="POST" action="{% url 'share_album' event_id=event.event_id %}">
                 {% csrf_token %}
@@ -31,8 +32,11 @@
         <h2 class="text-2xl font-semibold mb-4 ">Customer Selected Photos</h2>
         {% if photos %}
             {% if customer_selected_photos %}
-                <div class="mb-6">
+                <div class="mb-6 grid md:flex lg:flex items-center gap-6">
+                    <p>Number of selected photos : <strong class="border border-2 border-primary p-1 rounded-full">{{ number_of_selected_photos }}</strong></p>
+                    <button type="button" onclick="refresh()">Show Selected Photos</button>
                     <a href="{% url 'download_selected_photos' event_id=event.event_id %}" class="btn">Download All Selected Photos  <span class="icon-[tabler--file-type-zip] size-5 p-1 rtl:rotate-180"></span></a>
+                    
                 </div>
             {% endif %}
 
@@ -42,7 +46,7 @@
                     <div class="relative bg-white shadow-sm rounded overflow-hidden {% if photo.customer_selected %}border-2 border-green-500{% endif %}">
                         
                         <!-- Display Number Badge -->
-                        <div class="absolute top-2 left-2 bg-primary bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                        <div class="absolute top-2 left-2 bg-primary bg-opacity-65 text-white text-xs px-2 py-1 rounded">
                             {{ photo.display_number }}
                         </div>
 
@@ -127,6 +131,11 @@
             console.error('Failed to copy URL:', err);
             alert('Failed to copy the URL. Please copy it manually.');
         });
+    }
+
+    
+    function refresh(){
+        window.location.reload()
     }
 </script>
 {% endblock %}

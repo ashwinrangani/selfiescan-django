@@ -2,22 +2,19 @@
 {% load static %}
 
 {% block content %}
-<section class="container mx-auto px-4 max-w-6xl">
-    <!-- Event Title -->
-    <h1 class="text-3xl font-bold mb-6">{{ event.name }}</h1>
-
-    <!-- Instructions -->
-    <p class="mb-6">Please select the photos you’d like to include in the album. Once you're done, click <strong>Submit Selection</strong>.</p>
+<section class="container mx-auto max-w-6xl">
+  
+    <h1 class="text-3xl font-serif text-primary font-bold  mb-6">{{ event.name }}</h1>
+    <p class="mb-6">Please select the photos you'd like to include in the album. Once you're done, click <strong>Submit Selection</strong>.</p>
 
     <form method="POST" id="photo-selection-form">
         {% csrf_token %}
 
-        <!-- Photo Grid -->
         <div id="photo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {% for photo in photos %}
                 <label class="relative block cursor-pointer rounded-lg overflow-hidden shadow-sm border border-gray-200 transition-all duration-200 hover:shadow-md {% if photo.customer_selected %}ring-2 ring-green-500{% endif %}">
                     <!-- Display Number Badge -->
-                    <div class="absolute top-2 left-2 bg-primary bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                    <div class="absolute top-2 left-2 bg-primary bg-opacity-65 text-white text-xs px-2 py-1 rounded">
                         {{ photo.display_number|default:"" }}
                     </div>
 
@@ -32,22 +29,21 @@
 
         <!-- Load More Button and Loading Icon -->
         <div class="mt-6 text-center">
-            <button type="button" id="loadMoreBtn" class="btn btn-secondary px-6 py-2 text-white font-semibold rounded shadow hover:bg-secondary-dark transition" 
+            <button type="button" id="loadMoreBtn" class="btn btn-outline btn-sm shadow transition" 
                     data-total-photos="{{ total_photos }}" 
                     data-loaded-photos="{{ photos|length }}"
                     {% if total_photos <= photos|length %}style="display: none;"{% endif %}>
-                Load More Photos
+                Load More Photos<span class="icon-[tabler--loader] icon-submit size-5 p-1 shadow-md rtl:rotate-180"></span>
             </button>
             <div id="loading-icon" class="mt-4 hidden">
                 <span class="loading loading-dots loading-xl"></span>
             </div>
         </div>
-
-        <!-- Submit Button -->
-        <div class="mt-8 text-center">
-            <button type="submit" id="submit-btn" class="btn btn-primary px-6 py-2 text-white font-semibold rounded shadow hover:bg-primary-dark transition">
-                Submit Selection
-            </button>
+        <div class="mt-10">
+        <button type="submit" id="submit-btn" class="btn btn-sm hover:scale-105 fixed bottom-4 right-2 z-50 font-semibold shadow-lg flex items-center">
+            <span class="icon-[tabler--cloud-share] icon-submit size-5 p-1 shadow-md rtl:rotate-180"></span>
+            Submit Selection
+        </button>
         </div>
     </form>
 </section>
@@ -88,7 +84,7 @@ if (loadMoreBtn) {
             const label = document.createElement("label");
             label.className = `relative block cursor-pointer rounded-lg overflow-hidden shadow-sm border border-gray-200 transition-all duration-200 hover:shadow-md ${photo.selected ? "ring-2 ring-green-500" : ""}`;
             label.innerHTML = `
-                <div class="absolute top-2 left-2 bg-primary bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                <div class="absolute top-2 left-2 bg-primary bg-opacity-65 text-white text-xs px-2 py-1 rounded"">
                     ${photo.display_number || ""}
                 </div>
                 <img src="${photo.image_url}" alt="Photo" class="w-full h-auto">
@@ -104,7 +100,7 @@ if (loadMoreBtn) {
             loadMoreBtn.style.display = "none";
         } else {
             loadMoreBtn.disabled = false;
-            loadMoreBtn.innerText = "Load More Photos";
+            loadMoreBtn.innerHTML = `Load More Photos<span class="icon-[tabler--loader] icon-submit size-5 p-1 shadow-md rtl:rotate-180"></span>`;
         }
         loadingIcon.classList.add("hidden");  
     });
@@ -140,13 +136,18 @@ if (form) {
             
           
             submitBtn.disabled = false;
-            submitBtn.innerText = "Submit Selection";
+            submitBtn.innerHTML = `
+            <span class="icon-[tabler--cloud-share] icon-submit size-5 p-1 shadow-md rtl:rotate-180"></span>
+            Submit Selection`
+            
             notyf.success("Your selected choices have been submitted. You can keep selecting and continue submission!");
 
         } else {
             console.error("Error submitting selection:", res.statusText);
             submitBtn.disabled = false;
-            submitBtn.innerText = "Submit Selection";
+            submitBtn.innerHTML = `
+            <span class="icon-[tabler--cloud-share] icon-submit size-5 p-1 shadow-md rtl:rotate-180"></span>
+            Submit Selection`
         }
     });
 }

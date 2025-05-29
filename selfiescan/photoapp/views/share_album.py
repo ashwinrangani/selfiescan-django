@@ -10,6 +10,7 @@ def share_album(request, event_id):
     event = get_object_or_404(Event, event_id=event_id, photographer=request.user)
     photos_list = Photo.objects.filter(event=event).order_by('display_number')
     customer_selected_photos = photos_list.filter(customer_selected=True).exists()
+    number_of_selected_photos = photos_list.filter(customer_selected=True).count()
     # Log the number of photos
     logger.info(f"Event {event.id} has {photos_list.count()} photos")
 
@@ -51,4 +52,5 @@ def share_album(request, event_id):
         "photos": photos,
         "share_url": share_url,
         "customer_selected_photos": customer_selected_photos,
+        "number_of_selected_photos": number_of_selected_photos
     })

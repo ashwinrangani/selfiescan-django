@@ -16,6 +16,7 @@ from .views.payments.subscribe import subscribe
 from .views.customer_views import customer_album_view
 from .views.share_album import share_album
 from .views.download_selected import download_selected_photos
+from .views.footer import about_us, privacy_policy, terms_of_service, cancellation_refund_policy
 
 urlpatterns = [
     path("", homepage, name='homepage'),
@@ -47,6 +48,8 @@ urlpatterns = [
     path('event/<uuid:event_id>/share/', share_album, name='share_album'),
     path('share/<uuid:token>/', customer_album_view,name='customer_album_view'),
     path('share/<uuid:event_id>/download-selected/',download_selected_photos, name='download_selected_photos'),
-
+    path('about-us/', about_us, name='about-us'),
+    path('privacy-policy/', privacy_policy, name='privacy-policy'),
+    path('terms-of-service/', terms_of_service, name='terms-of-service'),
+    path('cancellation-refund-policy/', cancellation_refund_policy, name='cancellation-refund-policy')
 ]
-

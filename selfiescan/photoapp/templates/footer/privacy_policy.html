@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Privacy Policy - SelfieScan{% endblock %}
+
+{% block content %}
+<section class="container mt-12 mx-auto px-4 max-w-4xl py-12 rounded-lg shadow-lg">
+    <!-- Header Section -->
+    <div class="mb-12 text-center">
+        <h1 class="text-4xl font-bold mb-4">Privacy Policy</h1>
+        <p class="text-lg">
+            Last Updated: May 30, 2025
+        </p>
+    </div>
+
+    <!-- Introduction -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">Introduction</h2>
+        <p class="leading-relaxed">
+            Welcome to SelfieScan ("we," "us," or "our"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you use our photography platform, which allows photographers to upload, manage, and share photos with their clients. By using SelfieScan, you agree to the practices described in this policy.
+        </p>
+    </div>
+
+    <!-- Information We Collect -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">1. Information We Collect</h2>
+        <p class="leading-relaxed mb-4">
+            We collect the following types of information to provide and improve our services:
+        </p>
+        <ul class="list-disc list-inside space-y-2">
+            <li><strong>Personal Information:</strong> When you sign up or use SelfieScan, we may collect your name, email address, and other contact details.</li>
+            <li><strong>Photos and Content:</strong> Photographers upload photos to our platform, which may include metadata (e.g., timestamps, geolocation). We also generate branded versions of these photos.</li>
+            <li><strong>Client Selections:</strong> Clients can select photos via shared links. We store these selections to facilitate collaboration between photographers and clients.</li>
+            <li><strong>Usage Data:</strong> We collect information about how you interact with our platform, such as IP addresses, browser type, device information, and pages visited.</li>
+            <li><strong>Cookies and Tracking:</strong> We use cookies and similar technologies to enhance user experience, track usage, and analyze trends. You can manage cookie preferences in your browser settings.</li>
+        </ul>
+    </div>
+
+    <!-- How We Use Your Information -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">2. How We Use Your Information</h2>
+        <p class="leading-relaxed">
+            We use your information for the following purposes:
+        </p>
+        <ul class="list-disc list-inside space-y-2 mt-2">
+            <li><strong>Service Delivery:</strong> To enable photo uploads, branded photo generation, album sharing, and client photo selection.</li>
+            <li><strong>Communication:</strong> To send you updates, notifications, and support messages (e.g., confirming photo selections).</li>
+            <li><strong>Improvement:</strong> To analyze usage data and improve our platform’s functionality and user experience.</li>
+            <li><strong>Security:</strong> To protect against unauthorized access, fraud, and other illegal activities.</li>
+            <li><strong>Legal Compliance:</strong> To comply with applicable laws, regulations, and legal processes.</li>
+        </ul>
+    </div>
+
+    <!-- How We Share Your Information -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">3. How We Share Your Information</h2>
+        <p class="leading-relaxed">
+            We do not sell your personal information. We may share your data in the following circumstances:
+        </p>
+        <ul class="list-disc list-inside space-y-2 mt-2">
+            <li><strong>With Clients:</strong> Photographers share albums with clients via secure token-based links. Clients can view and select photos.</li>
+            <li><strong>Service Providers:</strong> We use third-party services (e.g., Amazon Web Services for hosting, storage, and processing) that may access your data to provide our services.</li>
+            <li><strong>Legal Obligations:</strong> We may disclose your information if required by law, court order, or governmental authority.</li>
+            <li><strong>Business Transfers:</strong> In the event of a merger, acquisition, or sale of assets, your information may be transferred to the new entity.</li>
+        </ul>
+    </div>
+
+    <!-- Data Storage and Security -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">4. Data Storage and Security</h2>
+        <p class="leading-relaxed">
+            We store your data on secure servers hosted by Amazon Web Services (AWS). Photos are stored in S3, and user data is stored in a PostgreSQL database managed by RDS. We use Redis for temporary task processing (e.g., branded photo generation). We implement industry-standard security measures, including encryption, access controls, and regular audits, to protect your data. However, no system is completely secure, and we cannot guarantee absolute security.
+        </p>
+    </div>
+
+    <!-- Your Rights -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">5. Your Rights</h2>
+        <p class="leading-relaxed">
+            Depending on your location, you may have the following rights under privacy laws (e.g., GDPR, CCPA, DPDP Act):
+        </p>
+        <ul class="list-disc list-inside space-y-2 mt-2">
+            <li><strong>Access:</strong> Request a copy of your personal data.</li>
+            <li><strong>Correction:</strong> Request correction of inaccurate data.</li>
+            <li><strong>Deletion:</strong> Request deletion of your data, subject to legal obligations.</li>
+            <li><strong>Opt-Out:</strong> Opt out of certain data uses (e.g., analytics cookies).</li>
+            <li><strong>Data Portability:</strong> Request your data in a machine-readable format.</li>
+        </ul>
+        <p class="leading-relaxed mt-4">
+            To exercise these rights, please contact us at <a href="mailto:privacy@selfieScan.com" class="text-blue-500 hover:underline">privacy@selfieScan.com</a>.
+        </p>
+    </div>
+
+    <!-- Data Retention -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">6. Data Retention</h2>
+        <p class="leading-relaxed">
+            We retain your personal information and photos for as long as necessary to provide our services or comply with legal obligations. For example, we retain photos in S3 until the photographer deletes them or their account is closed. Usage data is retained for up to 12 months for analytics purposes, after which it is anonymized or deleted.
+        </p>
+    </div>
+
+    <!-- International Data Transfers -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">7. International Data Transfers</h2>
+        <p class="leading-relaxed">
+            SelfieScan operates globally, and your data may be transferred to and processed in countries other than your own, including India (where our servers are located) and the United States (AWS data centers). We ensure that such transfers comply with applicable privacy laws, using mechanisms like Standard Contractual Clauses for GDPR compliance.
+        </p>
+    </div>
+
+    <!-- Children's Privacy -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">8. Children's Privacy</h2>
+        <p class="leading-relaxed">
+            SelfieScan is not intended for use by children under the age of 16. We do not knowingly collect personal information from children under 16. If we become aware that such data has been collected, we will delete it immediately.
+        </p>
+    </div>
+
+    <!-- Changes to This Policy -->
+    <div class="p-8 rounded-lg shadow-md mb-8 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">9. Changes to This Privacy Policy</h2>
+        <p class="leading-relaxed">
+            We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of significant changes by posting the updated policy on this page and updating the "Last Updated" date. We encourage you to review this policy periodically.
+        </p>
+    </div>
+
+    <!-- Contact Us -->
+    <div class="p-8 rounded-lg shadow-md border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4">10. Contact Us</h2>
+        <p class="leading-relaxed">
+            If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us at:
+        </p>
+        <ul class="list-none space-y-2 mt-2">
+            <li><strong>Email:</strong> <a href="mailto:privacy@selfieScan.com" class="text-blue-500 hover:underline">privacy@selfieScan.com</a></li>
+            <li><strong>Address:</strong> SelfieScan Inc., 123 Privacy Lane, Mumbai, Maharashtra, India</li>
+        </ul>
+    </div>
+</section>
+{% endblock %}

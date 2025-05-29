@@ -161,9 +161,10 @@
             <div>
                 <h3 class="text-xl font-semibold mb-4">Quick Links</h3>
                 <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                    <li><a href="{% url 'about-us' %}" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                    <li><a href="{% url 'privacy-policy' %}" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="{% url 'terms-of-service' %}" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                    <li><a href="{% url 'cancellation-refund-policy' %}" class="text-gray-400 hover:text-white transition-colors">Cancellation and Refunds</a></li>
                 </ul>
             </div>
             <div>
