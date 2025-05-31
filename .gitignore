@@ -3,3 +3,4 @@
 /selfiescan/static/css/output.css
 .env
 project-django.code-workspace
+selfiescan/photoapp/templates/homepage-trial.html

@@ -15,7 +15,7 @@
   <h1 class="text-center text-primary text-xl">Get your <span class="font-bold underline">{{event.name}}</span>'s photos by submitting your photo!</h1>
   <form method="post" enctype="multipart/form-data" id="upload_selfie" class="space-y-6" action="{% url 'find_photos' event_id=event.event_id %}">
     {% csrf_token %}
-    <div class="flex items-center justify-center gap-2 lg:gap-6">
+    <div class="flex items-center justify-center gap-0 lg:gap-6">
       
       <!-- Upload Selfie-->
       <input
@@ -89,7 +89,7 @@
 <p class="messages text-center text-primary mt-6">Kindly select or take a photo of yours or a group photo, you'll get all the photos of the persons in the group also!</p>
 <!-- Matches Section -->
 
-<div id="lightgallery" class="mt-4 matches-section columns-2 md:columns-4 gap-4 p-4"></div>
+<div id="lightgallery" class="mt-4 matches-section columns-2 md:columns-4 gap-4 p-4" data-event-isdownload="{{ event.is_downloadable|yesno:'true,false' }}"></div>
 
   <!-- Cards will be appended dynamically here -->
 </div>

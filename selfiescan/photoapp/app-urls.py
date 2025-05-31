@@ -17,6 +17,7 @@ from .views.customer_views import customer_album_view
 from .views.share_album import share_album
 from .views.download_selected import download_selected_photos
 from .views.footer import about_us, privacy_policy, terms_of_service, cancellation_refund_policy
+from .views.toggle_download import toggle_download
 
 urlpatterns = [
     path("", homepage, name='homepage'),
@@ -51,5 +52,6 @@ urlpatterns = [
     path('about-us/', about_us, name='about-us'),
     path('privacy-policy/', privacy_policy, name='privacy-policy'),
     path('terms-of-service/', terms_of_service, name='terms-of-service'),
-    path('cancellation-refund-policy/', cancellation_refund_policy, name='cancellation-refund-policy')
+    path('cancellation-refund-policy/', cancellation_refund_policy, name='cancellation-refund-policy'),
+    path('events/<uuid:event_id>/toggle-download/', toggle_download, name='toggle_download')
 ]

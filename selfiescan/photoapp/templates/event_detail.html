@@ -45,11 +45,16 @@
 
       </div>
     </div>
+    <!-- Download Toggle Switch -->
+        <div class="mt-5 flex items-center justify-center shadow-lg shadow-gray-600 rounded-md">
+            <label for="download-toggle" class="text-primary font-semibold  p-4">Allow Downloads for End Users</label>
+            <input type="checkbox" id="download-toggle" class="toggle-checkbox switch" data-event-id="{{ event.event_id }}" {% if event.is_downloadable %}checked{% endif %}>
+        </div>
   <!-- find photos -->
 
   <div class="mt-5 shadow-lg shadow-gray-600 rounded-md">
     <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block">
-      <span class="text-primary flex items-center justify-center p-2">Find photos
+      <span class="text-primary flex items-center justify-center p-2 font-semibold">Find photos
         <span class="icon-[tabler--face-id] size-5 rtl:rotate-180 ml-1"></span>
       </span>
     </a>
@@ -57,7 +62,7 @@
   <!-- album sharing -->
     <div class="mt-5 shadow-lg shadow-gray-600 rounded-md">
     <a href="{% url 'share_album' event_id=event.event_id %}" class="text-primary hover:underline block">
-      <span class="text-primary flex items-center justify-center p-2">Share Album for Selection
+      <span class="text-primary flex items-center justify-center font-semibold p-2">Share Album for Selection
         <span class="icon-[tabler--external-link] size-5 rtl:rotate-180 ml-1 mb-1"></span>
       </span>
     </a>

@@ -30,6 +30,8 @@ class Event(models.Model):
     branding_enabled = models.BooleanField(default=False)
     branding_image = models.ImageField(upload_to='branding/', null=True, blank=True)
     branding_text = models.CharField(max_length=100, blank=True, null=True)
+    is_downloadable = models.BooleanField(null=True, default=False)
+
 
 
     def save(self, *args, **kwargs):

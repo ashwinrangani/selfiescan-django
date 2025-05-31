@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const brandingTypeLogo = document.getElementById("brandingTypeLogo");
     const brandingTypeText = document.getElementById("brandingTypeText");
     const startBrandingBtn = document.getElementById("start-branding-btn");
-    
+    const downloadToggle = document.getElementById('download-toggle')
     let notyf = new Notyf({ duration: 5000 });
 
     // Enable or disable branding
@@ -185,6 +185,35 @@ if (removeLogoBtn) {
   });
 }
 
+//Handle download toggle
+downloadToggle.addEventListener('change', function(){
+  const eventId = this.getAttribute('data-event-id');
+  
+  const is_downloadable = this.checked;
+  console.log(is_downloadable)
+  fetch(`/events/${eventId}/toggle-download/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      "X-CSRFToken": document.querySelector("input[name='csrfmiddlewaretoken']").value,
+      'X-requested-With': 'XMLHttpRequest'
+    },
+    body: JSON.stringify({ is_downloadable: is_downloadable})
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success){
+      notyf.success(data.message)
+    } else {
+      notyf.error(data.message);
+      this.checked = !isDonloadable
+    }
+  })
+  .catch(error => {
+    notyf.error('An error occured while updating the download setting.');
+    this.checked = !isDonloadable
+  })
+})
   
 // photo grid of the event photos
   function initLightGallery() {

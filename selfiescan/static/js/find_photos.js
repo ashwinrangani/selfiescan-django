@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearPreviewButton = document.getElementById('clear-preview');
     const uploadForm = document.getElementById('upload_selfie');
     const loadingState = document.querySelector('.loading')
+    const is_event_downloadable = document.getElementById('lightgallery').dataset.eventIsdownload.toLowerCase() === "true";
+    console.log(is_event_downloadable);
     
     var notyf = new Notyf({
         duration: 5000
@@ -108,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             
                 if (data.matches) {
-                    console.log(data.matches)
                     matchesCount = data.matches.length
                     const messages = document.querySelector('.messages')
                     if  (matchesCount > 0 ) {
@@ -133,8 +134,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         img.src = match.path;
                         img.alt = "Matched photo";
                         img.className = "w-full h-auto rounded-lg object-cover shadow-md shadow-gray-600 hover:scale-105 transition duration-300";
-                        img.setAttribute("oncontextmenu", "return false;");
-                        img.setAttribute("draggable", "false");
+                        if (is_event_downloadable == false){
+                            img.setAttribute("oncontextmenu", "return false;");
+                            img.setAttribute("draggable", "false");
+                        } else {
+                            img.setAttribute("oncontextmenu", "return true;");
+                            img.setAttribute("draggable", "true");
+                        }
 
                         
                         anchor.appendChild(img);
@@ -148,22 +154,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (lgEl.lgInitialized) {
                     lgEl.lgDestroy(true); // destroy existing gallery
                     }
-
+                    
                     lightGallery(lgEl, {
                         plugins: [lgZoom,lgFullscreen],
                         selector: 'a',
                         speed: 400,
                         licenseKey: '0000-0000-000-0000',
-                        download: true,
+                        download: is_event_downloadable,
                         numberOfSlideItemsInDom: 10,
 
                         mobileSettings: {
                         controls: true,
                         showCloseIcon: true,
-                        download: true,
+                        download: is_event_downloadable,
                         closeOnTap: false,
                         },
                     });
+                    
+                    lgEl.addEventListener('lgAfterSlide', function(event) {
+                    // Find the currently active slide image
+                    const galleryImg = document.querySelector('.lg-current .lg-img-wrap img');
+                    if (galleryImg) {
+                        if (!is_event_downloadable) {
+                            galleryImg.setAttribute('oncontextmenu', 'return false;');
+                            galleryImg.setAttribute('draggable', 'false');
+                        } else {
+                            galleryImg.setAttribute('oncontextmenu', 'return true;');
+                            galleryImg.setAttribute('draggable', 'true');
+                        }
+                    }
+                });
 
                 }
 
