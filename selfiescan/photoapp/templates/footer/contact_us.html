@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Contact Us - PhotoFlow{% endblock %}
+
+{% block content %}
+<section class="container mx-auto max-w-4xl px-6 py-16 mt-12 rounded-2xl shadow-xl">
+    <!-- Page Heading -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold mb-3">Get in Touch</h1>
+        <p class="text-lg ">
+            Have questions, feedback, or need support? We'd love to hear from you.
+        </p>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid md:grid-cols-2 gap-8">
+        <!-- Contact Form -->
+        <div class="border border-gray-200 p-6 rounded-xl shadow-md">
+            <h2 class="text-2xl font-semibold mb-6">Send a Message</h2>
+            <form id="contact-form" action="{% url 'contact-us' %}" method="POST" class="space-y-5">
+                {% csrf_token %}
+                <div>
+                    <label for="name" class="block font-medium mb-1">Full Name</label>
+                    <input type="text" id="name" name="name" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+                <div>
+                    <label for="email" class="block font-medium mb-1">Email Address</label>
+                    <input type="email" id="email" name="email" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+                <div>
+                    <label for="message" class="block font-medium mb-1">Your Message</label>
+                    <textarea id="message" name="message" rows="5" required
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                </div>
+                <div>
+                    <button type="submit" id="send-message"
+                            class="w-full btn btn-outline rounded-lg hover:bg-blue-100 transition duration-300">
+                        Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="border border-gray-200 p-6 rounded-xl shadow-md">
+            <h2 class="text-2xl font-semibold mb-6">Contact Information</h2>
+            <ul class= space-y-4 text-base">
+                <li>
+                    <strong>Email:</strong><br>
+                    <a href="mailto:support@photoflow.com" class="text-blue-600 hover:underline">support@photoflow.com</a>
+                </li>
+                <li>
+                    <strong>Address:</strong><br>
+                    PhotoFlow, Kutch, Gujarat 370445, India
+                </li>
+                <li>
+                    <strong>Business Hours:</strong><br>
+                    Mon – Fri, 9:00 AM – 6:00 PM IST
+                </li>
+            </ul>
+            <!-- Optional: Add a map or image -->
+            <div class="mt-6">
+                <img src="{% static 'images/email.png' %}" alt="Contact illustration" class="w-full h-80 object-contain" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Policies -->
+    <div class="mt-12 border border-gray-200 p-6 rounded-xl shadow-md">
+        <h2 class="text-2xl font-semibold mb-4">Our Policies</h2>
+        <p class=" mb-4">Learn more about our terms and how we handle your information:</p>
+        <ul class="list-disc list-inside space-y-2 text-blue-600">
+            <li><a href="{% url 'privacy-policy' %}" class="hover:underline">Privacy Policy</a></li>
+            <li><a href="{% url 'terms-of-service' %}" class="hover:underline">Terms of Service</a></li>
+            <li><a href="{% url 'cancellation-refund-policy' %}" class="hover:underline">Cancellation & Refund Policy</a></li>
+        </ul>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const notyf = new Notyf({
+        duration: 5000,
+        position: { x: 'right', y: 'top' },
+        ripple: true,
+        dismissible: true
+    });
+
+    const contactForm = document.getElementById('contact-form');
+    const submitBtn = document.getElementById('send-message');
+
+    contactForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitBtn.textContent = 'Sending...';
+        const formData = new FormData(contactForm);
+
+        fetch(contactForm.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': contactForm.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitBtn.textContent = 'Send Message';
+            if (data.success) {
+                notyf.success(data.message || 'Message sent successfully!');
+                contactForm.reset();
+            } else {
+                notyf.error(data.message || 'Error sending your message.');
+            }
+        })
+        .catch(() => {
+            submitBtn.textContent = 'Send Message';
+            notyf.error('Something went wrong. Please try again later.');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,4 +1,3 @@
-
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from ...models import Subscription, Payment
@@ -9,15 +8,14 @@ from django.utils import timezone
 def billing_dashboard(request):
     user = request.user
     subscription = Subscription.objects.get_or_create(photographer=user, defaults={'subscription_type': 'FREE'})[0]
-    
+        
     if subscription.subscription_type == 'FREE':
         current_cycle_start = None
         current_cycle_end = None
     else:
         current_cycle_start = subscription.start_date
         current_cycle_end = subscription.end_date
-
-
+        
     context = {
         'subscription': subscription,
         'plans': [
@@ -36,3 +34,4 @@ def billing_dashboard(request):
         'payments': Payment.objects.filter(photographer=user).order_by('-created_at')[:5],  # Last 5 payments
     }
     return render(request, 'subscription/billing.html', context)
+ 

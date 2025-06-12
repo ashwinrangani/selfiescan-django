@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% block title %}PhotoFlow - Selection{% endblock %}
 {% block content %}
 <section class="container mx-auto max-w-6xl">
   
@@ -12,7 +12,7 @@
 
         <div id="photo-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {% for photo in photos %}
-                <label class="relative block cursor-pointer rounded-lg overflow-hidden shadow-sm border border-gray-200 transition-all duration-200 hover:shadow-md {% if photo.customer_selected %}ring-2 ring-green-500{% endif %}">
+                <label class="relative block cursor-pointer rounded-lg overflow-hidden shadow-xl border border-gray-200 transition-all duration-200 hover:shadow-2xl {% if photo.customer_selected %}ring-2 ring-green-500{% endif %}">
                     <!-- Display Number Badge -->
                     <div class="absolute top-2 left-2 bg-primary bg-opacity-65 text-white text-xs px-2 py-1 rounded">
                         {{ photo.display_number|default:"" }}

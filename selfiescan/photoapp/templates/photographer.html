@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block content %}
-<h1 class="text-3xl inline-flex items-center font-serif mb-4 mt-12">Your Dashboard<span class="w-12 bg-primary size-7 icon-[tabler--grain]"></span></h1>
+{% include "partials/breadcrumb.html" with page_level=1 %}
+<h1 class="text-3xl inline-flex items-center font-serif mb-4 mt-6">Your Dashboard<span class="w-12 bg-primary size-7 icon-[tabler--grain]"></span></h1>
 
 <!-- Container Grid Layout -->
 <div class="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">

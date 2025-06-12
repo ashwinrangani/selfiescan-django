@@ -2,8 +2,9 @@
 {% load static %}
 
 {% block content %}
+ {% include "partials/breadcrumb.html" with page_level=2 %}
 <section id="event-section" data-event-id="{{ event.event_id }}"> <!-- exporting event_id to external js -->
-  <div class="container mt-12 mx-auto p-1 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+  <div class="container mt-6 mx-auto p-1 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
 
     <!-- Left Section: Event Form -->
     <div class="shadow-lg shadow-gray-600 p-6 rounded-lg">

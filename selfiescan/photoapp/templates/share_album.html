@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% block title %}PhotoFlow - Share Album{% endblock %}
 {% block content %}
-<section class="container mx-auto px-4 mt-13 max-w-6xl">
+{% include "partials/breadcrumb.html" with page_level=3 current_page="Share Album" %}
+<section class="container mx-auto px-4 mt-6 max-w-6xl">
     <!-- Event Title -->
-    <h1 class="text-3xl font-bold mb-6">{{ event.name }}</h1>
+    <h1 class="text-3xl font-serif text-primary font-bold mb-6">{{ event.name }}</h1>
 
     <!-- Share Album Section -->
     <div class="shadow rounded-lg p-6 mb-8 border dark:border-0.5">
@@ -29,22 +30,34 @@
 
     <!-- Selected Photos Section -->
     <div class="mb-6">
-        <h2 class="text-2xl font-semibold mb-4 ">Customer Selected Photos</h2>
-        {% if photos %}
-            {% if customer_selected_photos %}
-                <div class="mb-6 grid md:flex lg:flex items-center gap-6">
-                    <p>Number of selected photos : <strong class="border border-2 border-primary p-1 rounded-full">{{ number_of_selected_photos }}</strong></p>
-                    <button type="button" onclick="refresh()">Show Selected Photos</button>
-                    <a href="{% url 'download_selected_photos' event_id=event.event_id %}" class="btn">Download All Selected Photos  <span class="icon-[tabler--file-type-zip] size-5 p-1 rtl:rotate-180"></span></a>
-                    
-                </div>
-            {% endif %}
+        {% if customer_selected_photos %}
+            <!-- Show heading and controls only if there are customer-selected photos -->
+            <h2 class="text-2xl font-semibold mb-4 ">Customer Selected Photos</h2>
+            <div class="mb-6 grid md:flex lg:flex items-center gap-6">
+                <p>Number of selected photos: <strong class="border border-2 border-primary p-1 rounded-full">{{ number_of_selected_photos }}</strong></p>
+                <a href="{% url 'download_selected_photos' event_id=event.event_id %}" class="btn">Download All Selected Photos <span class="icon-[tabler--file-type-zip] size-5 p-1 rtl:rotate-180"></span></a>
+                <!-- Toggle Button -->
+                <a href="{% url 'share_album' event_id=event.event_id %}?view={% if view_mode == 'selected' %}all{% else %}selected{% endif %}" 
+                   class="btn btn-primary">
+                    {% if view_mode == 'selected' %}Show All Photos{% else %}Show Only Selected Photos{% endif %}
+                </a>
+            </div>
+        {% else %}
+            <!-- Show message if no photos are selected -->
+            <div class="mb-6">
+                <p class="text-gray-600 text-lg">No photos have been selected by the customer yet. Share the album link above to start photo selection.</p>
+            </div>
+        {% endif %}
 
-            <!-- Photo Grid -->
+        <!-- Photo Grid Section -->
+        {% if photos %}
+            {% if not customer_selected_photos %}
+                <!-- Show a different heading if no photos are selected -->
+                <h2 class="text-2xl font-semibold mb-4 ">All Photos</h2>
+            {% endif %}
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {% for photo in photos %}
-                    <div class="relative bg-white shadow-sm rounded overflow-hidden {% if photo.customer_selected %}border-2 border-green-500{% endif %}">
-                        
+                    <div class="relative rounded-md shadow-xl overflow-hidden {% if photo.customer_selected %}border-2 border-green-500{% endif %}">
                         <!-- Display Number Badge -->
                         <div class="absolute top-2 left-2 bg-primary bg-opacity-65 text-white text-xs px-2 py-1 rounded">
                             {{ photo.display_number }}
@@ -70,45 +83,48 @@
             <div id="pagination-controls" class="mt-10 flex justify-center">
                 <div class="flex flex-wrap items-center gap-2">
                     {% if photos.has_previous %}
-                        <a href="{% url 'share_album' event_id=event.event_id %}?page=1" class="btn btn-primary btn-sm">« First</a>
-                        <a href="{% url 'share_album' event_id=event.event_id %}?page={{ photos.previous_page_number }}" class="btn btn-primary btn-sm">Previous</a>
+                        <a href="{% url 'share_album' event_id=event.event_id %}?view={{ view_mode }}&page=1" class="btn btn-primary btn-sm">« First</a>
+                        <a href="{% url 'share_album' event_id=event.event_id %}?view={{ view_mode }}&page={{ photos.previous_page_number }}" class="btn btn-primary btn-sm">Previous</a>
                     {% endif %}
 
                     {% if photos.number > 4 %}
-                        <a href="{% url 'share_album' event_id=event.event_id %}?page=1" class="btn btn-text btn-square">1</a>
+                        <a href="{% url 'share_album' event_id=event.event_id %}?view={{ view_mode }}&page=1" class="btn btn-text btn-square">1</a>
                         <span class="btn btn-text btn-square pointer-events-none">...</span>
                     {% endif %}
 
                     {% for num in photos.paginator.page_range %}
                         {% if num >= photos.number|add:'-2' and num <= photos.number|add:'2' %}
-                            <a href="{% url 'share_album' event_id=event.event_id %}?page={{ num }}" class="btn btn-text btn-sm btn-square {% if photos.number == num %}text-bg-primary aria-[current='page']{% endif %}" {% if photos.number == num %}aria-current="page"{% endif %}>{{ num }}</a>
+                            <a href="{% url 'share_album' event_id=event.event_id %}?view={{ view_mode }}&page={{ num }}" 
+                               class="btn btn-text btn-sm btn-square {% if photos.number == num %}text-bg-primary aria-[current='page']{% endif %}" 
+                               {% if photos.number == num %}aria-current="page"{% endif %}>{{ num }}</a>
                         {% endif %}
                     {% endfor %}
 
                     {% if photos.number < photos.paginator.num_pages|add:'-3' %}
                         <span class="btn btn-text btn-square pointer-events-none">...</span>
-                        <a href="{% url 'share_album' event_id=event.event_id %}?page={{ photos.paginator.num_pages }}" class="btn btn-text btn-square">{{ photos.paginator.num_pages }}</a>
+                        <a href="{% url 'share_album' event_id=event.event_id %}?view={{ view_mode }}&page={{ photos.paginator.num_pages }}" 
+                           class="btn btn-text btn-square">{{ photos.paginator.num_pages }}</a>
                     {% endif %}
 
                     {% if photos.has_next %}
-                        <a href="{% url 'share_album' event_id=event.event_id %}?page={{ photos.next_page_number }}" class="btn btn-primary btn-sm">Next</a>
-                        <a href="{% url 'share_album' event_id=event.event_id %}?page={{ photos.paginator.num_pages }}" class="btn btn-primary btn-sm">Last »</a>
+                        <a href="{% url 'share_album' event_id=event.event_id %}?view={{ view_mode }}&page={{ photos.next_page_number }}" class="btn btn-primary btn-sm">Next</a>
+                        <a href="{% url 'share_album' event_id=event.event_id %}?view={{ view_mode }}&page={{ photos.paginator.num_pages }}" class="btn btn-primary btn-sm">Last »</a>
                     {% endif %}
                 </div>
             </div>
         {% else %}
-            <p class="text-gray-600">No photos available for this event.</p>
+            <p class="text-gray-600">No photos available{% if view_mode == 'selected' %} (no customer-selected photos found){% endif %}.</p>
         {% endif %}
     </div>
 
     <!-- Back Link -->
     <div class="bottom-0 right-0 w-fit ml-auto p-4">
-    <a href="{% url 'event_detail' event_id=event.event_id %}" class="text-primary hover:underline block">
-      <span class="text-primary flex items-center justify-center p-2">
-        <span class="icon-[tabler--arrow-left] size-4 rtl:rotate-180"></span>Back to Event Details
-      </span>
-    </a>
-  </div>
+        <a href="{% url 'event_detail' event_id=event.event_id %}" class="text-primary hover:underline block">
+            <span class="text-primary flex items-center justify-center p-2">
+                <span class="icon-[tabler--arrow-left] size-4 rtl:rotate-180"></span>Back to Event Details
+            </span>
+        </a>
+    </div>
 </section>
 {% endblock %}
 
@@ -131,11 +147,6 @@
             console.error('Failed to copy URL:', err);
             alert('Failed to copy the URL. Please copy it manually.');
         });
-    }
-
-    
-    function refresh(){
-        window.location.reload()
     }
 </script>
 {% endblock %}

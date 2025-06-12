@@ -12,7 +12,7 @@
 {% include 'partials/subscription-expired.html'%}
 
 <!-- hero section -->
-<section class="hero py-20 text-center">
+<section class="hero py-20 text-center flex justify-center">
     <div class="container w-full">
         <h1 class="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white leading-tight animate-fade-in-up">
             Transform Your Photography Business
@@ -26,67 +26,84 @@
             <a href="{% url 'photographer' %}" class="btn btn-primary shadow-lg hover:shadow-indigo-500/50 text-lg">
                 Start Free Trial
             </a>
-            <button type="button" class="btn btn-outline border-2 text-lg" aria-haspopup="dialog" aria-expanded="false" aria-controls="demo-modal" data-overlay="#demo-modal">
+            <button type="button" class="btn btn-outline border-2 text-lg" aria-haspopup="dialog" aria-expanded="false" aria-controls="fullscreen-modal" data-overlay="#fullscreen-modal">
                 See How It Works
             </button>
         </div>
 
-        <!-- Demo Modal -->
-        <div id="demo-modal" class="overlay modal overlay-open:opacity-100 hidden" role="dialog" tabindex="-1">
-          <div class="modal-dialog overlay-open:mt-12 overlay-open:opacity-100 overlay-open:duration-500 transition-all ease-out max-w-2xl">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h3 class="modal-title">How PhotoShare Works</h3>
-                <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#demo-modal">
-                  <span class="icon-[tabler--x] size-4"></span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <div class="space-y-4">
-                  <div class="flex items-center space-x-4">
-                    <div class="text-3xl">📷</div>
-                    <div>
-                      <h4 class="font-semibold">Upload & Organize</h4>
-                      <p class="text-gray-600">Upload your event photos to secure cloud storage</p>
-                    </div>
-                  </div>
-                  <div class="flex items-center space-x-4">
-                    <div class="text-3xl">📱</div>
-                    <div>
-                      <h4 class="font-semibold">Share with QR Code</h4>
-                      <p class="text-gray-600">Generate QR codes for instant gallery access</p>
-                    </div>
-                  </div>
-                  <div class="flex items-center space-x-4">
-                    <div class="text-3xl">🤖</div>
-                    <div>
-                      <h4 class="font-semibold">AI Recognition</h4>
-                      <p class="text-gray-600">Clients upload selfies to find their photos automatically</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+<!-- Fullscreen Demo Modal -->
+<div id="fullscreen-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden transition-opacity duration-300 ease-in-out" role="dialog" aria-labelledby="modal-title" aria-modal="true" tabindex="-1">
+  <div class="modal-dialog bg-white w-full h-full max-w-none max-h-none flex flex-col transform transition-all duration-500 ease-out scale-95 opacity-0 overlay-open:scale-100 overlay-open:opacity-100">
+    <div class="modal-content flex flex-col h-full justify-between">
+      <!-- Modal Header -->
+      <div class="modal-header flex justify-between items-center p-6 sm:p-8 border-b border-gray-200">
+        <h3 id="modal-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-200">How PhotoFlow Works</h3>
+        <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#fullscreen-modal">
+          <span class="icon-[tabler--x] size-4"></span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body grow p-6 mt-4 sm:p-8 overflow-y-auto">
+        <div class="flex gap-4">
+        <div class="space-y-6">
+          <div class="flex items-start space-x-4 sm:space-x-6 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+            <div class="text-4xl sm:text-5xl flex-shrink-0"><span class="icon-[tabler--cloud-code] size-12"></span></div>
+            <div class="flex flex-col">
+              <h4 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-200">Upload & Organize</h4>
+              <p class="text-sm sm:text-base">Seamlessly upload your event photos to secure high-speed organized cloud storage.</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-4 sm:space-x-6 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+            <div class="text-4xl sm:text-5xl flex-shrink-0"><span class="icon-[tabler--qrcode] size-12"></div>
+            <div class="flex flex-col">
+              <h4 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-200">Share with QR Code</h4>
+              <p class="text-sm sm:text-base">Generate unique QR codes for instant, secure access to event galleries on any device.</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-4 sm:space-x-6 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+            <div class="text-4xl sm:text-5xl flex-shrink-0"><span class="icon-[tabler--robot] size-12"></div>
+            <div class="flex flex-col">
+              <h4 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-200">AI-Powered Face Recognition</h4>
+              <p class=" text-sm sm:text-base">Clients upload selfies, and our advanced AI instantly identifies and curates their photos.</p>
             </div>
           </div>
         </div>
-
-        <!-- Hero Images -->
-        <div class="flex flex-col md:flex-row gap-6 justify-center mt-12">
-            <div class="animate-fade-in-up animation-delay-600">
-                <img src="{% static 'images/wedding-pic.jpeg' %}" alt="Wedding Photography" class="rounded-xl shadow-2xl w-80 h-60 object-cover border border-gray-200 rotate-2 hover:rotate-0 transition-transform duration-500" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
-            </div>
-            <div class="animate-fade-in-up animation-delay-700">
-                <img src="{% static 'images/corporate-pic.jpg' %}" alt="Corporate Event" class="rounded-xl shadow-2xl w-80 h-60 object-cover border border-gray-200 -rotate-2 hover:rotate-0 transition-transform duration-500" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
-            </div>
-            <div class="animate-fade-in-up animation-delay-700">
-                <img src="{% static 'images/wedding-photo.png' %}" alt="Corporate Event" class="rounded-xl shadow-2xl w-80 h-60 object-cover border border-gray-200 -rotate-2 hover:rotate-0 transition-transform duration-500" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
-            </div>
+       
+        <div>
+            <img src="{% static 'images/system-workflow-2.png' %}" alt="Corporate Event" class="rounded-xl object-cover w-96 h-96" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
         </div>
+        </div>
+        
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-soft btn-primary" data-overlay="#fullscreen-modal">Close</button>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- Hero Images -->
+<div class="flex flex-col md:flex-row justify-center items-center mt-4 relative">
+    
+    <div class="animate-fade-in-up animation-delay-700 relative -ml-4 md:-ml-8">
+        <img src="{% static 'images/hero-image.webp' %}" 
+     alt="Corporate Event" 
+     class="rounded-xl shadow-2xl w-full h-96 object-cover border border-gray-200" 
+     onerror="this.src='/api/placeholder/600/400';this.onerror='';">
+
+    </div>
+    <div class="animate-fade-in-up animation-delay-700 relative -z-10 md:mt-12 ml-4 md:-ml-4">
+        <img src="{% static 'images/hero-image-2.jpg' %}" alt="Corporate Event" class="rounded-xl overflow-visible border border-gray-200 shadow-2xl h-64 md:h-96 lg:h-96 object-cover" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
+    </div>
+    
+</div>
 </section>
 
 <!-- How it works for photographers -->
-<section class="workflow py-20 backdrop-blur-sm">
+<section class="workflow py-10 backdrop-blur-sm">
     <div class="container max-w-6xl mx-auto px-6">
         <div class="text-center mb-16">
             <h2 class="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white animate-on-scroll">Your Complete Photography Workflow</h2>
@@ -122,7 +139,7 @@
 </section>
 
 <!-- Key Features -->
-<section class="features py-20 bg-gray-50 dark:bg-gray-900">
+<section id="features" class="features py-20 bg-gray-50 dark:bg-gray-900">
     <div class="container max-w-6xl mx-auto px-6">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div class="animate-on-scroll">
@@ -204,7 +221,7 @@
 <!-- Benefits for photographers -->
 <section class="benefits py-20">
     <div class="container max-w-4xl mx-auto text-center px-6">
-        <h2 class="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white animate-on-scroll mb-4">Why Photographers Choose PhotoShare</h2>
+        <h2 class="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white animate-on-scroll mb-4">Why Photographers Choose PhotoFlow</h2>
         <p class="text-gray-600 dark:text-gray-300 text-lg mb-16 animate-on-scroll animation-delay-100">Save time, increase client satisfaction, and grow your business</p>
         
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
@@ -254,7 +271,7 @@
                     <svg class="w-5 h-5 text-green-300" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                     </svg>
-                    <span>14-day free trial</span>
+                    <span>Free trial</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 h-5 text-green-300" fill="currentColor" viewBox="0 0 20 20">
@@ -272,7 +289,7 @@
             
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{% url 'photographer' %}" class="btn bg-white text-indigo-600 hover:bg-gray-100 shadow-lg text-lg font-semibold">
-                    Start Your Free Trial
+                    Explore Free Plan
                 </a>
                 <a href="{% url 'account_login' %}" class="btn border-2 border-white hover:bg-white hover:text-indigo-600 text-lg">
                     Sign In
@@ -287,7 +304,7 @@
     <div class="container mx-auto px-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <div class="col-span-1 md:col-span-2">
-                <h3 class="text-2xl font-bold mb-4">PhotoShare</h3>
+                <h3 class="text-2xl font-bold mb-4">PhotoFlow</h3>
                 <p class="text-gray-400 mb-6 max-w-md">The complete photography workflow platform. From shoot to delivery, we help photographers save time and delight clients.</p>
                 <div class="flex space-x-4">
                     <a href="#" class="text-gray-400 hover:text-white transition-colors">
@@ -311,9 +328,9 @@
             <div>
                 <h4 class="text-lg font-semibold mb-4">Platform</h4>
                 <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Features</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
+                    <li><a href="#" class="cursor-pointer text-gray-400 hover:text-white transition-colors aria-haspopup="dialog" aria-expanded="false" aria-controls="fullscreen-modal" data-overlay="#fullscreen-modal">How It Works</a></li>
+                    <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">Features</a></li>
+                    <li><a href="{% url 'billing_dashboard' %}" class="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
                     <li><a href="#" class="text-gray-400 hover:text-white transition-colors">API</a></li>
                 </ul>
             </div>
@@ -322,7 +339,7 @@
                 <h4 class="text-lg font-semibold mb-4">Support</h4>
                 <ul class="space-y-2">
                     <li><a href="{% url 'about-us' %}" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+                    <li><a href="{% url 'contact-us' %}" class="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
                     <li><a href="{% url 'privacy-policy' %}" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
                     <li><a href="{% url 'terms-of-service' %}" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
                     <li><a href="{% url 'cancellation-refund-policy' %}" class="text-gray-400 hover:text-white transition-colors">Cancellation and Refunds</a></li>
@@ -332,7 +349,7 @@
         
         <div class="border-t border-gray-800 pt-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-400">&copy; 2025 PhotoShare. All Rights Reserved.</p>
+                <p class="text-gray-400">&copy; 2025 PhotoFlow. All Rights Reserved.</p>
                 <div class="flex items-center space-x-4 mt-4 md:mt-0">
                     <span class="text-gray-400 text-sm">Trusted by 10,000+ photographers</span>
                     <div class="flex items-center space-x-1">
@@ -446,29 +463,7 @@
             observer.observe(el);
         });
         
-        // Modal functionality
-        document.querySelectorAll('[data-overlay]').forEach(trigger => {
-            trigger.addEventListener('click', function() {
-                const targetId = this.getAttribute('data-overlay');
-                const modal = document.querySelector(targetId);
-                if (modal) {
-                    modal.classList.remove('hidden');
-                    modal.classList.add('overlay-open:opacity-100');
-                    document.body.style.overflow = 'hidden';
-                }
-            });
-        });
         
-        // Close modal functionality
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this || e.target.hasAttribute('data-overlay')) {
-                    this.classList.add('hidden');
-                    this.classList.remove('overlay-open:opacity-100');
-                    document.body.style.overflow = '';
-                }
-            });
-        });
         
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

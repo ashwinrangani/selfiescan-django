@@ -1,0 +1,44 @@
+<div class="breadcrumbs mt-12">
+  <ul class="flex items-center space-x-2 text-gray-600">
+    <!-- Home -->
+    <li>
+      <a href="{% url 'homepage' %}" class="text-primary hover:underline">Home</a>
+    </li>
+
+    <!-- Dashboard (always shown) -->
+    <li class="breadcrumbs-separator rtl:rotate-180">
+      <span class="icon-[tabler--chevron-right] text-gray-400"></span>
+    </li>
+    <li>
+      {% if page_level == 1 %}
+        <span class="text-gray-800 font-medium" aria-current="page">Dashboard</span>
+      {% else %}
+        <a href="{% url 'photographer' %}" class="text-primary hover:underline">Dashboard</a>
+      {% endif %}
+    </li>
+
+    <!-- Event Detail (shown for page_level >= 2) -->
+    {% if page_level >= 2 and event %}
+      <li class="breadcrumbs-separator rtl:rotate-180">
+        <span class="icon-[tabler--chevron-right] text-gray-400"></span>
+      </li>
+      <li>
+        {% if page_level == 2 %}
+          <span class="text-gray-800 font-medium" aria-current="page">Event Detail</span>
+        {% else %}
+          <a href="{% url 'event_detail' event_id=event.event_id %}" class="text-primary hover:underline">Event Detail</a>
+        {% endif %}
+      </li>
+    {% endif %}
+
+    <!-- Current Page (shown for page_level >= 3) -->
+    {% if page_level >= 3 and event and current_page %}
+      <li class="breadcrumbs-separator rtl:rotate-180">
+        <span class="icon-[tabler--chevron-right] text-gray-400"></span>
+      </li>
+      <li aria-current="page" class="text-gray-800 font-medium">
+        {{ current_page }}
+      </li>
+    {% endif %}
+  </ul>
+</div>
