@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Blog-New{% endblock %}
+
+{% block content %}
+<section class="max-w-xl mt-12">
+    <h1 class="text-2xl font-bold mb-4">Submit Blog</h1>
+    
+    <form id="blog-form" class="space-y-4">
+        {% csrf_token %}
+        <input type="text" id="title" placeholder="Blog Title" class="w-full border px-4 py-2 rounded" required
+                value="{{ edit_blog.title|default:'' }}">
+
+        <textarea id="content" placeholder="Write your content here..." rows="6"
+                class="w-full border px-4 py-2 rounded" required>{{ edit_blog.content|default:'' }}</textarea>
+
+        <input type="hidden" id="edit-id" value="{{ edit_blog.id|default:'' }}">
+
+        <button id="btn" type="submit" class="btn btn-primary btn-sm">Publish</button>
+    </form>
+   <p id="response-message" class="mt-6 p-4 rounded bg-green-100 text-green-800 hidden">
+    You’ll be redirected to the blog list in <span id="countdown" class="font-semibold">10</span> seconds...<br>
+    Or <a href="{% url 'public-blog-list' %}" class="text-blue-600 underline hover:text-blue-800 transition">click here</a> to view all blogs now.
+</p>
+
+
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const notyf = new Notyf();
+        const formData = document.getElementById('blog-form');
+        const blogId = document.getElementById('edit-id').value;
+
+            formData.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const csrfToken = document.querySelector("input[name='csrfmiddlewaretoken']").value;
+            
+            const method = blogId ? 'PUT' : 'POST';
+            const url = blogId ? `/api/blogs/${blogId}/` : '/api/blogs/';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({ title, content })
+            })
+            .then(response => {
+                if (response.ok) {
+                    notyf.success("Blog Submitted Successfully!")
+                    formData.reset();
+                    const responseMessage = document.getElementById('response-message');
+                    responseMessage.classList.remove('hidden');
+                    const cancelBtn = document.createElement("button");
+                    cancelBtn.textContent = "Cancel Redirect";
+                    cancelBtn.className = "btn btn-sm btn-outline";
+                    cancelBtn.type = "button";
+                    const btnWrapper = document.createElement("div");
+                    btnWrapper.className = "mt-5";
+                    btnWrapper.appendChild(cancelBtn);
+                    responseMessage.appendChild(btnWrapper);
+
+                    cancelBtn.onclick = () => {
+                        clearInterval(interval);  // Stop the redirect
+                        cancelBtn.remove();       // Remove the cancel button after click (optional)
+                    };
+
+                    
+
+                    let countdown = 10;
+                    const countdownSpan = document.getElementById('countdown');
+
+                    const interval = setInterval(() => {
+                        countdown--;
+                        countdownSpan.textContent = countdown;
+                        if (countdown <= 0) {
+                            clearInterval(interval);
+                            window.location.href = '/blog/';
+                        }
+                    }, 1000);
+                } else {
+                    alert("Error: Blog not submitted");
+                }
+            });
+        });
+
+        
+        
+    });
+</script>
+{% endblock %}

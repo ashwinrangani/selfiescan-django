@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}{{ blog.title }}{% endblock %}
+
+{% block content %}
+<section class="max-w-xl mx-auto mt-12">
+    <h1 class="text-3xl font-bold mb-4">{{ blog.title }}</h1>
+    <p class="text-sm text-gray-500">Written by : {{ blog.author }}</p>
+    <p class="text-sm text-gray-500 mb-6">Published on {{ blog.published_at }}</p>
+    <div class="prose max-w-none">
+        {{ blog.content|linebreaks }}
+    </div>
+    {% if request.user.is_authenticated and request.user == blog.author %}
+    <div class="mt-6 flex gap-3">
+        <a href="{% url 'blog-submit' %}?edit={{ blog.id }}" class="btn btn-sm btn-primary">Edit</a>
+        <button id="deleteBtn" type="button" class="btn btn-sm btn-secondary">Delete</button>
+    </div>
+{% endif %}
+
+
+   
+</section>
+<section>
+    <h2 class="text-xl font-semibold mt-10 mb-3">Comments ({{ comments|length }})</h2>
+<div class="space-y-4" id="comments-section">
+    {% for comment in comments %}
+    <div class="p-3 bg-gray-100 rounded">
+        <p class="text-sm text-gray-700">{{ comment.comment }}</p>
+        <p class="text-xs text-gray-500 mt-1">
+            — {{ comment.author.username }} on {{ comment.created_at|date:"M d, Y H:i" }}
+        </p>
+    </div>
+    {% empty %}
+    <p class="text-gray-500 italic">No comments yet.</p>
+    {% endfor %}
+</div>
+
+{% if user.is_authenticated %}
+<form id="comment-form" class="mt-6 space-y-2">
+    {% csrf_token %}
+    <textarea id="comment" rows="3" placeholder="Add a comment..." class="w-full border rounded p-2" required></textarea>
+    <button type="submit" class="btn btn-sm btn-primary">Post Comment</button>
+</form>
+{% else %}
+<p class="text-sm text-gray-500 mt-6">🔒 <a href="{% url 'account_login' %}" class="text-blue-600 underline">Login</a> to comment.</p>
+{% endif %}
+
+
+</section>
+ <a href="{% url 'public-blog-list' %}" class="mt-6 right-0 inline-block text-blue-600 hover:underline">← Back to Blog List</a>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const notyf = new Notyf();
+    const form = document.getElementById('comment-form');
+    if(!form) return;
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const comment_text = document.getElementById('comment').value;
+        const blogId = "{{ blog.id}}"
+
+        fetch(`/api/blogs/${blogId}/comments/`, {
+            method : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({ comment: comment_text })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const commentHTML = `
+                <div class="p-3 bg-gray-100 rounded">
+                    <p class="text-sm text-gray-700">${data.comment}</p>
+                    <p class="text-xs text-gray-500 mt-1">— ${data.author_name} just now</p>
+                </div>
+            `;
+            document.getElementById('comments-section').insertAdjacentHTML('afterbegin', commentHTML);
+            document.getElementById('comment').value = '';
+        })
+    })
+    
+
+
+    const deleteBtn = document.getElementById('deleteBtn');
+    deleteBtn.addEventListener('click', () => {
+        const blogId = `{{ blog.id }}`;
+      if(deleteBtn){
+        
+      }  
+        if (!confirm("Are you sure you want to delete this blog?")) return;
+
+        fetch(`/api/blogs/${blogId}/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}', 
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                notyf.success("The blog is deleted successfully!")
+                window.location.href = '/blog/';
+                
+            } else {
+                return response.text().then(text => {
+                    console.error('Delete failed:', text);
+                    alert("Something went wrong. Could not delete the blog.");
+                });
+            }
+        });
+    });
+});
+
+</script>
+{% endblock %}

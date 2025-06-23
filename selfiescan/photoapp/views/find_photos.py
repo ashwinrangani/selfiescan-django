@@ -19,7 +19,7 @@ def resize_image_for_processing(image, max_width=800):
 
 logger = logging.getLogger(__name__)
 
-def find_matches(selfie_path, event_id, tolerance=0.5):
+def find_matches(selfie_path, event_id, tolerance=0.465):
     # Load and process selfie
     image = cv2.imread(selfie_path)
     

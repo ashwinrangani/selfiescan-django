@@ -36,9 +36,9 @@ DEBUG = True
 
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'c50d-106-216-89-157.ngrok-free.app',]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'e7c5-106-221-71-82.ngrok-free.app',]
 CSRF_TRUSTED_ORIGINS = [
-    'https://c50d-106-216-89-157.ngrok-free.app',
+    'https://e7c5-106-221-71-82.ngrok-free.app',
 ]
 
 # message broker
@@ -62,6 +62,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'rest_framework',
+    'blog',
 ]
 
 MIDDLEWARE = [
