@@ -51,6 +51,7 @@ DATA_UPLOAD_MAX_NUMBER_FILES = 200
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -64,6 +65,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'rest_framework',
     'blog',
+    'channels',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -160,7 +163,14 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # Use an App Password if using
 
 
 WSGI_APPLICATION = 'mysite.wsgi.application'
+ASGI_APPLICATION = 'mysite.asgi.application'
 
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

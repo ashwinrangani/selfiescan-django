@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.permissions import BasePermission
 from .models import Blog,Comment
 from .serializers import BlogSerializer, CommentSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -23,7 +24,7 @@ class BlogRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 class CommentListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    
+
     def get_queryset(self):
         blog_id = self.kwargs['pk']
         return Comment.objects.filter(blog_id=blog_id).order_by('-created_at')
@@ -34,10 +35,14 @@ class CommentListCreateAPIView(generics.ListCreateAPIView):
         serializer.save(author=self.request.user, blog=blog)
 
 
+class IsAuthorOrReadOnly(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.method in ['GET', 'HEAD', 'OPTIONS'] or obj.author == request.user
+
 class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
 
 # blog views
 def public_blog_list(request):

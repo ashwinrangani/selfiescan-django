@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('photoapp.app-urls')),
     path('', include('blog.urls')),
+    path('', include('chat.urls')),
     
 ]
 

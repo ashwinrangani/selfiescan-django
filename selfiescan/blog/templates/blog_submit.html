@@ -1,29 +1,46 @@
 {% extends "base.html" %}
-{% block title %}Blog-New{% endblock %}
+{% block title %}{{ edit_blog|default_if_none:''|yesno:"Edit Blog,New Blog" }}{% endblock %}
 
 {% block content %}
-<section class="max-w-xl mt-12">
-    <h1 class="text-2xl font-bold mb-4">Submit Blog</h1>
-    
-    <form id="blog-form" class="space-y-4">
-        {% csrf_token %}
-        <input type="text" id="title" placeholder="Blog Title" class="w-full border px-4 py-2 rounded" required
-                value="{{ edit_blog.title|default:'' }}">
+<section class="max-w-2xl mx-auto mt-16 px-4">
+    <div class="border shadow-sm rounded-xl p-6">
+        <h1 class="text-3xl font-bold mb-6">
+            {{ edit_blog|default_if_none:''|yesno:"✏️ Edit Blog,📝 Submit New Blog" }}
+        </h1>
 
-        <textarea id="content" placeholder="Write your content here..." rows="6"
-                class="w-full border px-4 py-2 rounded" required>{{ edit_blog.content|default:'' }}</textarea>
+        <form id="blog-form" class="space-y-4">
+            {% csrf_token %}
 
-        <input type="hidden" id="edit-id" value="{{ edit_blog.id|default:'' }}">
+            <div>
+                <label for="title" class="block text-sm font-medium  mb-1">Title</label>
+                <input type="text" id="title" placeholder="Enter blog title"
+                       value="{{ edit_blog.title|default:'' }}"
+                       class=" input px-4 py-2 rounded-md" required>
+            </div>
 
-        <button id="btn" type="submit" class="btn btn-primary btn-sm">Publish</button>
-    </form>
-   <p id="response-message" class="mt-6 p-4 rounded bg-green-100 text-green-800 hidden">
-    You’ll be redirected to the blog list in <span id="countdown" class="font-semibold">10</span> seconds...<br>
-    Or <a href="{% url 'public-blog-list' %}" class="text-blue-600 underline hover:text-blue-800 transition">click here</a> to view all blogs now.
-</p>
+            <div>
+                <label for="content" class="block text-sm font-medium mb-1">Content</label>
+                <textarea id="content" rows="8" placeholder="Write your content here..."
+                          class="textarea px-4 py-2 rounded-md resize-none"
+                          required>{{ edit_blog.content|default:'' }}</textarea>
+            </div>
 
+            <input type="hidden" id="edit-id" value="{{ edit_blog.id|default:'' }}">
 
+            <div class="pt-2">
+                <button id="btn" type="submit" class="btn btn-primary btn-sm">📤 Publish</button>
+            </div>
+        </form>
+
+        <p id="response-message" class="mt-6 hidden p-4 rounded bg-green-50 text-green-800 text-sm">
+            ✅ Your blog was submitted successfully!<br>
+            Redirecting to blog list in <span id="countdown" class="font-semibold">10</span> seconds...<br>
+            <a href="{% url 'public-blog-list' %}" class="text-blue-600 underline hover:text-blue-800 transition">Click here</a> to go now.
+        </p>
+    </div>
 </section>
+
+
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
