@@ -1,53 +1,31 @@
 {% extends "base.html" %}
-{% load static %}
-{% block title %}Ask AI{% endblock %}
-{% block content %}
-<section class="max-w-xl mx-auto mt-12">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">💬 Chat with our AI Assistant</h1>
+{% block title %}PhotoFlow-Ask AI{% endblock %}
 
-    <div id="chat-log" class="border rounded-lg p-4 h-96 overflow-y-auto bg-gray-50 space-y-3 shadow-inner scroll-smooth relative bg-gray-100 space-y-4 shadow-lg box-sizing-border-box">
+{% block content %}
+<section data-theme="gaurmet" class="max-w-4xl mx-auto h-96 px-4 p-4">
+    <h1 class="text-xl font-bold mb-2">Chat with our AI Assistant</h1>
+
+    <div id="chat-log" class=" grid-bg flex flex-col space-y-2 h-96 max-h-96 overflow-y-auto p-4 rounded-lg shadow-inner scroll-smooth">
         <!-- Messages will be appended here -->
     </div>
 
     <div class="flex mt-4 gap-2">
-        <input id="chat-message-input" type="text" 
-               class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-white" 
-               placeholder="Type your message...">
-        <button id="chat-message-submit" class="btn btn-primary px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition duration-200">Send</button>
+        <input id="chat-message-input" type="text" class="input w-full" placeholder="Type your message...">
+        <button id="chat-message-submit" class="btn btn-accent">Send</button>
     </div>
 </section>
-
 <style>
-    .message-bubble {
-        max-width: 70%;
-        word-wrap: break-word;
-        animation: fadeIn 0.3s ease-in;
-    }
-    .user-message {
-        background-color: #3b82f6; /* Blue-500 */
-        color: white;
-    }
-    .ai-message {
-        background-color: #ffffff;
-        color: #1f2937; /* Gray-800 */
-    }
-    .loading-message {
-        background-color: #f3f4f6; /* Gray-100 */
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .scroll-smooth {
-        scroll-behavior: smooth;
-    }
-    #chat-log {
-        box-sizing: border-box; /* Ensure padding is included in dimensions */
-    }
+  .grid-bg {
+    background-color: #91416557; /* subtle light gray base */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%23e5e7eb' stroke-width='1'%3E%3Cpath d='M 20 0 L 0 0 0 20'/%3E%3C/svg%3E");
+  }
 </style>
 
 <script>
-    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+    const chatSocket = new WebSocket(
+    (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host + "/ws/chat/"
+);
+
     const chatLog = document.getElementById('chat-log');
     const messageInput = document.getElementById('chat-message-input');
     const sendButton = document.getElementById('chat-message-submit');
@@ -55,11 +33,11 @@
 
     chatSocket.onmessage = function(e) {
         if (loadingMessage) {
-            loadingMessage.remove(); // Remove loading indicator
+            loadingMessage.remove();
             loadingMessage = null;
         }
         const data = JSON.parse(e.data);
-        appendMessage('🤖', data.message, true);
+        appendMessage(data.message, true);
     };
 
     chatSocket.onopen = () => console.log('WebSocket connected.');
@@ -73,40 +51,59 @@
     function sendMessage() {
         const message = messageInput.value.trim();
         if (!message) return;
-
-        appendMessage('🧑', message, false);
+        appendMessage(message, false);
         appendLoading();
-        chatSocket.send(JSON.stringify({'message': message}));
+        chatSocket.send(JSON.stringify({ 'message': message }));
         messageInput.value = '';
     }
 
-    function appendMessage(sender, message, isAi) {
+    function appendMessage(message, isAI) {
         const messageEl = document.createElement('div');
-        messageEl.className = `flex ${isAi ? 'justify-start' : 'justify-end'} items-start mb-2`;
-        
         const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        messageEl.innerHTML = `
-            <div class="flex items-center gap-2">
-                ${isAi ? `<span class="text-2xl">${sender}</span>` : ''}
-                <div class="message-bubble px-4 py-2 rounded-lg shadow ${isAi ? 'ai-message' : 'user-message'}">
-                    <p>${escapeHtml(message)}</p>
-                    <span class="text-xs text-gray-500">${timestamp}</span>
+        
+        if (isAI) {
+            messageEl.innerHTML = `
+                <div class="chat chat-receiver">
+                    <div class="chat-avatar avatar">
+                        <div class="size-10 rounded-full">
+                            <img src="https://cdn.flyonui.com/fy-assets/avatar/avatar-1.png" alt="AI">
+                        </div>
+                    </div>
+                    <div class="chat-bubble">${escapeHtml(message)}
+                        <div class="text-[10px] text-gray-400 mt-1">${timestamp}</div>
+                    </div>
                 </div>
-                ${isAi ? '' : `<span class="text-2xl">${sender}</span>`}
-            </div>
-        `;
+            `;
+        } else {
+            messageEl.innerHTML = `
+                <div class="chat chat-sender">
+                    <div class="chat-avatar avatar">
+                        <div class="size-10 rounded-full">
+                            <img src="https://cdn.flyonui.com/fy-assets/avatar/avatar-2.png" alt="You">
+                        </div>
+                    </div>
+                    <div class="chat-bubble bg-blue-300 text-gray-900">
+                        ${escapeHtml(message)}
+                        <div class="text-[10px] text-gray-700 mt-1">${timestamp}</div>
+                    </div>
+                </div>
+            `;
+        }
         chatLog.appendChild(messageEl);
         chatLog.scrollTop = chatLog.scrollHeight;
     }
 
     function appendLoading() {
         loadingMessage = document.createElement('div');
-        loadingMessage.className = 'flex justify-start items-start mb-2';
         loadingMessage.innerHTML = `
-            <div class="flex items-center gap-2">
-                <span class="text-2xl">🤖</span>
-                <div class="message-bubble loading-message px-4 py-2 rounded-lg shadow">
-                    <span class="loading loading-dots loading-lg"></span>
+            <div class="chat chat-receiver">
+                <div class="chat-avatar avatar">
+                    <div class="size-10 rounded-full">
+                        <img src="https://cdn.flyonui.com/fy-assets/avatar/avatar-1.png" alt="AI">
+                    </div>
+                </div>
+                <div class="chat-bubble loading-message">
+                    <span class="loading loading-dots loading-xs"></span>
                 </div>
             </div>
         `;

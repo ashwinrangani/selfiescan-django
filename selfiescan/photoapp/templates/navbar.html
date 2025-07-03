@@ -1,6 +1,6 @@
 <nav id="navbar" class="navbar rounded-box fixed top-0 z-10 backdrop-blur-md bg-opacity-90 bg-base-100 shadow transition-transform duration-300">
   <div class="navbar-start">
-    <div class="dropdown relative inline-flex [--auto-close:inside] [--offset:9]">
+    <!-- <div class="dropdown relative inline-flex [--auto-close:inside] [--offset:9]">
       <button id="dropdown-name" type="button" class="dropdown-toggle btn btn-text btn-circle dropdown-open:bg-base-content/10 dropdown-open:text-base-content" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
         <span class="icon-[tabler--menu-2] size-5"></span>
       </button>
@@ -11,17 +11,19 @@
         <hr class="border-base-content/25 -mx-2 my-3" />
         <li><a class="dropdown-item" href="#">Link 4</a></li>
       </ul>
-    </div>
-  </div>
-  <div class="navbar-center flex items-center">
-    <a class="link text-base-content/90 link-neutral text-3xl font-pacifico no-underline" href="/">
+    </div> -->
+    <div class="navbar-center flex items-center">
+    <a class="link text-base-content/90 link-neutral text-2xl font-pacifico no-underline" href="/">
       PhotoFlow
     </a>
     <span class="bg-primary size-8 icon-[tabler--camera-search]"></span>
     
   </div>
-  <div class="navbar-end items-center gap-2 md:gap-4">
-    <button id="theme-toggle" class='h-8'>
+  </div>
+  
+  <div class="navbar-end items-center gap-2 md:gap-5">
+    <a class="pt-1 no-underline btn btn-sm btn-outline btn-accent" href="{% url 'chat-page' %}">Ask AI</a>
+    <button id="theme-toggle" class='h-10'>
       <!-- Light Mode Icon -->
       <svg    class="fill-violet-700 block" fill="currentColor" viewBox="0 0 20 20" width="24" height="24">
         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
@@ -77,6 +79,13 @@
           {% endif %}
           
         </li>
+        <li>
+          <a class="dropdown-item" href="{% url 'photographer' %}">
+            <span class="icon-[tabler--grain]"></span>
+            Dashboard
+          </a>
+        </li>
+        
         <li>
           <a class="dropdown-item" href="{% url 'profile'%}" >
             <span class="icon-[tabler--user]"></span>
