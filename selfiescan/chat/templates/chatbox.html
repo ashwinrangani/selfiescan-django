@@ -2,22 +2,151 @@
 {% block title %}PhotoFlow-Ask AI{% endblock %}
 
 {% block content %}
-<section data-theme="gaurmet" class="max-w-4xl mx-auto h-96 px-4 p-4">
-    <h1 class="text-xl font-bold mb-2">Chat with our AI Assistant</h1>
+<section data-theme="gaurmet" class="w-full px-2 sm:px-4 py-2 sm:py-4 max-w-4xl mx-auto mobile-full-height">
+<div class="flex justify-end">
+    <a href="/" class="flex items-center gap-1"><span class="icon-[tabler--arrow-back] size-5 bg-accent"></span>Home</a>
+    </div>
+    <div class="flex justify-between items-center">
+     <h1 class="flex items-center gap-2 sm:text-xl font-bold mb-2 sm:mb-4 text-center sm:text-left">Chat with our AI Assistant<span class="icon-[tabler--messages] size-7 bg-accent"></span></h1>
+       
+    </div>
 
-    <div id="chat-log" class=" grid-bg flex flex-col space-y-2 h-96 max-h-96 overflow-y-auto p-4 rounded-lg shadow-inner scroll-smooth">
+    <div id="chat-log" class="grid-bg flex flex-col space-y-2 overflow-y-auto p-2 sm:p-4 rounded-lg shadow-inner scroll-smooth chat-container">
+        <!-- Quick questions section -->
+        <div id="quick-questions" class="mb-4 p-3 bg-white/10 rounded-lg">
+            <p class="text-sm font-medium mb-2 text-gray-700">Quick Questions:</p>
+            <div class="flex flex-wrap gap-2">
+                <button class="quick-question-btn btn btn-sm btn-outline text-xs sm:text-sm" data-question="What is the pricing?">
+                    💰 What is the pricing?
+                </button>
+                <button class="quick-question-btn btn btn-sm btn-outline text-xs sm:text-sm" data-question="How to create events?">
+                    📅 How to create events?
+                </button>
+                <button class="quick-question-btn btn btn-sm btn-outline text-xs sm:text-sm" data-question="What features are available?">
+                    ⚡ What features are available?
+                </button>
+                <button class="quick-question-btn btn btn-sm btn-outline text-xs sm:text-sm" data-question="How do I get started?">
+                    🚀 How do I get started?
+                </button>
+            </div>
+        </div>
         <!-- Messages will be appended here -->
     </div>
 
-    <div class="flex mt-4 gap-2">
-        <input id="chat-message-input" type="text" class="input w-full" placeholder="Type your message...">
-        <button id="chat-message-submit" class="btn btn-accent">Send</button>
+    <div class="flex mt-2 sm:mt-4 gap-2">
+        <input id="chat-message-input" type="text" class="input w-full text-sm sm:text-base" placeholder="Type your message...">
+        <button id="chat-message-submit" class="btn btn-accent text-sm sm:text-base px-3 sm:px-4"><span class="icon-[tabler--send] size-6"></button>
     </div>
 </section>
+
 <style>
   .grid-bg {
-    background-color: #91416557; /* subtle light gray base */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%23e5e7eb' stroke-width='1'%3E%3Cpath d='M 20 0 L 0 0 0 20'/%3E%3C/svg%3E");
+    /* background-color: #c7acb857;  */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%23e5e7eb' stroke-width='1.5'%3E%3Cpath d='M 20 0 L 0 0 0 20'/%3E%3C/svg%3E");
+  }
+
+  /* Desktop: Fixed height for chat container */
+  .chat-container {
+    height: 400px;
+  }
+
+  /* Quick questions styling */
+  .quick-question-btn {
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+  }
+  
+  .quick-question-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .quick-question-btn:active {
+    transform: translateY(0);
+  }
+  
+  #quick-questions {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+  }
+
+  /* Mobile: Full viewport approach */
+  @media (max-width: 640px) {
+    .mobile-full-height {
+      min-height: 100vh;
+      min-height: 95dvh; /* Dynamic viewport height for mobile browsers */
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chat-container {
+      height: auto;
+      flex: 1;
+      min-height: 0;
+      transition: max-height 0.3s ease;
+    }
+    
+    /* Ensure input stays visible above keyboard */
+    .mobile-full-height > div:last-child {
+      position: relative;
+      z-index: 10;
+      background: inherit;
+      padding-top: 0.5rem;
+    }
+    
+    .chat-bubble {
+      max-width: calc(100vw - 120px) !important;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    .chat-avatar .size-10 {
+      width: 2rem !important;
+      height: 2rem !important;
+    }
+    
+    .chat-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Ensure chat messages don't overflow on small screens */
+    .chat {
+      max-width: 100%;
+    }
+    
+    /* Smaller text for timestamps on mobile */
+    .chat-bubble .text-\[10px\] {
+      font-size: 0.625rem;
+    }
+    
+    /* Smooth scrolling when input is focused */
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Fix for iOS Safari viewport issues */
+  @supports (-webkit-touch-callout: none) {
+    @media (max-width: 640px) {
+      .mobile-full-height {
+        min-height: -webkit-fill-available;
+      }
+    }
   }
 </style>
 
@@ -57,41 +186,43 @@
         messageInput.value = '';
     }
 
-    function appendMessage(message, isAI) {
-        const messageEl = document.createElement('div');
-        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        if (isAI) {
-            messageEl.innerHTML = `
-                <div class="chat chat-receiver">
-                    <div class="chat-avatar avatar">
-                        <div class="size-10 rounded-full">
-                            <img src="https://cdn.flyonui.com/fy-assets/avatar/avatar-1.png" alt="AI">
-                        </div>
-                    </div>
-                    <div class="chat-bubble">${escapeHtml(message)}
-                        <div class="text-[10px] text-gray-400 mt-1">${timestamp}</div>
+   function appendMessage(message, isAI) {
+    const messageEl = document.createElement('div');
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    if (isAI) {
+        messageEl.innerHTML = `
+            <div class="chat chat-receiver">
+                <div class="chat-avatar avatar">
+                    <div class="size-10 rounded-full">
+                        <span class="icon-[tabler--input-ai] size-8 bg-primary"></span>
                     </div>
                 </div>
-            `;
-        } else {
-            messageEl.innerHTML = `
-                <div class="chat chat-sender">
-                    <div class="chat-avatar avatar">
-                        <div class="size-10 rounded-full">
-                            <img src="https://cdn.flyonui.com/fy-assets/avatar/avatar-2.png" alt="You">
-                        </div>
-                    </div>
-                    <div class="chat-bubble bg-blue-300 text-gray-900">
-                        ${escapeHtml(message)}
-                        <div class="text-[10px] text-gray-700 mt-1">${timestamp}</div>
+                <div class="chat-bubble">
+                    ${formatAiMessage(message)}
+                    <div class="text-[10px] text-gray-400 mt-1">${timestamp}</div>
+                </div>
+            </div>
+        `;
+    } else {
+        messageEl.innerHTML = `
+            <div class="chat chat-sender">
+                <div class="chat-avatar avatar">
+                    <div class="size-10 rounded-full">
+                        <span class="icon-[tabler--user-question] size-7 bg-accent"></span>
                     </div>
                 </div>
-            `;
-        }
-        chatLog.appendChild(messageEl);
-        chatLog.scrollTop = chatLog.scrollHeight;
+                <div class="chat-bubble bg-blue-300 text-gray-900">
+                    ${escapeHtml(message)}
+                    <div class="text-[10px] text-gray-800 mt-1">${timestamp}</div>
+                </div>
+            </div>
+        `;
     }
+    chatLog.appendChild(messageEl);
+    chatLog.scrollTop = chatLog.scrollHeight;
+}
+
 
     function appendLoading() {
         loadingMessage = document.createElement('div');
@@ -99,7 +230,7 @@
             <div class="chat chat-receiver">
                 <div class="chat-avatar avatar">
                     <div class="size-10 rounded-full">
-                        <img src="https://cdn.flyonui.com/fy-assets/avatar/avatar-1.png" alt="AI">
+                        <span class="icon-[tabler--input-ai] size-8 bg-accent">
                     </div>
                 </div>
                 <div class="chat-bubble loading-message">
@@ -116,5 +247,99 @@
         div.textContent = text;
         return div.innerHTML;
     }
+
+    function formatAiMessage(text) {
+        // Step 1: escape HTML
+        let escaped = escapeHtml(text);
+
+        // Step 2: replace URLs with clickable links
+        escaped = escaped.replace(
+            /(https?:\/\/[^\s]+)/g,
+            url => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">${url}</a>`
+        );
+
+        // Step 3: replace **bold** markdown with <strong>
+        escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+        // Step 4: preserve line breaks (convert \n to <br>)
+        escaped = escaped.replace(/\n/g, '<br>');
+
+        return escaped;
+    }
+    // Quick questions functionality
+    const quickQuestions = document.querySelectorAll('.quick-question-btn');
+    quickQuestions.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const question = this.getAttribute('data-question');
+            messageInput.value = question;
+            sendMessage();
+            
+            // Hide quick questions after first use
+            /*const quickQuestionsContainer = document.getElementById('quick-questions');
+            quickQuestionsContainer.style.animation = 'fadeOut 0.3s ease-in-out';
+            setTimeout(() => {
+                quickQuestionsContainer.style.display = 'none';
+            }, 300); */
+        });
+    });
+
+    // Handle keyboard visibility on mobile
+    function handleKeyboardFocus() {
+        if (window.innerWidth <= 640) { // Mobile devices
+            // Scroll input into view
+            setTimeout(() => {
+                messageInput.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 300); // Wait for keyboard animation
+            
+            // Adjust chat container height to account for keyboard
+            const chatContainer = document.getElementById('chat-log');
+            chatContainer.style.maxHeight = '50vh';
+        }
+    }
+
+    function handleKeyboardBlur() {
+        if (window.innerWidth <= 640) {
+            // Restore original height
+            const chatContainer = document.getElementById('chat-log');
+            chatContainer.style.maxHeight = '';
+        }
+    }
+
+    // Prevent zoom on input focus for iOS and handle keyboard
+    messageInput.addEventListener('focus', function() {
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            messageInput.style.fontSize = '16px';
+        }
+        handleKeyboardFocus();
+    });
+
+    messageInput.addEventListener('blur', function() {
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            messageInput.style.fontSize = '';
+        }
+        handleKeyboardBlur();
+    });
+
+    // Handle window resize (when keyboard appears/disappears)
+    let initialViewportHeight = window.innerHeight;
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 640) {
+            const currentHeight = window.innerHeight;
+            const heightDifference = initialViewportHeight - currentHeight;
+            
+            // If height decreased significantly (keyboard appeared)
+            if (heightDifference > 150) {
+                const chatContainer = document.getElementById('chat-log');
+                chatContainer.style.maxHeight = `${currentHeight - 120}px`;
+            } else {
+                // Keyboard disappeared
+                const chatContainer = document.getElementById('chat-log');
+                chatContainer.style.maxHeight = '';
+            }
+        }
+    });
 </script>
 {% endblock %}
