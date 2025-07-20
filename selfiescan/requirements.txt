@@ -12,6 +12,8 @@ Automat==25.4.16
 beautifulsoup4==4.12.3
 billiard==4.2.1
 blinker==1.9.0
+boto3==1.39.8
+botocore==1.39.8
 celery==5.4.0
 certifi==2024.12.14
 cffi==1.17.1
@@ -28,10 +30,10 @@ cryptography==44.0.0
 cycler==0.12.1
 Cython==3.0.12
 daphne==4.2.0
-deepface==0.0.93
 Django==5.1.4
 django-allauth==65.3.1
 django-environ==0.12.0
+django-storages==1.14.6
 djangorestframework==3.16.0
 dlib==19.24.6
 easydict==1.13
@@ -62,6 +64,7 @@ incremental==24.7.2
 insightface==0.7.3
 itsdangerous==2.2.0
 Jinja2==3.1.4
+jmespath==1.0.1
 joblib==1.4.2
 keras==3.7.0
 kiwisolver==1.4.8
@@ -94,6 +97,7 @@ prettytable==3.16.0
 prometheus_client==0.21.1
 prompt_toolkit==3.0.50
 protobuf==5.29.1
+psycopg2-binary==2.9.10
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pycparser==2.22
@@ -114,6 +118,7 @@ requests==2.32.3
 requests-oauthlib==2.0.0
 retina-face==0.0.17
 rich==13.9.4
+s3transfer==0.13.0
 scikit-image==0.25.2
 scikit-learn==1.6.1
 scipy==1.15.2
@@ -128,7 +133,6 @@ stringzilla==3.12.4
 sympy==1.13.3
 tensorboard==2.18.0
 tensorboard-data-server==0.7.2
-tensorflow==2.18.0
 termcolor==2.5.0
 tf_keras==2.18.0
 threadpoolctl==3.6.0
