@@ -1,4 +1,4 @@
-absl-py==2.1.0
+absl-py==2.3.1
 albucore==0.0.23
 albumentations==2.0.5
 amqp==5.3.1
@@ -61,7 +61,6 @@ hyperlink==21.0.0
 idna==3.10
 imageio==2.37.0
 incremental==24.7.2
-insightface==0.7.3
 itsdangerous==2.2.0
 Jinja2==3.1.4
 jmespath==1.0.1
@@ -84,8 +83,6 @@ namex==0.0.8
 networkx==3.4.2
 numpy==2.0.2
 oauthlib==3.2.2
-onnx==1.17.0
-onnxruntime==1.21.0
 opencv-python==4.10.0.84
 opencv-python-headless==4.11.0.86
 opt_einsum==3.4.0
@@ -116,7 +113,6 @@ razorpay==1.4.2
 redis==5.2.1
 requests==2.32.3
 requests-oauthlib==2.0.0
-retina-face==0.0.17
 rich==13.9.4
 s3transfer==0.13.0
 scikit-image==0.25.2
