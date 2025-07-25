@@ -5,22 +5,23 @@ from PIL import Image, ImageOps
 import logging
 import cv2
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 logger = logging.getLogger(__name__)
 
 
-def load_and_correct_image(image_path):
+def load_and_correct_image(file_obj):
     try:
-        image_pil = Image.open(image_path)
+        image_pil = Image.open(file_obj)
 
         exif = image_pil.getexif()
         original_orientation = exif.get(0x0112, 1)
-        print(f"[DEBUG] Original orientation of {image_path}: {original_orientation}")
+        
 
         image_pil = ImageOps.exif_transpose(image_pil)
         new_exif = image_pil.getexif()
         new_orientation = new_exif.get(0x0112, 1)
-        print(f"[DEBUG] New Orientation of {image_path} is {new_orientation}")
+        
 
         # Convert to OpenCV format
         image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
@@ -46,12 +47,12 @@ def resize_image_for_processing(image, max_width=800):
 @shared_task(bind=True, acks_late=True, autoretry_for=(Exception,), retry_backoff=True,retry_jitter=True)
 def process_photo(self, photo_id):
     from .models import Photo, FaceEncoding
-    
+
     try:
         photo = Photo.objects.get(id=photo_id)
-        image_path = photo.image.path
-        image = load_and_correct_image(image_path)
-               
+        image_name = photo.image.name  # relative path
+        with default_storage.open(image_name, 'rb') as f:
+            image = load_and_correct_image(f)
 
         if image is None:
             return f"Failed to load image for photo {photo_id}"
@@ -73,7 +74,7 @@ def process_photo(self, photo_id):
         logger.info(f"Detected {len(face_locations)} face locations")
         
         if not face_locations:
-            logger.warning(f"No faces detected in {image_path}. Marking as processed.")
+            logger.warning(f"No faces detected in {image.name}. Marking as processed.")
             photo.is_processed = True
             photo.save()
             return f"No face found in photo {photo_id}"
@@ -166,7 +167,9 @@ def branded_photo(self, photo_id):
             return f"Photo {photo_id} already branded"
 
         # Open the image with PIL and convert to RGBA
-        image = Image.open(photo.image.path).convert("RGBA")
+        with default_storage.open(photo.image.name, 'rb') as f:
+            image = Image.open(f).convert("RGBA")
+
         if image is None:
             logger.error(f"Failed to load image for branding photo {photo_id}")
             return f"Failed to load image for branding photo {photo_id}"

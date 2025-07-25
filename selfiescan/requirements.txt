@@ -127,10 +127,7 @@ soupsieve==2.6
 sqlparse==0.5.3
 stringzilla==3.12.4
 sympy==1.13.3
-tensorboard==2.18.0
-tensorboard-data-server==0.7.2
 termcolor==2.5.0
-tf_keras==2.18.0
 threadpoolctl==3.6.0
 tifffile==2025.3.30
 tornado==6.4.2

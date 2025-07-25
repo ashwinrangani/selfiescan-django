@@ -1,0 +1,31 @@
+services:
+  web:
+    build: .
+    image: my-django-app
+    container_name: photoapp-web
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+    env_file:
+      - .env
+    expose:
+      - "8000"
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "82:80"  # HOST:CONTAINER → maps localhost:82 to nginx container:80
+    volumes:
+      - static_volume:/app/staticfiles
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
+
+  redis:
+    image: redis:7
+    # ports:
+    #   - "6379:6379"
+    restart: always
+
+volumes:
+  static_volume:

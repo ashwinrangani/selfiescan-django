@@ -36,13 +36,19 @@ DEBUG = True
 
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '81b8-106-216-89-154.ngrok-free.app',]
+ALLOWED_HOSTS = [
+    'localhost', '127.0.0.1', '81b8-106-216-89-154.ngrok-free.app'
+]
+
 CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:82',
+    'http://127.0.0.1:82',
     'https://81b8-106-216-89-154.ngrok-free.app',
 ]
 
+
 # message broker
-CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BROKER_URL = "redis://redis:6379/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
@@ -229,6 +235,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 
 # Default primary key field type
