@@ -15,6 +15,7 @@ services:
     image: nginx:latest
     ports:
       - "82:80"  # HOST:CONTAINER → maps localhost:82 to nginx container:80
+      - "443:443"  # Allow HTTPS
     volumes:
       - static_volume:/app/staticfiles
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf

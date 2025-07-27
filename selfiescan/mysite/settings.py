@@ -32,20 +32,26 @@ MEDIA_ROOT = BASE_DIR / 'media'
 SECRET_KEY = 'django-insecure-bl75(lby!wu6q)dehh1h4j=lj4wsv)&bititpjuc8b22bjv@ov'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 
 # ALLOWED_HOSTS = []
 ALLOWED_HOSTS = [
-    'localhost', '127.0.0.1', '81b8-106-216-89-154.ngrok-free.app'
+    'localhost', '127.0.0.1','43.204.107.230' '81b8-106-216-89-154.ngrok-free.app'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:82',
     'http://127.0.0.1:82',
+    'http://43.204.107.230',
+    'https://43.204.107.230'
     'https://81b8-106-216-89-154.ngrok-free.app',
 ]
 
+# HTTPS Redirect
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # message broker
 CELERY_BROKER_URL = "redis://redis:6379/0"
