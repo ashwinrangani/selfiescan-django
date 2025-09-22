@@ -100,8 +100,14 @@ def process_selfie(request, event_id):
             }, status=202)
         
     if request.method == 'POST':
+        print("FILES received:", request.FILES, flush=True)
+        print("FILES keys:", request.FILES.keys(), flush=True)
+
+        logger.debug("FILES received: %s", request.FILES)
+        logger.debug("Files keys:", request.FILES.keys())
         selfie = request.FILES.get('selfie') or request.FILES.get('camera_selfie')
         if selfie:
+            print("Selfie found:", selfie.name, selfie.content_type, selfie.size)
             if not selfie.content_type.startswith('image/'):
                 return JsonResponse({'message': 'Invalid file type'}, status=400)
             if selfie.size > 10 * 1024 * 1024:

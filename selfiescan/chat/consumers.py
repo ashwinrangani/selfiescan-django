@@ -10,7 +10,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         async with httpx.AsyncClient() as client:
             try:
                 resp = await client.post(
-                    'http://localhost:5678/webhook/2f9eaa78-a070-4824-9c06-21ea32693527',
+                    'http://43.204.107.230:5678/webhook/2f9eaa78-a070-4824-9c06-21ea32693527',
                     json={'message': message},
                     timeout=10.0
                 )

@@ -28,30 +28,41 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-bl75(lby!wu6q)dehh1h4j=lj4wsv)&bititpjuc8b22bjv@ov'
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+    }
 
 
 # ALLOWED_HOSTS = []
 ALLOWED_HOSTS = [
-    'localhost', '127.0.0.1','43.204.107.230' '81b8-106-216-89-154.ngrok-free.app'
+    'localhost', '127.0.0.1','43.204.107.230', '31b9417e0e5c.ngrok-free.app'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:82',
     'http://127.0.0.1:82',
-    'http://43.204.107.230',
-    'https://43.204.107.230'
+    'http://43.204.107.230:82',
+    'https://43.204.107.230:82',
     'https://81b8-106-216-89-154.ngrok-free.app',
+    'https://31b9417e0e5c.ngrok-free.app'
 ]
 
 # HTTPS Redirect
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 # message broker
 CELERY_BROKER_URL = "redis://redis:6379/0"
@@ -103,7 +114,10 @@ ACCOUNT_USERNAME_REQUIRED = True
 
 
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+ENV_FILE = os.getenv("ENV_FILE", ".env.dev")
+environ.Env.read_env(os.path.join(BASE_DIR, ENV_FILE))
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

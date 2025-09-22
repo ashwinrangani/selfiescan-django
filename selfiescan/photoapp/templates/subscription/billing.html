@@ -22,10 +22,17 @@
             </div>
             <div><span class="font-semibold">Subscription:</span> {{ subscription.subscription_type }}</div>
             {% if subscription.subscription_type != "FREE" %}
-            <div><span class="font-semibold">Period:</span> {{ current_cycle.start|date:'d-m-Y' }} to {{ current_cycle.end|date:'d-m-Y' }}</div>
-            {% else %}
-            <div><span class="font-semibold">Period:</span> Unlimited</div>
-            {% endif %}
+              <div>
+                  <span class="font-semibold">Period:</span>
+                  {% if current_cycle.start and current_cycle.end %}
+                      {{ current_cycle.start|date:'d-m-Y' }} to {{ current_cycle.end|date:'d-m-Y' }}
+                  {% else %}
+                      --
+                  {% endif %}
+              </div>
+          {% else %}
+              <div><span class="font-semibold">Period:</span> Unlimited</div>
+          {% endif %}
             <div><span class="font-semibold">Remaining Photos:</span> {{ current_cycle.remaining_photos }}</div>
         </div>
     </div>

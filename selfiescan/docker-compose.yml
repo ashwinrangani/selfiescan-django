@@ -7,7 +7,7 @@ services:
       - .:/app
       - static_volume:/app/staticfiles
     env_file:
-      - .env
+      - .env.env
     expose:
       - "8000"
 
@@ -27,6 +27,32 @@ services:
     # ports:
     #   - "6379:6379"
     restart: always
+    
+  celery:
+    image: ashwynrangani/my-django-app:latest
+    command: celery -A mysite worker --loglevel=info
+    env_file:
+      - .env.dev
+    depends_on:
+      - redis
+    restart: always
+    volumes:
+      - .:/app
+  
+  #celery_beat:
+   #image: ashwynrangani/my-django-app:latest
+    #command: celery -A mysite beat --loglevel=info
+    #env_file:
+     # - .env.dev
+    #depends_on:
+     # - redis
+    #restart: always
+    #volumes:
+     # - .:/app
+    
+ 
 
 volumes:
   static_volume:
+  
+  

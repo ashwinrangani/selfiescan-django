@@ -74,7 +74,7 @@ def process_photo(self, photo_id):
         logger.info(f"Detected {len(face_locations)} face locations")
         
         if not face_locations:
-            logger.warning(f"No faces detected in {image.name}. Marking as processed.")
+            logger.warning(f"No faces detected in {image_name}. Marking as processed.")
             photo.is_processed = True
             photo.save()
             return f"No face found in photo {photo_id}"

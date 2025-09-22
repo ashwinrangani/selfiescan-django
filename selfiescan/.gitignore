@@ -2,3 +2,5 @@
 /selfiescan/media
 /selfiescan/static/css/output.css
 .env
+.evn.dev
+.env.prod
