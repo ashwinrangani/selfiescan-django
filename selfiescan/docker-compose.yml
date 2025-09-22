@@ -7,7 +7,7 @@ services:
       - .:/app
       - static_volume:/app/staticfiles
     env_file:
-      - .env.env
+      - .env.dev
     expose:
       - "8000"
 
