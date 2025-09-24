@@ -19,6 +19,9 @@ from django.shortcuts import render
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.sitemaps.views import sitemap
+from sitemap import sitemaps
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
@@ -26,6 +29,8 @@ urlpatterns = [
     path('',include('photoapp.app-urls')),
     path('', include('blog.urls')),
     path('', include('chat.urls')),
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
+    path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name="robots_txt"),
     
 ]
 
