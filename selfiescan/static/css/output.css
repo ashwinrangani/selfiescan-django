@@ -7046,10 +7046,6 @@ textarea:focus-visible {
   margin-top: 2rem;
 }
 
-.mr-0 {
-  margin-right: 0px;
-}
-
 .block {
   display: block;
 }
@@ -7297,10 +7293,6 @@ textarea:focus-visible {
 
 .w-full {
   width: 100%;
-}
-
-.w-15 {
-  width: 3.75rem;
 }
 
 .min-w-60 {
@@ -8058,11 +8050,6 @@ textarea:focus-visible {
 .py-20 {
   padding-top: 5rem;
   padding-bottom: 5rem;
-}
-
-.px-0 {
-  padding-left: 0px;
-  padding-right: 0px;
 }
 
 .pb-3 {

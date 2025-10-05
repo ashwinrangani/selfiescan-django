@@ -6,7 +6,6 @@ env/
 django-env/
 venv/
 media/
-static/
 *.sqlite3
 .DS_Store
 .git/

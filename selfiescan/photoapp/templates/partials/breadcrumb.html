@@ -11,7 +11,7 @@
     </li>
     <li>
       {% if page_level == 1 %}
-        <span class="text-gray-800 font-medium" aria-current="page">Dashboard</span>
+        <span class="font-medium" aria-current="page">Dashboard</span>
       {% else %}
         <a href="{% url 'photographer' %}" class="text-primary hover:underline">Dashboard</a>
       {% endif %}
@@ -24,7 +24,7 @@
       </li>
       <li>
         {% if page_level == 2 %}
-          <span class="text-gray-800 font-medium" aria-current="page">Event Detail</span>
+          <span class="font-medium" aria-current="page">Event Detail</span>
         {% else %}
           <a href="{% url 'event_detail' event_id=event.event_id %}" class="text-primary hover:underline">Event Detail</a>
         {% endif %}
@@ -36,7 +36,7 @@
       <li class="breadcrumbs-separator rtl:rotate-180">
         <span class="icon-[tabler--chevron-right] text-gray-400"></span>
       </li>
-      <li aria-current="page" class="text-gray-800 font-medium">
+      <li aria-current="page" class="font-medium">
         {{ current_page }}
       </li>
     {% endif %}
