@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+
 {% block title %}PhotoFlow-Ask AI{% endblock %}
 
 {% block content %}
-<section data-theme="gaurmet" class="w-full px-2 sm:px-4 py-2 sm:py-4 max-w-4xl mx-auto mobile-full-height">
+<section data-theme="gaurmet" class="w-full px-2 sm:px-4 py-2 sm:py-4 max-w-4xl mx-auto mobile-full-height" style="background-image: url('static/images/bg-2.jpg');">
 <div class="flex justify-end">
     <a href="/" class="flex items-center gap-1"><span class="icon-[tabler--arrow-back] size-5 bg-accent"></span>Home</a>
     </div>
@@ -38,6 +39,9 @@
         <button id="chat-message-submit" class="btn btn-accent text-sm sm:text-base px-3 sm:px-4"><span class="icon-[tabler--send] size-6"></button>
     </div>
 </section>
+<div class="mt-8">
+{% include 'footer.html'%}
+</div>
 
 <style>
   .grid-bg {

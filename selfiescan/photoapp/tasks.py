@@ -1,3 +1,4 @@
+# tasks.py (modified)
 from celery import shared_task
 import face_recognition
 import numpy as np
@@ -6,36 +7,56 @@ import logging
 import cv2
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+import boto3
+from botocore.exceptions import ClientError, NoCredentialsError
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+# Initialize Rekognition client (singleton for efficiency)
+rekognition = boto3.client(
+    'rekognition',
+    region_name= 'ap-south-1',  # e.g., 'us-east-1' from settings.py
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+)
+
+def get_or_create_collection(event_id):
+    """Create a Rekognition collection for the event if it doesn't exist."""
+    collection_id = f"event_{event_id}"
+    try:
+        # Check if collection exists
+        rekognition.describe_collection(CollectionId=collection_id)
+        logger.info(f"Collection {collection_id} already exists.")
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'ResourceNotFoundException':
+            try:
+                rekognition.create_collection(CollectionId=collection_id)
+                logger.info(f"Created new collection: {collection_id}")
+            except ClientError as create_error:
+                logger.error(f"Failed to create collection {collection_id}: {create_error}")
+                raise
+        else:
+            logger.error(f"Error checking collection {collection_id}: {e}")
+            raise
+    return collection_id
 
 def load_and_correct_image(file_obj):
     try:
         image_pil = Image.open(file_obj)
-
         exif = image_pil.getexif()
         original_orientation = exif.get(0x0112, 1)
-        
-
         image_pil = ImageOps.exif_transpose(image_pil)
         new_exif = image_pil.getexif()
         new_orientation = new_exif.get(0x0112, 1)
-        
-
-        # Convert to OpenCV format
+        # Convert to OpenCV format for fallback
         image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
-
         return image_cv
-
     except Exception as e:
-        print(f"[ERROR] Failed to process image {image_path}: {e}")
+        logger.error(f"[ERROR] Failed to process image: {e}")
         return None
 
-
-
-
-def resize_image_for_processing(image, max_width=800):
+def resize_image_for_processing(image, max_width=600):
     height, width = image.shape[:2]
     if width > max_width:
         scaling_factor = max_width / width
@@ -43,19 +64,16 @@ def resize_image_for_processing(image, max_width=800):
         image = cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
     return image
 
-# face encoding of uploaded photos
-@shared_task(bind=True, acks_late=True, autoretry_for=(Exception,), retry_backoff=True,retry_jitter=True)
+# face encoding of uploaded photos (Rekognition + fallback)
+@shared_task(bind=True, acks_late=True, autoretry_for=(Exception,), retry_backoff=True, retry_jitter=True)
 def process_photo(self, photo_id):
     from .models import Photo, FaceEncoding
 
     try:
         photo = Photo.objects.get(id=photo_id)
-        image_name = photo.image.name  # relative path
-        with default_storage.open(image_name, 'rb') as f:
-            image = load_and_correct_image(f)
+        image_name = photo.image.name  # S3 relative path (e.g., 'events/.../photo.jpg')
+        bucket = settings.AWS_STORAGE_BUCKET_NAME  # From django-storages settings
 
-        if image is None:
-            return f"Failed to load image for photo {photo_id}"
         # Skip if already processed
         if photo.is_processed:
             return f"Photo {photo_id} already processed"
@@ -64,57 +82,207 @@ def process_photo(self, photo_id):
         if FaceEncoding.objects.filter(photo=photo).exists():
             if not photo.is_processed:
                 photo.is_processed = True
-                photo.save(update_fields=["is_processed"]) # or photo.save()
+                photo.save(update_fields=["is_processed"])
             return f"Encodings for photo {photo_id} already exist"
 
+        # Rekognition: Detect and index faces
+        use_rekognition = True
+        try:
+            collection_id = get_or_create_collection(photo.event.event_id)
 
-        image = resize_image_for_processing(image)
+            # Index faces directly — this both detects and stores face metadata
+            index_response = rekognition.index_faces(
+                CollectionId=collection_id,
+                Image={'S3Object': {'Bucket': bucket, 'Name': image_name}},
+                ExternalImageId=str(photo.id),
+                DetectionAttributes=[]  # empty list = no extra attributes (faster)
+            )
 
-        face_locations = face_recognition.face_locations(image, number_of_times_to_upsample=3)
-        logger.info(f"Detected {len(face_locations)} face locations")
-        
-        if not face_locations:
-            logger.warning(f"No faces detected in {image_name}. Marking as processed.")
+            face_records = index_response.get('FaceRecords', [])
+            face_count = len(face_records)
+            logger.info(f"Rekognition indexed {face_count} faces in {image_name}")
+
+            if face_count == 0:
+                photo.is_processed = True
+                photo.save()
+                return f"No face found in photo {photo_id}"
+
+            # Save optional Rekognition FaceIds if you want to use them later
+            for record in face_records:
+                face_id = record['Face']['FaceId']
+                logger.info(f"Face indexed with FaceId: {face_id}")
+                # You could store this in your FaceEncoding model if needed
+                # FaceEncoding.objects.create(photo=photo, rekognition_face_id=face_id)
+
+            # photo.rekognition_collection = collection_id  # Optional: keep for reference
             photo.is_processed = True
             photo.save()
-            return f"No face found in photo {photo_id}"
+            return f"Photo {photo_id} processed with Rekognition: {face_count} faces indexed"
 
-        
-        face_encodings = []
-        for idx, location in enumerate(face_locations):
-            encoding = face_recognition.face_encodings(image, [location])[0]
-            face_encodings.append(encoding)
+        except (ClientError, NoCredentialsError) as e:
+            logger.warning(f"Rekognition failed for photo {photo_id}: {e}. Falling back to face_recognition.")
+            use_rekognition = False
+
             
-
-        # Draw boxes on the image for verification
-        # draw = ImageDraw.Draw(pil_image)
-        # for (top, right, bottom, left) in face_locations:
-        #     draw.rectangle([left, top, right, bottom], outline="red", width=2)
+            
         
-        # Save the annotated image
-        # annotated_path = os.path.join(os.path.dirname(image_path), f"annotated_{os.path.basename(image_path)}")
-        # pil_image.save(annotated_path)
-        # logger.info(f"Annotated image saved at {annotated_path}")
-
-        
-        if face_encodings:
-            for encoding in face_encodings:
-                FaceEncoding.objects.create(
-                    photo=photo,
-                    encoding=np.array(encoding).tobytes()
-                )
-             
-            photo.is_processed = True
-            photo.save()
-            return f"Photo {photo_id} processed successfully"
-        else:
-            return f"No face found in photo {photo_id}"
+        # Fallback to face_recognition
+        if not use_rekognition:
+            with default_storage.open(image_name, 'rb') as f:
+                image = load_and_correct_image(f)
+            
+            if image is None:
+                return f"Failed to load image for photo {photo_id}"
+            
+            image = resize_image_for_processing(image)
+            face_locations = face_recognition.face_locations(image, number_of_times_to_upsample=1)
+            logger.info(f"Fallback: Detected {len(face_locations)} face locations")
+            
+            if not face_locations:
+                photo.is_processed = True
+                photo.save()
+                return f"No face found in photo {photo_id}"
+            
+            face_encodings = []
+            for location in face_locations:
+                encoding = face_recognition.face_encodings(image, [location])[0]
+                face_encodings.append(encoding)
+            
+            if face_encodings:
+                for encoding in face_encodings:
+                    FaceEncoding.objects.create(
+                        photo=photo,
+                        encoding=np.array(encoding).tobytes()
+                    )
+                photo.is_processed = True
+                photo.save()
+                return f"Photo {photo_id} processed with fallback: {len(face_encodings)} encodings stored"
+            else:
+                return f"No face found in photo {photo_id}"
 
     except Photo.DoesNotExist:
         return f"Photo {photo_id} not found"
     except Exception as e:
         logger.error(f"Error processing photo {photo_id}: {str(e)}")
         raise self.retry(exc=e)
+
+# from celery import shared_task
+# import face_recognition
+# import numpy as np
+# from PIL import Image, ImageOps
+# import logging
+# import cv2
+# from django.core.files.base import ContentFile
+# from django.core.files.storage import default_storage
+
+# logger = logging.getLogger(__name__)
+
+
+# def load_and_correct_image(file_obj):
+#     try:
+#         image_pil = Image.open(file_obj)
+
+#         exif = image_pil.getexif()
+#         original_orientation = exif.get(0x0112, 1)
+        
+
+#         image_pil = ImageOps.exif_transpose(image_pil)
+#         new_exif = image_pil.getexif()
+#         new_orientation = new_exif.get(0x0112, 1)
+        
+
+#         # Convert to OpenCV format
+#         image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
+
+#         return image_cv
+
+#     except Exception as e:
+#         print(f"[ERROR] Failed to process image {image_path}: {e}")
+#         return None
+
+
+
+
+# def resize_image_for_processing(image, max_width=600):
+#     height, width = image.shape[:2]
+#     if width > max_width:
+#         scaling_factor = max_width / width
+#         new_size = (int(width * scaling_factor), int(height * scaling_factor))
+#         image = cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
+#     return image
+
+# # face encoding of uploaded photos
+# @shared_task(bind=True, acks_late=True, autoretry_for=(Exception,), retry_backoff=True,retry_jitter=True)
+# def process_photo(self, photo_id):
+#     from .models import Photo, FaceEncoding
+
+#     try:
+#         photo = Photo.objects.get(id=photo_id)
+#         image_name = photo.image.name  # relative path
+#         with default_storage.open(image_name, 'rb') as f:
+#             image = load_and_correct_image(f)
+
+#         if image is None:
+#             return f"Failed to load image for photo {photo_id}"
+#         # Skip if already processed
+#         if photo.is_processed:
+#             return f"Photo {photo_id} already processed"
+
+#         # Skip if encodings already exist (prevent duplicates)
+#         if FaceEncoding.objects.filter(photo=photo).exists():
+#             if not photo.is_processed:
+#                 photo.is_processed = True
+#                 photo.save(update_fields=["is_processed"]) # or photo.save()
+#             return f"Encodings for photo {photo_id} already exist"
+
+
+#         image = resize_image_for_processing(image)
+
+#         face_locations = face_recognition.face_locations(image, number_of_times_to_upsample=1)
+#         logger.info(f"Detected {len(face_locations)} face locations")
+        
+#         if not face_locations:
+#             logger.warning(f"No faces detected in {image_name}. Marking as processed.")
+#             photo.is_processed = True
+#             photo.save()
+#             return f"No face found in photo {photo_id}"
+
+        
+#         face_encodings = []
+#         for idx, location in enumerate(face_locations):
+#             encoding = face_recognition.face_encodings(image, [location])[0]
+#             face_encodings.append(encoding)
+            
+
+#         # Draw boxes on the image for verification
+#         # draw = ImageDraw.Draw(pil_image)
+#         # for (top, right, bottom, left) in face_locations:
+#         #     draw.rectangle([left, top, right, bottom], outline="red", width=2)
+        
+#         # Save the annotated image
+#         # annotated_path = os.path.join(os.path.dirname(image_path), f"annotated_{os.path.basename(image_path)}")
+#         # pil_image.save(annotated_path)
+#         # logger.info(f"Annotated image saved at {annotated_path}")
+
+        
+#         if face_encodings:
+#             for encoding in face_encodings:
+#                 FaceEncoding.objects.create(
+#                     photo=photo,
+#                     encoding=np.array(encoding).tobytes()
+#                 )
+             
+#             photo.is_processed = True
+#             photo.save()
+#             return f"Photo {photo_id} processed successfully"
+#         else:
+#             return f"No face found in photo {photo_id}"
+
+#     except Photo.DoesNotExist:
+#         return f"Photo {photo_id} not found"
+#     except Exception as e:
+#         logger.error(f"Error processing photo {photo_id}: {str(e)}")
+#         raise self.retry(exc=e)
 
 
 
@@ -167,7 +335,8 @@ def branded_photo(self, photo_id):
             return f"Photo {photo_id} already branded"
 
         # Open the image with PIL and convert to RGBA
-        with default_storage.open(photo.image.name, 'rb') as f:
+        image_name = photo.image.name
+        with default_storage.open(image_name, 'rb') as f:
             image = Image.open(f).convert("RGBA")
 
         if image is None:
@@ -182,9 +351,10 @@ def branded_photo(self, photo_id):
         right_margin = 30  # Margin from right edge in pixels
         bottom_margin = 15  # Reduced margin from bottom edge in pixels
 
-        if event.branding_image and event.branding_image.path:
+        if event.branding_image and event.branding_image.name:
             # Load and scale the logo
-            logo = Image.open(event.branding_image.path).convert("RGBA")
+            with default_storage.open(event.branding_image.name, 'rb') as logo_file:
+                logo = Image.open(logo_file).convert("RGBA")
             has_alpha = logo.getchannel('A').getextrema() != (255, 255)
             logger.info(f"Logo loaded: size={logo.size}, mode={logo.mode}, has_alpha={has_alpha}")
             
@@ -334,14 +504,14 @@ def notify_expired_subscriptions():
     "username": user.username,
     "plan_type": sub.subscription_type.title(),
     "end_date": sub.end_date.date(),
-    "renew_link": "http://127.0.0.1:8000/billing/",
-    "unsubscribe_link": f"http://127.0.0.1:8000/unsubscribe/{user.id}/",
+    "renew_link": "https://photoflow.in/billing/",
+    "unsubscribe_link": f"https://photoflow.in/unsubscribe/{user.id}/",
     "year": timezone.now().year,
 })
         email = EmailMultiAlternatives(
         subject="Reminder: Your Subscription has Expired",
         body="This is an HTML-only email. Please view it in an HTML-compatible client.",
-        from_email="noreply@selfiescan.com",
+        from_email="noreply@photoflow.in",
         to=[user.email],
 )
         email.attach_alternative(html_message, "text/html")

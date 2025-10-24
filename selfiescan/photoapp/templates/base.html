@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="AI-powered photo discovery for events. Photographers share galleries, guests find their pictures.">
     <meta name="keywords" content="photography, event photos, facial recognition, photo sharing">
+    <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-5JQX1LG9HB"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-5JQX1LG9HB');
+      </script>
     <link rel="icon" type="image/svg" href="{% static 'images/camera-favicon.png' %}">
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,13 +50,13 @@
 
 
 <!-- <main class="p-6" style="background-image: url('static/images/bg-2.jpg');"> -->
-    <main class="p-6">
+    <main class="p-6" >
         {% block content %}
          
         {% endblock %}
         
     </main>
-   {% include 'footer.html'%}
+   
     <script src="{% static 'js/base.js' %}"></script>
     <script src="{% static 'js/flyonui.js' %}"></script>
     <script src="{% static 'js/theme-toggle.js' %}"></script>

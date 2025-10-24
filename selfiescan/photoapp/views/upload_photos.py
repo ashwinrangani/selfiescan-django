@@ -31,11 +31,12 @@ def upload_photos(request, event_id):
         for data in upload_data:
             photo = Photo(event=event, image=data)
             photo.save()  # `post_save` will trigger Celery task
-            subscription = Subscription.objects.get(photographer=request.user)
-            if subscription.subscription_type == 'FREE':
-                subscription.photo_count += 1
-                subscription.save()
             saved_data.append(photo.image.url)
+        
+        subscription = Subscription.objects.get(photographer=request.user)
+        if subscription.subscription_type == 'FREE':
+            subscription.photo_count += 1
+            subscription.save()
 
         return JsonResponse({
             "upload_success": True,

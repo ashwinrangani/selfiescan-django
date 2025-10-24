@@ -44,10 +44,26 @@ LOGGING = {
     },
     }
 
+env = environ.Env()
+ENV_FILE = os.getenv("ENV_FILE", ".env.dev")
+environ.Env.read_env(os.path.join(BASE_DIR, ENV_FILE))
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
+SECRET_KEY = env("DJANGO_SECRET_KEY")
+
+# HTTPS Redirect
+SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=False)
+SESSION_COOKIE_SECURE = env.bool("DJANGO_SESSION_COOKIE_SECURE", default=False)
+CSRF_COOKIE_SECURE = env.bool("DJANGO_CSRF_COOKIE_SECURE", default=False)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # ALLOWED_HOSTS = []
 ALLOWED_HOSTS = [
-    'localhost', '127.0.0.1','43.204.107.230', '31b9417e0e5c.ngrok-free.app'
+    'photoflow.in', 'www.photoflow.in', 'localhost', '127.0.0.1','43.204.107.230', 
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -55,21 +71,24 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:82',
     'http://43.204.107.230:82',
     'https://43.204.107.230:82',
-    'https://81b8-106-216-89-154.ngrok-free.app',
-    'https://31b9417e0e5c.ngrok-free.app'
+    'http://photoflow.in',
+    'http://www.photoflow.in',
+    'https://photoflow.in',
+    'https://www.photoflow.in',
 ]
 
-# HTTPS Redirect
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+
 
 # message broker
-CELERY_BROKER_URL = "redis://redis:6379/0"
+
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://redis:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 200
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB per field (adjust based on avg photo size)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB per file
+
 
 # Application definition
 
@@ -115,11 +134,7 @@ ACCOUNT_SIGNUP_REDIRECT_URL = "/"  # Redirect after signup
 ACCOUNT_USERNAME_REQUIRED = True
 
 
-env = environ.Env()
-ENV_FILE = os.getenv("ENV_FILE", ".env.dev")
-environ.Env.read_env(os.path.join(BASE_DIR, ENV_FILE))
-DEBUG = env.bool("DJANGO_DEBUG", default=False)
-SECRET_KEY = env("DJANGO_SECRET_KEY")
+
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

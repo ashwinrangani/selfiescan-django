@@ -36,7 +36,7 @@ class Event(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.qr_code:
-            qr = qrcode.make(f"http://localhost:8000/find/photos/{self.event_id}/")
+            qr = qrcode.make(f"https://photoflow.in/find/photos/{self.event_id}/")
             qr_io = BytesIO()
             qr.save(qr_io, format='PNG')
             self.qr_code.save(f"{self.event_id}.png", ContentFile(qr_io.getvalue()), save=False)
