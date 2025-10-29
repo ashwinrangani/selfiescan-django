@@ -2,7 +2,7 @@ from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from ..forms import EventRegistration
-from ..models import Event, Photo
+from ..models import Event, Photo,SiteStats
 from django.contrib import messages
 
 @login_required
@@ -29,9 +29,13 @@ def create_event(request):
 
     # Get user's events and statistics
     events = Event.objects.filter(photographer=request.user)
+    stats = SiteStats.objects.first()
+    total_queries = stats.total_face_search_queries if stats else 0
+
     stats = {
         "total_events": events.count(),
         "total_uploads": Photo.objects.filter(event__in=events).count(),
+        "total_queries": total_queries,
     }
 
     return render(request, "photographer.html", {"form": form, "events": events, "stats": stats})

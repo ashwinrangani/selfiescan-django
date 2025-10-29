@@ -138,3 +138,10 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.id} - {self.photographer.username} - {self.status}"
+
+
+class SiteStats(models.Model):
+    total_face_search_queries = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"Stats (queries={self.total_face_search_queries})"

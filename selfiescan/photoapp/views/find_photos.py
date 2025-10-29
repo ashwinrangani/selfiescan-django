@@ -5,7 +5,7 @@ from django.http import JsonResponse
 import os
 import face_recognition
 import numpy as np
-from ..models import FaceEncoding, Event, Photo
+from ..models import FaceEncoding, Event, Photo, SiteStats
 import logging
 import cv2
 import boto3
@@ -13,6 +13,7 @@ from botocore.exceptions import ClientError, NoCredentialsError
 from django.conf import settings
 import tempfile
 from PIL import Image
+from django.db.models import F
 
 # Initialize Rekognition client
 rekognition = boto3.client(
@@ -197,6 +198,12 @@ def process_selfie(request, event_id):
                     photo_url = photo.branded_image.url if event.branding_enabled and photo.is_branded and photo.branded_image else photo.image.url
                     matches.append({"path": photo_url, "distance": distance})
 
+                # Update query counter
+                SiteStats.objects.update_or_create(id=1, defaults={})
+                SiteStats.objects.filter(id=1).update(
+                    total_face_search_queries=F('total_face_search_queries') + 1
+                )
+                
                 return JsonResponse({
                     'message': 'Matching photos found' if matching_images else 'Matching photos not found',
                     'matches': matches
@@ -209,6 +216,7 @@ def process_selfie(request, event_id):
                     os.remove(selfie_path)
 
         return JsonResponse({'message': 'No file uploaded'}, status=400)
+    
 
     return render(request, 'find_photos.html', {'event': event})
 
