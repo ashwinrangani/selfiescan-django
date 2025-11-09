@@ -261,8 +261,23 @@
     <span class="loading hidden loading-ring loading-lg"></span>
   </div>
 
-  <!-- Include the photo grid -->
+ 
+<!-- Photo Action Bar -->
+<div id="photo-action-bar" class="hidden mb-3 flex justify-between items-center p-2 rounded-lg">
+  <div class="flex gap-2">
+    <button id="select-all" class="btn btn-sm btn-outline">Select All</button>
+    <button id="deselect-all" class="btn btn-sm btn-outline">Deselect All</button>
+  </div>
+  <button
+  id="delete-selected"
+  class="btn btn-error btn-circle fixed bottom-6 right-6 z-50 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+  title="Delete selected photos"
+>
+  <span class="icon-[tabler--trash-filled] size-6"></span>
+</button>
 
+</div>
+ <!-- Include the photo grid -->
   <div id="photo-grid" class="hidden">
     {% include 'partials/photo_grid.html' %}
   </div>

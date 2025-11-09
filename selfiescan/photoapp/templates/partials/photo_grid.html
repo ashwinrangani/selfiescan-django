@@ -1,19 +1,32 @@
+<!-- Photo Grid -->
 <div id="lightgallery" class="photo-grid columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 mt-2">
   {% for photo in photos %}
-  <div class="overflow-hidden">
-  <a href="{{ photo.image.url}}" data-lg-download="{{photo.image.url}}">
-    <img 
-      src="{{ photo.image.url }}" 
-      alt="Event photo" 
-      class="event-image transition transform duration-500 hover:scale-105 object-cover rounded-lg w-full" 
-    />
+  <div class="photo-item relative overflow-hidden group">
+    <a href="{{ photo.image.url }}" data-lg-download="{{ photo.image.url }}">
+      <img
+        src="{{ photo.image.url }}"
+        alt="Event photo"
+        class="event-image transition transform duration-500 hover:scale-105 object-cover rounded-lg w-full"
+      />
     </a>
-    </div>
+
+    <!-- Checkbox appears on hover/visible on mobile -->
+    <input
+      type="checkbox"
+      name="photo_ids"
+      value="{{ photo.id }}"
+      class="absolute top-2 left-2 checkbox checkbox-primary opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
+    />
+  </div>
   {% endfor %}
-
 </div>
+<style>
+  .photo-item.selected {
+    opacity: 1;
+  }
 
-<script>
-
-
-</script>
+  .photo-item.selected img {
+    transform: scale(0.98);
+    filter: brightness(0.5);
+  }
+</style>

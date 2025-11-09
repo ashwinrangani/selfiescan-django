@@ -275,4 +275,98 @@ initLightGallery()
         .catch((error) => console.error("Error loading photos:", error));
     }
   });
+
+ // ---- DELETE SELECTED PHOTOS LOGIC ---- //
+
+const selectAllBtn = document.getElementById("select-all");
+const deselectAllBtn = document.getElementById("deselect-all");
+const deleteSelectedBtn = document.getElementById("delete-selected");
+const photoActionBar = document.getElementById("photo-action-bar");
+
+function getSelectedPhotoIds() {
+  return Array.from(document.querySelectorAll('input[name="photo_ids"]:checked'))
+              .map(cb => cb.value);
+}
+
+function updateActionBarVisibility() {
+  const anyChecked = getSelectedPhotoIds().length > 0;
+  photoActionBar.classList.toggle("hidden", !anyChecked);
+
+}
+
+document.addEventListener("change", (e) => {
+ if (e.target.name === "photo_ids") {
+    const photoItem = e.target.closest(".photo-item");
+    if (e.target.checked) {
+      photoItem.classList.add("selected");
+    } else {
+      photoItem.classList.remove("selected");
+    }
+    updateActionBarVisibility();
+  }
+});
+
+if (selectAllBtn) {
+  selectAllBtn.addEventListener("click", () => {
+  document.querySelectorAll('input[name="photo_ids"]').forEach(cb => {
+    cb.checked = true;
+    cb.closest(".photo-item").classList.add("selected");
+  });
+  updateActionBarVisibility();
+});
+}
+
+if (deselectAllBtn) {
+  deselectAllBtn.addEventListener("click", () => {
+  document.querySelectorAll('input[name="photo_ids"]').forEach(cb => {
+    cb.checked = false;
+    cb.closest(".photo-item").classList.remove("selected");
+  });
+  updateActionBarVisibility();
+});
+}
+
+if (deleteSelectedBtn) {
+  deleteSelectedBtn.addEventListener("click", () => {
+    const selectedIds = getSelectedPhotoIds();
+    if (selectedIds.length === 0) {
+      notyf.error("No photos selected!");
+      return;
+    }
+
+    if (!confirm(`Delete ${selectedIds.length} selected photo(s)?`)) return;
+
+    fetch(`/event/${eventId}/delete-selected/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector("input[name='csrfmiddlewaretoken']").value,
+      },
+      body: JSON.stringify({ photo_ids: selectedIds }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          notyf.success(data.message);
+          // Remove deleted photos from DOM
+          selectedIds.forEach(id => {
+            const photoDiv = document.querySelector(`input[value="${id}"]`)?.closest("div");
+            if (photoDiv){
+            photoDiv.classList.add("opacity-0", "scale-95", "transition", "duration-300");
+            setTimeout(() => photoDiv.remove(), 300);
+            } 
+           });
+          updateActionBarVisibility(); 
+        } else {
+          notyf.error(data.message || "Failed to delete selected photos.");
+        }
+      })
+      .catch(err => {
+        console.error("Delete Error:", err);
+        notyf.error("An error occurred while deleting photos.");
+      });
+  });
+}
+
+
 });

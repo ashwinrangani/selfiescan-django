@@ -8,7 +8,7 @@ from .views.homepage import homepage
 from .views.photographer import create_event, download_qr
 from .views.event_detail import event_detail, load_photos, create_branding,remove_branding_logo,start_branding
 from .views.event_delete import event_delete,delete_event_photos
-
+from .views.delete_selected_photos import delete_selected_photos
 from .views.unsubscribe_email import unsubscribe_reminders
 from .views.payments.billing_dashboard import billing_dashboard
 from .views.payments.payment_webhook import payment_success, payment_webhook
@@ -55,4 +55,6 @@ urlpatterns = [
     path('cancellation-refund-policy/', cancellation_refund_policy, name='cancellation-refund-policy'),
     path('events/<uuid:event_id>/toggle-download/', toggle_download, name='toggle_download'),
     path("contact-us/", contact_us, name='contact-us'),
+    path("event/<uuid:event_id>/delete-selected/", delete_selected_photos, name="delete_selected_photos"),
+
 ]

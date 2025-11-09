@@ -60,8 +60,7 @@ def find_matches(selfie_path, event_id, tolerance=0.55):
             search_response = rekognition.search_faces_by_image(
                 CollectionId=collection_id,
                 Image={'S3Object': {'Bucket': bucket, 'Name': s3_key}},
-                MaxFaces=10,
-                FaceMatchThreshold=90  # Confidence threshold (adjust as needed)
+                FaceMatchThreshold=86  # Confidence threshold (adjust as needed)
             )
             
             if 'FaceMatches' in search_response:

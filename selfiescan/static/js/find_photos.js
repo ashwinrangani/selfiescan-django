@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         speed: 400,
                         licenseKey: '0000-0000-000-0000',
                         download: is_event_downloadable,
-                        numberOfSlideItemsInDom: 10,
+                        
 
                         mobileSettings: {
                         controls: true,
