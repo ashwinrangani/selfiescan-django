@@ -1,9 +1,11 @@
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from ..forms import EventRegistration
 from ..models import Event, Photo,SiteStats
 from django.contrib import messages
+from django.conf import settings
+import boto3
 
 @login_required
 def create_event(request):
@@ -45,3 +47,20 @@ def download_qr(request, event_id):
     if event.qr_code:
         return FileResponse(event.qr_code.open(), as_attachment=True, filename=f"{event.name}_QR.png")
     return HttpResponse("QR Code not found.", status=404)
+
+
+@login_required
+def get_storage_usage(request):
+    user = request.user
+    s3 = boto3.client("s3")
+
+    prefix = f"photos/{user.username}/"
+    total_bytes = 0
+
+    paginator = s3.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Prefix=prefix):
+        for obj in page.get("Contents", []):
+            total_bytes += obj["Size"]
+
+    total_mb = round(total_bytes / (1024 * 1024), 2)
+    return JsonResponse({"usage": total_mb})

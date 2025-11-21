@@ -5,7 +5,7 @@ from .views.auth_views import sign_in, sign_up, sign_out
 from .views.profile import profile
 from .views.acc_settings import settings, update_username, delete_account
 from .views.homepage import homepage
-from .views.photographer import create_event, download_qr
+from .views.photographer import create_event, download_qr, get_storage_usage
 from .views.event_detail import event_detail, load_photos, create_branding,remove_branding_logo,start_branding
 from .views.event_delete import event_delete,delete_event_photos
 from .views.delete_selected_photos import delete_selected_photos
@@ -56,5 +56,6 @@ urlpatterns = [
     path('events/<uuid:event_id>/toggle-download/', toggle_download, name='toggle_download'),
     path("contact-us/", contact_us, name='contact-us'),
     path("event/<uuid:event_id>/delete-selected/", delete_selected_photos, name="delete_selected_photos"),
+    path("get-storage-usage/", get_storage_usage, name="get_storage_usage"),
 
 ]

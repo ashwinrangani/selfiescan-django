@@ -216,11 +216,19 @@ downloadToggle.addEventListener('change', function(){
 })
   
 // photo grid of the event photos
-  function initLightGallery() {
+let lgInstance = null;
+let lgOpen = false;  // track if gallery is open
+
+function initLightGallery() {
   const lightGalleryElement = document.getElementById('lightgallery');
   if (lightGalleryElement) {
-    lightGallery(lightGalleryElement, {
-      plugins: [lgZoom,lgFullscreen],
+    // destroy previous instance if exists (important for AJAX pagination)
+    if (lgInstance) {
+      try { lgInstance.destroy(true); } catch (e) {}
+    }
+
+    lgInstance = lightGallery(lightGalleryElement, {
+      plugins: [lgZoom, lgFullscreen],
       selector: 'a',
       speed: 400,
       licenseKey: '0000-0000-000-0000',
@@ -228,14 +236,33 @@ downloadToggle.addEventListener('change', function(){
       numberOfSlideItemsInDom: 12,
 
       mobileSettings: {
-      controls: true,
-      showCloseIcon: true,
-      download: true,
-      closeOnTap: false,
+        controls: true,
+        showCloseIcon: true,
+        download: true,
+        closeOnTap: false,
       },
+    });
+
+    // === BACK BUTTON FIX ===
+    lightGalleryElement.addEventListener("lgAfterOpen", () => {
+      lgOpen = true;
+      history.pushState({ lg: true }, ""); // fake history entry
+    });
+
+    lightGalleryElement.addEventListener("lgAfterClose", () => {
+      lgOpen = false;
     });
   }
 }
+
+// Handle browser back button
+window.addEventListener("popstate", function (event) {
+  if (lgOpen && lgInstance) {
+    lgInstance.closeGallery();
+    history.pushState({ lg: true }, ""); // re-add fake state so next back press works
+  }
+});
+
 initLightGallery()
   if (!photoGrid || !paginationControls) {
     console.error("Error: photo-grid or pagination-controls not found!");

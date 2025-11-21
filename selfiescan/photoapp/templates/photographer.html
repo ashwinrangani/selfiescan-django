@@ -31,25 +31,30 @@
     <!-- Total Events Card -->
     <div class="card bg-blue-50 dark:bg-inherit p-8 shadow-lg shadow-gray-600 rounded-lg text-center">
       <h1 class="card-header text-2xl font-semibold mb-2">Total Events</h1>
-      <p class="card-body text-4xl font-bold counter" data-target="{{ stats.total_events }}">0</p>
+      <p class="card-body text-3xl font-bold counter" data-target="{{ stats.total_events }}">0</p>
     </div>
 
     <!-- Total Uploads-->
     <div class="card bg-green-200 dark:bg-inherit p-8 shadow-lg shadow-gray-600 rounded-lg text-center">
       <h1 class="card-header text-2xl font-semibold mb-2">Total Uploads</h1>
-      <p class="card-body text-4xl font-bold counter" data-target="{{ stats.total_uploads }}">0</p>
+      <p class="card-body text-3xl font-bold counter" data-target="{{ stats.total_uploads }}">0</p>
     </div>
 
     <!-- Total Search Queries-->
     <div class="card bg-purple-200 dark:bg-inherit p-8 shadow-lg shadow-gray-600 rounded-lg text-center">
       <h1 class="card-header text-2xl font-semibold mb-2">Total Search Queries</h1>
-      <p class="card-body text-4xl font-bold counter" data-target="{{ stats.total_queries }}">0</p>
+      <p class="card-body text-3xl font-bold counter" data-target="{{ stats.total_queries }}">0</p>
     </div>
 
     <!-- Placeholder  -->
     <div class="card bg-gray-300 dark:bg-inherit p-8 shadow-lg shadow-gray-600 rounded-lg text-center">
-      <h1 class="card-header text-2xl font-semibold mb-2">📈 Placeholder</h1>
-      <p class="card-body text-gray-700 text-2xl font-semibold">Coming soon...</p>
+      <h1 class="card-header text-2xl font-semibold mb-2">Storage Usage</h1>
+      <div class="flex items-center gap-2">
+      <p id="storage-usage" class="card-body text-3xl font-semibold">Loading...</p>
+      <button id="refresh-usage" class="btn btn-circle" title="Load data usage">
+      <span class="icon-[tabler--refresh] size-6 rtl:rotate-180"></span>
+      </button>
+      </div>
     </div>
   </div>
 </div>
@@ -132,7 +137,38 @@
         );
     
         counters.forEach((counter) => observeCounters.observe(counter));
-    });
-    
+        
+        // data usage card
+   async function fetchStorageUsage() {
+        const usageElement = document.getElementById("storage-usage");
+        const refreshButton = document.getElementById("refresh-usage");
+        const icon = refreshButton?.querySelector("span");
+
+        if (!usageElement || !refreshButton || !icon) return;
+
+        // Start spinning icon
+        icon.classList.add("animate-spin");
+
+        try {
+            const response = await fetch("{% url 'get_storage_usage' %}");
+            const data = await response.json();
+            usageElement.textContent = `${data.usage} MB`;
+        } catch (error) {
+            usageElement.textContent = "Error fetching usage";
+            console.error("Error:", error);
+        } finally {
+            // Stop spinning
+            icon.classList.remove("animate-spin");
+        }
+    }
+
+    const refreshButton = document.getElementById("refresh-usage");
+    if (refreshButton) {
+        refreshButton.addEventListener("click", fetchStorageUsage);
+    }
+
+    // Auto-fetch on page load
+    fetchStorageUsage();
+});
 </script>
 {% endblock %}
