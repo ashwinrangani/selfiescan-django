@@ -63,7 +63,10 @@ def resize_image_for_processing(image, max_width=600):
         new_size = (int(width * scaling_factor), int(height * scaling_factor))
         image = cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
     return image
+    
 
+        
+        
 # face encoding of uploaded photos (Rekognition + fallback)
 @shared_task(bind=True, acks_late=True, autoretry_for=(Exception,), retry_backoff=True, retry_jitter=True)
 def process_photo(self, photo_id):
@@ -158,7 +161,9 @@ def process_photo(self, photo_id):
                 photo.save()
                 return f"Photo {photo_id} processed with fallback: {len(face_encodings)} encodings stored"
             else:
-                return f"No face found in photo {photo_id}"
+                photo.is_processed = True
+                photo.save()
+                return f"No face found in fallback for photo {photo_id}"
 
     except Photo.DoesNotExist:
         return f"Photo {photo_id} not found"
@@ -166,6 +171,16 @@ def process_photo(self, photo_id):
         logger.error(f"Error processing photo {photo_id}: {str(e)}")
         raise self.retry(exc=e)
 
+# This task is for re-running pending processing of the photos of the event 
+@shared_task
+def process_event_photos(event_id):
+    from .models import Photo
+    photos = Photo.objects.filter(event_id=event_id)
+
+    for photo in photos:
+        process_photo.delay(photo.id)
+ 
+# following is the working tasks exclusively for the face_recognition/implemented before aws reko.     
 # from celery import shared_task
 # import face_recognition
 # import numpy as np
@@ -276,7 +291,9 @@ def process_photo(self, photo_id):
 #             photo.save()
 #             return f"Photo {photo_id} processed successfully"
 #         else:
-#             return f"No face found in photo {photo_id}"
+#             photo.is_processed = True
+#             photo.save()
+#             return f"No face found in fallback for photo {photo_id}"
 
 #     except Photo.DoesNotExist:
 #         return f"Photo {photo_id} not found"
@@ -474,7 +491,7 @@ def branded_photo(self, photo_id):
         logger.error(f"Error branding photo {photo_id}: {str(e)}")
         raise self.retry(exc=e)
 
-# e-mail notification for expired subscription
+# e-mail notification for expired subscription and welcome email
 
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
@@ -519,3 +536,24 @@ def notify_expired_subscriptions():
         print("email sent")
         sub.last_notified = now
         sub.save(update_fields=["last_notified"])
+
+
+
+
+@shared_task
+def send_welcome_email_task(user_id, email):
+    subject = "Welcome to PhotoFlow 🎉"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to_email = [email]
+
+    # Render HTML template
+    html_content = render_to_string("emails/welcome_email.html", {
+        "user_id": user_id,
+    })
+
+    # Plain text fallback
+    text_content = "Welcome to PhotoFlow! We're glad to have you here."
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()

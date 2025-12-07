@@ -120,6 +120,7 @@ INSTALLED_APPS = [
 ]
 
 SITE_ID = 1
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

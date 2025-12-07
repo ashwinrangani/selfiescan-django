@@ -31,7 +31,7 @@ def create_event(request):
 
     # Get user's events and statistics
     events = Event.objects.filter(photographer=request.user)
-    stats = SiteStats.objects.first()
+    stats, _ = SiteStats.objects.get_or_create(photographer=request.user)
     total_queries = stats.total_face_search_queries if stats else 0
 
     stats = {

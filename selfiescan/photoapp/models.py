@@ -141,7 +141,8 @@ class Payment(models.Model):
 
 
 class SiteStats(models.Model):
+    photographer = models.OneToOneField(User, on_delete=models.CASCADE)
     total_face_search_queries = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"Stats (queries={self.total_face_search_queries})"
+        return f"Stats for {self.photographer.username}"

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome to PhotoFlow</title>
+    <style>
+        body {
+            background-color: #f4f7fb;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 560px;
+            margin: 30px auto;
+            background: #f0eded;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #1b1f3b;
+            margin-bottom: 20px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .button {
+            display: block;
+            width: 60%;
+            margin: 25px auto;
+            padding: 12px;
+            background-color: #4F46E5;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+        p {
+            font-size: 15px;
+            color: #4d4d4d;
+            line-height: 1.6;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- <div class="logo">
+            <img src="https://photoflow.in/static/images/workflow-homepage.jpg" width="150" alt="PhotoFlow Logo">
+        </div> -->
+
+        <h1>Welcome to PhotoFlow 🎉</h1>
+
+        <p>
+            Hi there,<br>
+            We're thrilled to have you onboard! PhotoFlow helps you store, manage, and share with clients with our top notch AI face recognition system seamlessly.
+        </p>
+
+        <p>
+            You can now log in anytime and upload your photos instantly and share with clients.
+        </p>
+
+        <a class="button" href="https://photoflow.in/accounts/login/">
+            Go to Login
+        </a>
+
+        <p>
+            If you have any questions, feel free to reach out to us anytime.
+        </p>
+
+        <div class="footer">
+            © {{ now|date:"Y" }} PhotoFlow. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

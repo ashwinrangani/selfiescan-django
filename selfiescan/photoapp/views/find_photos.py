@@ -198,9 +198,8 @@ def process_selfie(request, event_id):
                     matches.append({"path": photo_url, "distance": distance})
 
                 # Update query counter
-                SiteStats.objects.update_or_create(id=1, defaults={})
-                SiteStats.objects.filter(id=1).update(
-                    total_face_search_queries=F('total_face_search_queries') + 1
+                SiteStats.objects.filter(photographer=event.photographer).update(
+                total_face_search_queries=F('total_face_search_queries') + 1
                 )
                 
                 return JsonResponse({
