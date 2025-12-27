@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ event.name }} - Gallery{% endblock %}
+{% block main_padding %}!p-0{% endblock %}
+{% block content %}
+<div data-theme="luxury" class="gallery-background !p-0">
+<section class="container p-4 md:p-2 lg:p-1">
+    <div class="navbar-center flex items-center pt-2">
+    <a class="link text-base-content/90 link-neutral text-xl font-pacifico no-underline" href="/">
+      PhotoFlow
+    </a><span class="bg-primary size-6 icon-[tabler--camera-search]"></span>
+   </div>
+    <h1 class="text-2xl pt-4 font-serif text-primary text-center font-semibold">{{ event.name }} - Photo Gallery</h1>
+    <div class="mt-5 flex justify-end">
+    <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block">
+      <span class="text-base text-sm flex items-center justify-center p-2 font-semibold">Click here to find your own photos
+        <span class="icon-[tabler--photo-ai] size-5 rtl:rotate-180 ml-1"></span>
+      </span>
+    </a>
+  </div>
+    <!-- LightGallery Container -->
+    <div 
+  id="lightgallery" class="gallery-grid mt-6">
+
+        {% for photo in photos %}
+            <a href="{{ photo.image.url }}" class="gallery-item group">
+            <div class="img-wrap">
+              <img
+                src="{{ photo.image.url }}"
+                loading="lazy"
+                alt="Event photo"
+              />
+            </div>
+          </a>
+
+        {% endfor %}
+    </div>
+
+    <!-- Load More -->
+    <div class="mt-8 text-center mb-10">
+        <button 
+            type="button" 
+            id="loadMoreBtn" 
+            class="btn btn-outline btn-sm shadow transition"
+            data-total-photos="{{ total_photos }}"
+            data-loaded-photos="{{ photos|length }}"
+            {% if total_photos <= photos|length %}style="display:none"{% endif %}
+        >
+            Load More Photos
+        </button>
+
+        <div id="loading-icon" class="mt-3 hidden">
+            <span class="loading loading-dots loading-xl"></span>
+        </div>
+    </div>
+<style>
+.gallery-background {
+    
+    background-image: radial-gradient(#d8d0d0 0.5px, transparent 0.5px);
+    background-size: 18px 18px;
+}
+
+.gallery-grid {
+  display: grid;
+  gap: 1rem;
+  grid-auto-flow: row;
+}
+
+
+/* Mobile */
+@media (min-width: 0px) {
+  .gallery-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablets */
+@media (min-width: 640px) {
+  .gallery-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Laptops */
+@media (min-width: 1024px) {
+  .gallery-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Large desktops */
+@media (min-width: 1536px) {
+  .gallery-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* ================================
+   GALLERY ITEM
+   ================================ */
+
+.gallery-item {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f5f5f5;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+/* Hover polish */
+.gallery-item:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* ================================
+   IMAGE WRAPPER
+   ================================ */
+
+.img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;   /* Portrait-friendly */
+  overflow: hidden;
+}
+
+/* Image */
+.img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+/* Subtle zoom on hover */
+.gallery-item:hover img {
+  transform: scale(1.06);
+}
+
+/* ================================
+   TOUCH DEVICES (no hover jank)
+   ================================ */
+
+@media (hover: none) {
+  .gallery-item:hover {
+    transform: none;
+    box-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.08);
+  }
+
+  .gallery-item:hover img {
+    transform: none;
+  }
+.img-wrap {
+  background: linear-gradient(
+    110deg,
+    #ececec 8%,
+    #f5f5f5 18%,
+    #ececec 33%
+  );
+  background-size: 200% 100%;
+  animation: shine 1.5s infinite linear;
+}
+
+@keyframes shine {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+.img-wrap img {
+  background: none;
+}
+}
+</style>
+
+
+
+</section>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/fullscreen/lg-fullscreen.min.js"></script>
+
+<script>
+/* ============================================================
+   LIGHTGALLERY + BACK BUTTON + LOAD MORE (FIXED)
+   ============================================================ */
+
+const galleryEl = document.getElementById("lightgallery");
+const loadMoreBtn = document.getElementById("loadMoreBtn");
+const loadingIcon = document.getElementById("loading-icon");
+
+let offset = parseInt("{{ photos|length }}");
+const limit = 20;
+
+let isGalleryOpen = false;
+
+// Prevent immediate page exit
+history.replaceState({ page: true }, "");
+
+// INIT LIGHTGALLERY (ONCE)
+const galleryInstance = lightGallery(galleryEl, {
+  selector: "a",
+  plugins: [lgZoom, lgFullscreen],
+  speed: 400,
+  licenseKey: "0000-0000-0000-0000",
+  closeOnTap: false,
+  mobileSettings: {
+    controls: true,
+    showCloseIcon: true,
+    download: true,
+    closeOnTap: false,
+  },
+});
+
+// BACK BUTTON HANDLING
+galleryEl.addEventListener("lgAfterOpen", () => {
+  isGalleryOpen = true;
+  history.pushState({ gallery: true }, "");
+});
+
+galleryEl.addEventListener("lgAfterClose", () => {
+  isGalleryOpen = false;
+});
+
+window.addEventListener("popstate", () => {
+  if (isGalleryOpen) {
+    galleryInstance.closeGallery();
+  }
+});
+
+// LOAD MORE
+if (loadMoreBtn) {
+  loadMoreBtn.addEventListener("click", async () => {
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.innerText = "Loading...";
+    loadingIcon.classList.remove("hidden");
+
+    const res = await fetch(`?offset=${offset}&limit=${limit}`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    });
+
+    const data = await res.json();
+
+    data.photos.forEach(photo => {
+      const a = document.createElement("a");
+      a.href = photo.image_url;
+      a.className = "gallery-item group";
+
+      a.innerHTML = `
+        <div class="img-wrap">
+          <img src="${photo.image_url}" loading="lazy" alt="Event photo">
+        </div>
+      `;
+
+      galleryEl.appendChild(a);
+    });
+  
+    galleryInstance.refresh();
+
+    offset = data.loaded_photos;
+
+    if (offset >= data.total_photos) {
+      loadMoreBtn.style.display = "none";
+    } else {
+      loadMoreBtn.disabled = false;
+      loadMoreBtn.innerText = "Load More Photos";
+    }
+
+    loadingIcon.classList.add("hidden");
+  });
+}
+</script>
+{% endblock %}

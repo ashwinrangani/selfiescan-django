@@ -1,7 +1,7 @@
 from re import I
 from django.db import models
 from django.contrib.auth.models import User
-import uuid
+import uuid,secrets
 import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
@@ -31,10 +31,13 @@ class Event(models.Model):
     branding_image = models.ImageField(upload_to='branding/', null=True, blank=True)
     branding_text = models.CharField(max_length=100, blank=True, null=True)
     is_downloadable = models.BooleanField(null=True, default=False)
-
-
+    is_public_gallery_enabled = models.BooleanField(default=False)
+    public_token = models.CharField(max_length=32, unique=True)
 
     def save(self, *args, **kwargs):
+        if not self.public_token:
+            self.public_token = secrets.token_hex(16)
+
         if not self.qr_code:
             qr = qrcode.make(f"https://photoflow.in/find/photos/{self.event_id}/")
             qr_io = BytesIO()

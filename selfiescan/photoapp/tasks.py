@@ -10,6 +10,7 @@ from django.core.files.storage import default_storage
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 from django.conf import settings
+from io import BytesIO
 
 logger = logging.getLogger(__name__)
 
@@ -41,134 +42,157 @@ def get_or_create_collection(event_id):
             raise
     return collection_id
 
-def load_and_correct_image(file_obj):
+def load_and_correct_image(file_obj, max_side=2000):
     try:
-        image_pil = Image.open(file_obj)
-        exif = image_pil.getexif()
-        original_orientation = exif.get(0x0112, 1)
-        image_pil = ImageOps.exif_transpose(image_pil)
-        new_exif = image_pil.getexif()
-        new_orientation = new_exif.get(0x0112, 1)
+        img = Image.open(file_obj).convert("RGB")
+        img = ImageOps.exif_transpose(img)
+        
+        if max(img.size) > max_side:
+            img.thumbnail((max_side,max_side), Image.LANCZOS)
         # Convert to OpenCV format for fallback
-        image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2BGR)
+        image_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         return image_cv
     except Exception as e:
         logger.error(f"[ERROR] Failed to process image: {e}")
         return None
 
-def resize_image_for_processing(image, max_width=600):
-    height, width = image.shape[:2]
-    if width > max_width:
-        scaling_factor = max_width / width
-        new_size = (int(width * scaling_factor), int(height * scaling_factor))
-        image = cv2.resize(image, new_size, interpolation=cv2.INTER_AREA)
+def resize_image_for_processing(image, max_side=1600):
+    h, w = image.shape[:2]
+    scale = max_side / max(h, w)
+
+    if scale < 1:
+        image = cv2.resize(
+            image,
+            (int(w * scale), int(h * scale)),
+            interpolation=cv2.INTER_AREA
+        )
     return image
+
+def load_resize_for_rekognition(file_obj, max_side=4000):
+    img = Image.open(file_obj).convert("RGB")
+    img = ImageOps.exif_transpose(img)
+
+    if max(img.size) > max_side:
+        img.thumbnail((max_side, max_side), Image.LANCZOS)
+
+    buffer = BytesIO()
+    img.save("debug_pil.jpg", format="JPEG", quality=95)
+    img.save(buffer, format="JPEG", quality=95)
     
+    return buffer.getvalue()
+
 
         
         
 # face encoding of uploaded photos (Rekognition + fallback)
-@shared_task(bind=True, acks_late=True, autoretry_for=(Exception,), retry_backoff=True, retry_jitter=True)
+@shared_task(bind=True,acks_late=True,autoretry_for=(Exception,),retry_backoff=True,retry_jitter=True)
 def process_photo(self, photo_id):
     from .models import Photo, FaceEncoding
 
     try:
         photo = Photo.objects.get(id=photo_id)
-        image_name = photo.image.name  # S3 relative path (e.g., 'events/.../photo.jpg')
-        bucket = settings.AWS_STORAGE_BUCKET_NAME  # From django-storages settings
+        image_name = photo.image.name
+        bucket = settings.AWS_STORAGE_BUCKET_NAME
 
-        # Skip if already processed
         if photo.is_processed:
             return f"Photo {photo_id} already processed"
 
-        # Skip if encodings already exist (prevent duplicates)
         if FaceEncoding.objects.filter(photo=photo).exists():
-            if not photo.is_processed:
-                photo.is_processed = True
-                photo.save(update_fields=["is_processed"])
-            return f"Encodings for photo {photo_id} already exist"
+            photo.is_processed = True
+            photo.save(update_fields=["is_processed"])
+            return f"Encodings already exist for photo {photo_id}"
 
-        # Rekognition: Detect and index faces
-        use_rekognition = True
+        collection_id = get_or_create_collection(photo.event.event_id)
+        index_response = None
+
+        # --------------------
+        # Try Rekognition
+        # --------------------
         try:
-            collection_id = get_or_create_collection(photo.event.event_id)
-
-            # Index faces directly — this both detects and stores face metadata
             index_response = rekognition.index_faces(
-                CollectionId=collection_id,
+                CollectionId="INVALID_COLLECTION",
                 Image={'S3Object': {'Bucket': bucket, 'Name': image_name}},
-                ExternalImageId=str(photo.id),
-                DetectionAttributes=[]  # empty list = no extra attributes (faster)
+                ExternalImageId=str(photo.id)
             )
 
-            face_records = index_response.get('FaceRecords', [])
+        except ClientError as e:
+            error_code = e.response["Error"]["Code"]
+
+            if error_code in ("InvalidImageFormatException", "ValidationException"):
+                logger.warning(
+                    f"S3Object failed ({error_code}) for {photo_id}, "
+                    f"retrying with resized bytes"
+                )
+
+                with default_storage.open(image_name, 'rb') as f:
+                    image_bytes = load_resize_for_rekognition(f, max_side=4000)
+
+                index_response = rekognition.index_faces(
+                    CollectionId=collection_id,
+                    Image={'Bytes': image_bytes},
+                    ExternalImageId=str(photo.id)
+                )
+
+            else:
+                # AWS outage / permissions / throttling → fallback
+                logger.warning(
+                    f"Rekognition failed for {photo_id} ({error_code}), "
+                    f"falling back to face_recognition"
+                )
+                index_response = None
+
+        # --------------------
+        # Rekognition success path
+        # --------------------
+        if index_response:
+            face_records = index_response.get("FaceRecords", [])
             face_count = len(face_records)
-            logger.info(f"Rekognition indexed {face_count} faces in {image_name}")
 
-            if face_count == 0:
-                photo.is_processed = True
-                photo.save()
-                return f"No face found in photo {photo_id}"
+            logger.info(f"Rekognition indexed {face_count} faces for {photo_id}")
 
-            # Save optional Rekognition FaceIds if you want to use them later
-            for record in face_records:
-                face_id = record['Face']['FaceId']
-                logger.info(f"Face indexed with FaceId: {face_id}")
-                # You could store this in your FaceEncoding model if needed
-                # FaceEncoding.objects.create(photo=photo, rekognition_face_id=face_id)
-
-            # photo.rekognition_collection = collection_id  # Optional: keep for reference
             photo.is_processed = True
             photo.save()
-            return f"Photo {photo_id} processed with Rekognition: {face_count} faces indexed"
 
-        except (ClientError, NoCredentialsError) as e:
-            logger.warning(f"Rekognition failed for photo {photo_id}: {e}. Falling back to face_recognition.")
-            use_rekognition = False
+            return f"Photo {photo_id} processed with Rekognition: {face_count} faces"
 
-            
-            
-        
-        # Fallback to face_recognition
-        if not use_rekognition:
-            with default_storage.open(image_name, 'rb') as f:
-                image = load_and_correct_image(f)
-            
-            if image is None:
-                return f"Failed to load image for photo {photo_id}"
-            
-            image = resize_image_for_processing(image)
-            face_locations = face_recognition.face_locations(image, number_of_times_to_upsample=1)
-            logger.info(f"Fallback: Detected {len(face_locations)} face locations")
-            
-            if not face_locations:
-                photo.is_processed = True
-                photo.save()
-                return f"No face found in photo {photo_id}"
-            
-            face_encodings = []
-            for location in face_locations:
-                encoding = face_recognition.face_encodings(image, [location])[0]
-                face_encodings.append(encoding)
-            
-            if face_encodings:
-                for encoding in face_encodings:
-                    FaceEncoding.objects.create(
-                        photo=photo,
-                        encoding=np.array(encoding).tobytes()
-                    )
-                photo.is_processed = True
-                photo.save()
-                return f"Photo {photo_id} processed with fallback: {len(face_encodings)} encodings stored"
-            else:
-                photo.is_processed = True
-                photo.save()
-                return f"No face found in fallback for photo {photo_id}"
+      
+        # Fallback: face_recognition
+       
+        logger.info(f"Using fallback face_recognition for photo {photo_id}")
+
+        with default_storage.open(image_name, 'rb') as f:
+            image = load_and_correct_image(f)
+
+        if image is None:
+            photo.is_processed = True
+            photo.save()
+            return f"Failed to load image for photo {photo_id}"
+
+        image = resize_image_for_processing(image)
+        face_locations = face_recognition.face_locations(image, number_of_times_to_upsample=1)
+
+        if not face_locations:
+            photo.is_processed = True
+            photo.save()
+            return f"No faces found (fallback) for photo {photo_id}"
+
+        for loc in face_locations:
+            encoding = face_recognition.face_encodings(image, [loc])[0]
+            FaceEncoding.objects.create(
+                photo=photo,
+                encoding=np.array(encoding).tobytes()
+            )
+
+        photo.is_processed = True
+        photo.save()
+
+        return f"Photo {photo_id} processed with fallback: {len(face_locations)} faces"
 
     except Photo.DoesNotExist:
         return f"Photo {photo_id} not found"
+
     except Exception as e:
-        logger.error(f"Error processing photo {photo_id}: {str(e)}")
+        logger.error(f"Fatal error processing photo {photo_id}: {e}")
         raise self.retry(exc=e)
 
 # This task is for re-running pending processing of the photos of the event 

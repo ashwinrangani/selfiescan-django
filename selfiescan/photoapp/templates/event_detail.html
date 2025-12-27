@@ -235,6 +235,69 @@
   </div>
   
 </div>
+<!-- public gallery -->
+<div class="p-4 shadow rounded-lg mt-6">
+  <h2 class="text-lg font-semibold mb-2">Public Gallery</h2>
+
+  <label class="flex items-center cursor-pointer gap-3">
+    <span class="font-medium text-gray-100">Enable Public Gallery</span>
+    <input id="publicGalleryToggle" type="checkbox"
+           class="checkbox checkbox-primary"
+           {% if event.is_public_gallery_enabled %}checked{% endif %}>
+  </label>
+
+  <div id="publicGalleryLink"
+       class="mt-4 p-3 rounded border text-sm {% if not event.is_public_gallery_enabled %}hidden{% endif %}"
+       data-public-url="{% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}">
+    <span id="galleryUrl" class="break-all">{% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}</span>
+    <button id="copy-btn" onclick="copyGalleryLink()" class="btn btn-sm btn-primary ml-2">Copy</button>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const toggle = document.getElementById("publicGalleryToggle");
+  const linkBox = document.getElementById("publicGalleryLink");
+  const linkSpan = document.getElementById("galleryUrl");
+
+  const notyf = new Notyf()
+  toggle.addEventListener("change", function() {
+    const enabled = toggle.checked;
+
+    fetch("{% url 'toggle_public_gallery' event.event_id %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ enabled })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.enabled) {
+
+        // SHOW AND UPDATE URL INSTANTLY
+        linkSpan.textContent = data.public_url;
+        linkBox.dataset.publicUrl = data.public_url;
+        linkBox.classList.remove("hidden");
+        notyf.success("Public Gallery enabled!")
+      } else {
+
+        // HIDE INSTANTLY
+        linkBox.classList.add("hidden");
+        linkSpan.textContent = "";
+        linkBox.dataset.publicUrl = "";
+        notyf.error("Public Gallery disabled!")
+      }
+    });
+  });
+  });
+function copyGalleryLink() { 
+    const copyBtn = document.getElementById("copy-btn")
+    const text = document.getElementById("galleryUrl").textContent; navigator.clipboard.writeText(text);
+    copyBtn.innerText = "Copied!"
+  }
+</script>
 
 
 
