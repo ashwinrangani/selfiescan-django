@@ -3,14 +3,15 @@ from celery import shared_task
 import face_recognition
 import numpy as np
 from PIL import Image, ImageOps
-import logging
+import logging,os
 import cv2
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 import boto3
-from botocore.exceptions import ClientError, NoCredentialsError
+from botocore.exceptions import ClientError, NoCredentialsError,EndpointConnectionError
 from django.conf import settings
 from io import BytesIO
+from .utils.image_variants import generate_variant, VARIANTS
 
 logger = logging.getLogger(__name__)
 
@@ -76,16 +77,52 @@ def load_resize_for_rekognition(file_obj, max_side=4000):
         img.thumbnail((max_side, max_side), Image.LANCZOS)
 
     buffer = BytesIO()
-    img.save("debug_pil.jpg", format="JPEG", quality=95)
+    #img.save("debug_pil.jpg", format="JPEG", quality=95)
     img.save(buffer, format="JPEG", quality=95)
     
     return buffer.getvalue()
+
+def generate_photo_variants(photo):
+
+    if photo.thumb_image and photo.medium_image and photo.large_image:
+        return
+
+    image_field_map = {
+        "thumb": photo.thumb_image,
+        "medium": photo.medium_image,
+        "large": photo.large_image,
+    }
+
+    base_name = os.path.basename(photo.image.name)
+    name, _ = os.path.splitext(base_name)
+
+    for variant, field in image_field_map.items():
+        config = VARIANTS[variant]
+
+        buffer = generate_variant(
+            photo.image,
+            size=config["size"],
+            quality=config["quality"],
+        )
+
+        if not buffer:
+            continue
+
+        filename = f"{name}_{variant}.jpg"
+
+        field.save(
+            filename,
+            ContentFile(buffer.read()),
+            save=False
+        )
+
+    photo.save(update_fields=["thumb_image", "medium_image", "large_image"])
 
 
         
         
 # face encoding of uploaded photos (Rekognition + fallback)
-@shared_task(bind=True,acks_late=True,autoretry_for=(Exception,),retry_backoff=True,retry_jitter=True)
+@shared_task(bind=True,acks_late=True,autoretry_for=(ClientError, EndpointConnectionError),retry_backoff=True,retry_jitter=True,retry_kwargs={"max_retries": 3})
 def process_photo(self, photo_id):
     from .models import Photo, FaceEncoding
 
@@ -110,7 +147,7 @@ def process_photo(self, photo_id):
         # --------------------
         try:
             index_response = rekognition.index_faces(
-                CollectionId="INVALID_COLLECTION",
+                CollectionId=collection_id,
                 Image={'S3Object': {'Bucket': bucket, 'Name': image_name}},
                 ExternalImageId=str(photo.id)
             )
@@ -151,7 +188,10 @@ def process_photo(self, photo_id):
             logger.info(f"Rekognition indexed {face_count} faces for {photo_id}")
 
             photo.is_processed = True
-            photo.save()
+            photo.save(update_fields=["is_processed"])
+
+            generate_photo_variants(photo)
+
 
             return f"Photo {photo_id} processed with Rekognition: {face_count} faces"
 
@@ -184,7 +224,10 @@ def process_photo(self, photo_id):
             )
 
         photo.is_processed = True
-        photo.save()
+        photo.save(update_fields=["is_processed"])
+
+        generate_photo_variants(photo)
+
 
         return f"Photo {photo_id} processed with fallback: {len(face_locations)} faces"
 

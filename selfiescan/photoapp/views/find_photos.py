@@ -146,6 +146,27 @@ def find_matches(selfie_path, event_id, tolerance=0.55):
     return matched_photos
 
 
+
+def get_variant_urls(photo, event):
+    """
+    Decide branded vs normal and return variant URLs.
+    """
+    base = photo
+
+    if event.branding_enabled and photo.is_branded and photo.branded_image:
+        return {
+            "thumb": photo.thumb_image.url if photo.thumb_image else photo.branded_image.url,
+            "medium": photo.medium_image.url if photo.medium_image else photo.branded_image.url,
+            "large": photo.large_image.url if photo.large_image else photo.branded_image.url,
+        }
+
+    return {
+        "thumb": photo.thumb_image.url if photo.thumb_image else photo.image.url,
+        "medium": photo.medium_image.url if photo.medium_image else photo.image.url,
+        "large": photo.large_image.url if photo.large_image else photo.image.url,
+    }
+
+
 def process_selfie(request, event_id):
     
     event = get_object_or_404(Event, event_id=event_id)
@@ -194,8 +215,14 @@ def process_selfie(request, event_id):
                 for photo_id, distance in matching_images:
                     photo = Photo.objects.get(id=photo_id)
                     # Serve branded photo if branding is enabled and available, otherwise original
-                    photo_url = photo.branded_image.url if event.branding_enabled and photo.is_branded and photo.branded_image else photo.image.url
-                    matches.append({"path": photo_url, "distance": distance})
+                    variants = get_variant_urls(photo, event)
+
+                    matches.append({
+                        "thumb": variants["thumb"],
+                        "medium": variants["medium"],
+                        "large": variants["large"],
+                        "distance": distance
+                    })
 
                 # Update query counter
                 SiteStats.objects.filter(photographer=event.photographer).update(

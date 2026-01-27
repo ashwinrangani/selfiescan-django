@@ -28,6 +28,7 @@ def public_gallery(request, event_id, token):
     # First Page Load
     photos = Photo.objects.filter(event=event).order_by("id")[:20]
     total_photos = Photo.objects.filter(event=event).count()
+    studio_name = event.studio_name
 
     return render(request, "public_gallery.html", {
         "event": event,
@@ -35,5 +36,8 @@ def public_gallery(request, event_id, token):
         "token": token,
         "photos": photos,
         "total_photos": total_photos,
+        "studio_name": studio_name,
         "hide_navbar": True,
     })
+    
+    

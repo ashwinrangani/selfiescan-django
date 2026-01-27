@@ -33,6 +33,7 @@ class Event(models.Model):
     is_downloadable = models.BooleanField(null=True, default=False)
     is_public_gallery_enabled = models.BooleanField(default=False)
     public_token = models.CharField(max_length=32, unique=True)
+    studio_name = models.CharField(max_length=50, blank=True, null=True, editable=True)
 
     def save(self, *args, **kwargs):
         if not self.public_token:
@@ -54,25 +55,48 @@ class EventShare(models.Model):
     def __str__(self):
         return f"Share for {self.event.name} (Token: {self.token})"
 
-
+# LEGACY: required for old migrations – do not remove
 def event_photo_path(instance, filename):
-    """Generate file path for new photo, organized by photographer and event name."""
-    photographer_name = instance.event.photographer.username 
+    photographer_name = instance.event.photographer.username
     safe_event_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in instance.event.name)
     return f"photos/{photographer_name}/{safe_event_name}/{filename}"
 
+# LEGACY: required for old migrations – do not remove
 def event_photo_branded_path(instance, filename):
     photographer_name = instance.event.photographer.username
     safe_event_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in instance.event.name)
     return f"photos/{photographer_name}/{safe_event_name}_branded/{filename}"
 
+def photo_upload_path(instance, filename, variant):
+    photographer_id = instance.event.photographer.id
+    event_id = instance.event.event_id
+    return f"photos/photographer_{photographer_id}/event_{event_id}/{variant}/{filename}"
+
+def original_path(instance, filename):
+    return photo_upload_path(instance, filename, "originals")
+
+def thumb_path(instance, filename):
+    return photo_upload_path(instance, filename, "thumb")
+
+def medium_path(instance, filename):
+    return photo_upload_path(instance, filename, "medium")
+
+def large_path(instance, filename):
+    return photo_upload_path(instance, filename, "large")
+
+def branded_path(instance, filename):
+    return photo_upload_path(instance, filename, "branded")
+
 
 class Photo(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=event_photo_path)
+    image = models.ImageField(upload_to=original_path,max_length=500)
+    thumb_image = models.ImageField(upload_to=thumb_path, null=True, blank=True,max_length=500)
+    medium_image = models.ImageField(upload_to=medium_path, null=True, blank=True,max_length=500)
+    large_image = models.ImageField(upload_to=large_path, null=True, blank=True,max_length=500)
+    branded_image = models.ImageField(upload_to=branded_path, null=True, blank=True,max_length=500)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     is_processed = models.BooleanField(default=False)
-    branded_image = models.ImageField(upload_to=event_photo_branded_path, null=True, blank=True)
     is_branded = models.BooleanField(default=False) 
     customer_selected = models.BooleanField(default=False)
     display_number = models.PositiveIntegerField(null=True, blank=True)

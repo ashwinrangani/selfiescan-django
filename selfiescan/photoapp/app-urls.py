@@ -18,7 +18,7 @@ from .views.share_album import share_album
 from .views.download_selected import download_selected_photos
 from .views.footer import about_us, privacy_policy, terms_of_service, cancellation_refund_policy,contact_us
 from .views.toggle_download import toggle_download
-from .views.toggle_public_gallery import toggle_public_gallery
+from .views.toggle_public_gallery import toggle_public_gallery, update_studio_name
 from .views.public_gallery import public_gallery
 
 urlpatterns = [
@@ -60,6 +60,7 @@ urlpatterns = [
     path("event/<uuid:event_id>/delete-selected/", delete_selected_photos, name="delete_selected_photos"),
     path("get-storage-usage/", get_storage_usage, name="get_storage_usage"),
     path("events/<uuid:event_id>/toggle-public-gallery/", toggle_public_gallery, name="toggle_public_gallery"),
+    path("event/<uuid:event_id>/update-studio-name/",update_studio_name, name="update_studio_name"),
     path("gallery/<uuid:event_id>/<str:token>/", public_gallery, name="public_gallery"),
 
 

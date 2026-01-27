@@ -7,6 +7,7 @@ celery_app = Celery("mysite")
 celery_app.config_from_object("django.conf:settings", namespace="CELERY")
 celery_app.autodiscover_tasks()
 celery_app.conf.worker_concurrency = 1  # Only process 1 tasks at a time
+celery_app.conf.worker_prefetch_multiplier = 1
 
 @celery_app.task(bind=True, ignore_result=True)
 def debug_task(self):

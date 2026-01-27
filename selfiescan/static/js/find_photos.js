@@ -123,33 +123,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         const matchesContainer = document.getElementById("lightgallery");
                         matchesContainer.innerHTML = '';
 
-                        data.matches.forEach((match) => {
+                        data.matches.forEach(match => {
                             const container = document.createElement('div');
                             container.className = "overflow-hidden rounded-lg";
 
                             const anchor = document.createElement('a');
-                            anchor.href = match.path;
-                            anchor.setAttribute('data-lg-download', match.path);
+                            anchor.href = match.medium;               // lightbox image
+                            anchor.dataset.src = match.medium;
+                            anchor.dataset.downloadUrl = match.large; // download target
                             anchor.className = "block mb-4";
 
                             const img = document.createElement('img');
-                            img.src = match.path;
+                            img.src = match.thumb;                    // thumbnail
                             img.alt = "Matched photo";
+                            img.loading = "lazy";
                             img.className =
                                 "w-full h-auto rounded-lg object-cover shadow-md shadow-gray-600 hover:scale-105 transition duration-300";
 
                             if (!is_event_downloadable) {
-                                img.setAttribute("oncontextmenu", "return false;");
-                                img.setAttribute("draggable", "false");
-                            } else {
-                                img.setAttribute("oncontextmenu", "return true;");
-                                img.setAttribute("draggable", "true");
+                                img.oncontextmenu = () => false;
+                                img.draggable = false;
                             }
 
                             anchor.appendChild(img);
                             container.appendChild(anchor);
                             matchesContainer.appendChild(container);
                         });
+
 
                         // ================= LightGallery Safe Init =================
                         const lgEl = document.getElementById("lightgallery");

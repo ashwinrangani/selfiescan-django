@@ -235,69 +235,161 @@
   </div>
   
 </div>
-<!-- public gallery -->
-<div class="p-4 shadow rounded-lg mt-6">
-  <h2 class="text-lg font-semibold mb-2">Public Gallery</h2>
 
-  <label class="flex items-center cursor-pointer gap-3">
-    <span class="font-medium text-gray-100">Enable Public Gallery</span>
-    <input id="publicGalleryToggle" type="checkbox"
-           class="checkbox checkbox-primary"
-           {% if event.is_public_gallery_enabled %}checked{% endif %}>
-  </label>
+<!-- Public Gallery Card -->
+<div class="mt-4 w-full shadow-lg shadow-gray-600 p-6 rounded-md">
 
-  <div id="publicGalleryLink"
-       class="mt-4 p-3 rounded border text-sm {% if not event.is_public_gallery_enabled %}hidden{% endif %}"
-       data-public-url="{% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}">
-    <span id="galleryUrl" class="break-all">{% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}</span>
-    <button id="copy-btn" onclick="copyGalleryLink()" class="btn btn-sm btn-primary ml-2">Copy</button>
+  <div class="p-2 flex flex-col gap-2">
+    <h2 class="text-lg font-semibold">Public Gallery</h2>
+
+    <label class="flex items-center gap-3 cursor-pointer">
+      <span class="font-medium text-md">Share Gallery</span>
+      <input id="publicGalleryToggle"
+             type="checkbox"
+             class="checkbox checkbox-primary"
+             {% if event.is_public_gallery_enabled %}checked{% endif %}>
+    </label>
   </div>
+
+  <!-- Studio Name -->
+  <div class="p-2 flex flex-col gap-2">
+    <label class="text-md font-medium mb-1">
+      Studio Name <span class="text-sm italic"> [ To be displayed on Gallery Page ] </span>
+    </label>
+    <div class="flex items-center gap-1">
+    <input
+      id="studio_name"
+      type="text"
+      maxlength="50"
+      class="input w-full"
+      placeholder="Eg. PhotoFlow Studio"
+      value="{{ event.studio_name|default:'' }}"
+    >
+    <button
+      id="saveStudioBtn"
+      onclick="saveStudioName()"
+      class="btn btn-primary btn-sm">
+      Save
+    </button>
+    </div>
+  </div>
+
+  <!-- Public Gallery Link -->
+  <div id="publicGalleryLink"
+       class="p-3 rounded-lg border text-sm bg-base-200 flex items-center justify-between gap-3
+       {% if not event.is_public_gallery_enabled %}hidden{% endif %}"
+       data-public-url="{% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}">
+
+    <span id="galleryUrl" class="break-all text-primary">
+      {% if event.is_public_gallery_enabled %}
+        {{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}
+      {% endif %}
+    </span>
+
+    <button id="copy-btn"
+            onclick="copyGalleryLink()"
+            class="btn btn-sm btn-outline">
+      Copy
+    </button>
+  </div>
+
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   const toggle = document.getElementById("publicGalleryToggle");
   const linkBox = document.getElementById("publicGalleryLink");
   const linkSpan = document.getElementById("galleryUrl");
+  const studioInput = document.getElementById("studio_name");
 
-  const notyf = new Notyf()
-  toggle.addEventListener("change", function() {
-    const enabled = toggle.checked;
+  const notyf = new Notyf();
 
+  function setStudioState() {
+    studioInput.disabled = !toggle.checked;
+    studioInput.classList.toggle("opacity-50", !toggle.checked);
+  }
+
+  toggle.addEventListener("change", function () {
     fetch("{% url 'toggle_public_gallery' event.event_id %}", {
       method: "POST",
       headers: {
         "X-CSRFToken": "{{ csrf_token }}",
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({ enabled })
+      body: new URLSearchParams({ enabled: toggle.checked })
     })
     .then(res => res.json())
     .then(data => {
       if (data.enabled) {
-
-        // SHOW AND UPDATE URL INSTANTLY
         linkSpan.textContent = data.public_url;
-        linkBox.dataset.publicUrl = data.public_url;
         linkBox.classList.remove("hidden");
-        notyf.success("Public Gallery enabled!")
+        notyf.success("Public gallery enabled");
       } else {
-
-        // HIDE INSTANTLY
         linkBox.classList.add("hidden");
         linkSpan.textContent = "";
-        linkBox.dataset.publicUrl = "";
-        notyf.error("Public Gallery disabled!")
+        notyf.error("Public gallery disabled");
       }
+      setStudioState();
     });
   });
-  });
-function copyGalleryLink() { 
-    const copyBtn = document.getElementById("copy-btn")
-    const text = document.getElementById("galleryUrl").textContent; navigator.clipboard.writeText(text);
-    copyBtn.innerText = "Copied!"
-  }
+
+  setStudioState();
+});
 </script>
+
+<script>
+function copyGalleryLink() {
+  const btn = document.getElementById("copy-btn");
+  const text = document.getElementById("galleryUrl").textContent;
+
+  navigator.clipboard.writeText(text);
+  btn.textContent = "Copied ✓";
+
+  setTimeout(() => {
+    btn.textContent = "Copy";
+  }, 1500);
+}
+</script>
+
+<script>
+function saveStudioName() {
+  const studioInput = document.getElementById("studio_name");
+  const saveBtn = document.getElementById("saveStudioBtn");
+  const notyf = new Notyf();
+
+  if (studioInput.disabled) return;
+
+  saveBtn.disabled = true;
+  saveBtn.innerText = "Saving...";
+
+  fetch("{% url 'update_studio_name' event.event_id %}", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      studio_name: studioInput.value.trim()
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      notyf.success("Studio name saved");
+    } else {
+      notyf.error("Failed to save");
+    }
+  })
+  .catch(() => {
+    notyf.error("Something went wrong");
+  })
+  .finally(() => {
+    saveBtn.disabled = false;
+    saveBtn.innerText = "Save";
+  });
+}
+</script>
+
 
 
 

@@ -54,7 +54,7 @@ def get_storage_usage(request):
     user = request.user
     s3 = boto3.client("s3")
 
-    prefix = f"photos/{user.username}/"
+    prefix = f"photos/photographer_{user.id}/"
     total_bytes = 0
 
     paginator = s3.get_paginator("list_objects_v2")

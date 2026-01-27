@@ -3,13 +3,22 @@
 {% block title %}{{ event.name }} - Gallery{% endblock %}
 {% block main_padding %}!p-0{% endblock %}
 {% block content %}
-<div data-theme="luxury" class="gallery-background !p-0">
-<section class="container p-4 md:p-2 lg:p-1">
-    <div class="navbar-center flex items-center pt-2">
+<div data-theme="luxury" class="gallery-background">
+<section class="p-3 md:p-2 lg:p-2">
+<div class="flex justify-between items-center">
+    <div class="navbar-center flex justify-center items-center">
     <a class="link text-base-content/90 link-neutral text-xl font-pacifico no-underline" href="/">
       PhotoFlow
     </a><span class="bg-primary size-6 icon-[tabler--camera-search]"></span>
    </div>
+   <div>
+   {% if studio_name %}
+    <h2 class="text-base font-serif font-semibold">
+      {{ studio_name }}
+    </h2>
+  {% endif %}
+  </div>
+  </div>
     <h1 class="text-2xl pt-4 font-serif text-primary text-center font-semibold">{{ event.name }} - Photo Gallery</h1>
     <div class="mt-5 flex justify-end">
     <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block">
@@ -28,7 +37,7 @@
               <img
                 src="{{ photo.image.url }}"
                 loading="lazy"
-                alt="Event photo"
+                alt="Event photos"
               />
             </div>
           </a>
@@ -62,7 +71,7 @@
 
 .gallery-grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.5rem;
   grid-auto-flow: row;
 }
 
@@ -70,7 +79,7 @@
 /* Mobile */
 @media (min-width: 0px) {
   .gallery-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -91,7 +100,7 @@
 /* Large desktops */
 @media (min-width: 1536px) {
   .gallery-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
   }
 }
 
@@ -100,7 +109,7 @@
    ================================ */
 
 .gallery-item {
-  border-radius: 16px;
+  border-radius: 8px;
   overflow: hidden;
   background: #f5f5f5;
   box-shadow:
@@ -177,9 +186,6 @@
 }
 }
 </style>
-
-
-
 </section>
 </div>
 {% endblock %}
@@ -258,7 +264,7 @@ if (loadMoreBtn) {
 
       a.innerHTML = `
         <div class="img-wrap">
-          <img src="${photo.image_url}" loading="lazy" alt="Event photo">
+          <img src="${photo.image_url}" loading="lazy" alt="Event Photos">
         </div>
       `;
 

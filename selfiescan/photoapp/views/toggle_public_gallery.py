@@ -28,3 +28,17 @@ def toggle_public_gallery(request, event_id):
         "enabled": enabled,
         "public_url": public_url,
     })
+    
+@require_POST
+def update_studio_name(request, event_id):
+    event = get_object_or_404(Event, event_id=event_id)
+
+    studio_name = request.POST.get("studio_name", "").strip()
+
+    event.studio_name = studio_name
+    event.save(update_fields=["studio_name"])
+
+    return JsonResponse({
+        "success": True,
+        "studio_name": studio_name,
+    })

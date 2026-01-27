@@ -206,12 +206,12 @@ downloadToggle.addEventListener('change', function(){
       notyf.success(data.message)
     } else {
       notyf.error(data.message);
-      this.checked = !isDonloadable
+      this.checked = !is_downloadable
     }
   })
   .catch(error => {
     notyf.error('An error occured while updating the download setting.');
-    this.checked = !isDonloadable
+    this.checked = !is_downloadable
   })
 })
   

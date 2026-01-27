@@ -2,7 +2,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.core.paginator import Paginator
 from ..models import Event, EventShare, Photo
-import logging
+import logging, os
 import zipfile
 from io import BytesIO
 from django.contrib.auth.decorators import login_required
@@ -22,14 +22,16 @@ def download_selected_photos(request, event_id):
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         for photo in selected_photos:
-            # Use the original image
-            file_path = photo.image.path
-            file_name = f"photo_{photo.display_number}.jpg"  # Customize filename as needed
             try:
-                with open(file_path, 'rb') as f:
-                    zip_file.writestr(file_name, f.read())
-            except FileNotFoundError:
-                logger.error(f"Photo file not found: {file_path}")
+                
+                with photo.image.open('rb') as f:
+                    original_name = os.path.basename(photo.image.name)
+                    zip_file.writestr(original_name, f.read())
+
+            except Exception as e:
+                logger.error(
+                    f"Failed to add photo {photo.id}: {str(e)}"
+                )
                 continue
 
     buffer.seek(0)
