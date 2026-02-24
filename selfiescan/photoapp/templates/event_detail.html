@@ -47,13 +47,25 @@
 
       </div>
     </div>
+    <!-- find photos toggle -->
+        <div class="mt-5 flex items-center justify-center shadow-lg shadow-gray-600 rounded-md">
+        <label class="flex items-center gap-3 cursor-pointer p-2">
+          <span class="text-primary font-semibold p-2">Enable Find Photos[Live QR] </span>
+          <input id="findPhotosToggle"
+                 type="checkbox"
+                 class="switch switch-primary"
+                 data-event-id="{{ event.event_id }}"
+                 {% if event.is_find_photos_enabled %}checked{% endif %}>
+        </label>
+        </div>
+
     <!-- Download Toggle Switch -->
         <div class="mt-5 flex items-center justify-center shadow-lg shadow-gray-600 rounded-md">
             <label for="download-toggle" class="text-primary font-semibold  p-4">Allow Downloads for End Users</label>
-            <input type="checkbox" id="download-toggle" class="toggle-checkbox switch" data-event-id="{{ event.event_id }}" {% if event.is_downloadable %}checked{% endif %}>
+            <input type="checkbox" id="download-toggle" class="switch switch-primary" data-event-id="{{ event.event_id }}" {% if event.is_downloadable %}checked{% endif %}>
         </div>
-  <!-- find photos -->
-
+  
+<!-- find photos -->
   <div class="mt-5 shadow-lg shadow-gray-600 rounded-md">
     <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block">
       <span class="text-primary flex items-center justify-center p-2 font-semibold">Find photos
@@ -250,7 +262,25 @@
              {% if event.is_public_gallery_enabled %}checked{% endif %}>
     </label>
   </div>
+<!-- Public Gallery Link -->
+  <div id="publicGalleryLink"
+       class="p-3 rounded-lg border text-sm bg-base-200 flex items-center justify-between gap-3
+       {% if not event.is_public_gallery_enabled %}hidden{% endif %}"
+       data-public-url="{% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}">
 
+    <span id="galleryUrl" class="break-all text-primary">
+      {% if event.is_public_gallery_enabled %}
+        {{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}
+      {% endif %}
+    </span>
+
+    <button id="copy-btn"
+            onclick="copyGalleryLink()"
+            class="btn btn-sm btn-outline">
+      Copy
+    </button>
+  </div>
+  
   <!-- Studio Name -->
   <div class="p-2 flex flex-col gap-2">
     <label class="text-md font-medium mb-1">
@@ -274,24 +304,13 @@
     </div>
   </div>
 
-  <!-- Public Gallery Link -->
-  <div id="publicGalleryLink"
-       class="p-3 rounded-lg border text-sm bg-base-200 flex items-center justify-between gap-3
-       {% if not event.is_public_gallery_enabled %}hidden{% endif %}"
-       data-public-url="{% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}">
-
-    <span id="galleryUrl" class="break-all text-primary">
-      {% if event.is_public_gallery_enabled %}
-        {{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}
-      {% endif %}
-    </span>
-
-    <button id="copy-btn"
-            onclick="copyGalleryLink()"
-            class="btn btn-sm btn-outline">
-      Copy
-    </button>
-  </div>
+<label class="flex items-center gap-3 cursor-pointer p-2">
+  <span class="font-medium text-md">Allow Public Downloads</span>
+  <input id="publicDownloadToggle"
+         type="checkbox"
+         class="checkbox checkbox-primary"
+         {% if event.is_public_gallery_downloadable %}checked{% endif %}>
+</label>
 
 </div>
 
@@ -334,6 +353,28 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   setStudioState();
+  
+const downloadToggle = document.getElementById("publicDownloadToggle");
+
+downloadToggle.addEventListener("change", function () {
+  fetch("{% url 'toggle_public_gallery_download' event.event_id %}", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({ enabled: downloadToggle.checked })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.enabled) {
+      notyf.success("Public download enabled");
+    } else {
+      notyf.error("Public download disabled");
+    }
+  });
+});
+
 });
 </script>
 
@@ -439,8 +480,8 @@ function saveStudioName() {
 
   <!-- Include the pagination controls -->
   <div id="pagination-controls" class="hidden">
-    {% include 'partials/pagination_controls.html' %}
-  </div>
+  {% include 'partials/pagination_controls.html' with photos=photos_page %}
+</div>
 </section>
 <div class="mt-6">
 {% include 'footer.html'%}

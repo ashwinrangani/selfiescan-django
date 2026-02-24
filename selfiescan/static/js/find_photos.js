@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const anchor = document.createElement('a');
                             anchor.href = match.medium;               // lightbox image
                             anchor.dataset.src = match.medium;
-                            anchor.dataset.downloadUrl = match.large; // download target
+                            anchor.dataset.downloadUrl = match.download; // download target
                             anchor.className = "block mb-4";
 
                             const img = document.createElement('img');
@@ -180,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         lgEl.addEventListener("lgAfterOpen", () => {
                             lgOpenFind = true;
                             history.pushState({ lgFind: true }, "");
+                            
                         });
 
                         lgEl.addEventListener("lgAfterClose", () => {

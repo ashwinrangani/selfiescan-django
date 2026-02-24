@@ -22,6 +22,16 @@ def delete_selected_photos(request, event_id):
         for photo in photos:
             if photo.image:
                 photo.image.delete(save=False)
+                
+            if photo.thumb_image:
+                photo.thumb_image.delete(save=False)
+
+            if photo.medium_image:
+                photo.medium_image.delete(save=False)
+
+            if photo.large_image:
+                photo.large_image.delete(save=False)
+                
             if photo.branded_image:
                 photo.branded_image.delete(save=False)
 

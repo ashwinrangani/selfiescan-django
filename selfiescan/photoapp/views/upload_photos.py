@@ -3,12 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from django.http import JsonResponse
 from ..models import Event, Photo, Subscription
-import razorpay
+#import razorpay
 import logging
 logger = logging.getLogger(__name__)
 from .payments.check_subscription import check_subscription
 
-razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+#razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 @login_required
 def upload_photos(request, event_id):

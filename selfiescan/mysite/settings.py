@@ -68,14 +68,14 @@ if not DEBUG:
 
 # ALLOWED_HOSTS = []
 ALLOWED_HOSTS = [
-    'photoflow.in', 'www.photoflow.in', 'localhost', '127.0.0.1','43.204.107.230', 
+    'photoflow.in', 'www.photoflow.in', 'localhost', '127.0.0.1','3.109.123.110', 
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:82',
     'http://127.0.0.1:82',
-    'http://43.204.107.230:82',
-    'https://43.204.107.230:82',
+    'http://3.109.123.110:82',
+    'https://3.109.123.110:82',
     'http://photoflow.in',
     'http://www.photoflow.in',
     'https://photoflow.in',
@@ -91,8 +91,8 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 200
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB per field (adjust based on avg photo size)
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB per file
+DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 0
 
 
 # Application definition
@@ -311,3 +311,16 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
+
+REDIS_CACHE_URL = env(
+    "REDIS_CACHE_URL",
+    default="redis://redis:6379/1"
+)
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_CACHE_URL,
+    }
+}
+

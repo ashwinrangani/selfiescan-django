@@ -2,14 +2,16 @@
 <div id="lightgallery" class="photo-grid columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 mt-2">
   {% for photo in photos %}
   <div class="photo-item relative overflow-hidden group">
-    <a href="{{ photo.image.url }}" data-lg-download="{{ photo.image.url }}">
+
+    <a href="{{ photo.medium }}" data-download-url="{{ photo.large }}">
+
       <img
-        src="{{ photo.image.url }}"
+        src="{{ photo.thumb }}"
         alt="Event photo"
         class="event-image transition transform duration-500 hover:scale-105 object-cover rounded-lg w-full"
+        loading="lazy"
       />
     </a>
-
     <!-- Checkbox appears on hover/visible on mobile -->
     <input
       type="checkbox"

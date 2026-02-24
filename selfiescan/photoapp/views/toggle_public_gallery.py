@@ -42,3 +42,21 @@ def update_studio_name(request, event_id):
         "success": True,
         "studio_name": studio_name,
     })
+
+@login_required
+@require_POST
+def toggle_public_gallery_download(request, event_id):
+    event = get_object_or_404(Event, event_id=event_id)
+
+    if event.photographer != request.user:
+        return JsonResponse({"error": "Not allowed"}, status=403)
+
+    enabled = request.POST.get("enabled") == "true"
+
+    event.is_public_gallery_downloadable = enabled
+    event.save(update_fields=["is_public_gallery_downloadable"])
+
+    return JsonResponse({
+        "enabled": enabled,
+    })
+

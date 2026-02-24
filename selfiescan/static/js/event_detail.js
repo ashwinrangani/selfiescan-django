@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const brandingTypeText = document.getElementById("brandingTypeText");
     const startBrandingBtn = document.getElementById("start-branding-btn");
     const downloadToggle = document.getElementById('download-toggle')
+    const toggleFindPhotos = document.getElementById('findPhotosToggle')
     let notyf = new Notyf({ duration: 5000 });
 
     // Enable or disable branding
@@ -185,7 +186,37 @@ if (removeLogoBtn) {
   });
 }
 
-//Handle download toggle
+// Handle toggle enable/disable for find photos
+toggleFindPhotos.addEventListener('change', function(){
+  const eventId = this.getAttribute('data-event-id');
+  
+  const is_enabled = this.checked;
+  console.log(is_enabled)
+  fetch(`/events/${eventId}/toggle-find-photos/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      "X-CSRFToken": document.querySelector("input[name='csrfmiddlewaretoken']").value,
+      'X-requested-With': 'XMLHttpRequest'
+    },
+    body: JSON.stringify({ is_enabled: is_enabled})
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success){
+      notyf.success(data.message)
+    } else {
+      notyf.error(data.message);
+      this.checked = !is_enabled
+    }
+  })
+  .catch(error => {
+    notyf.error('An error occured while updating the enable/disable setting.');
+    this.checked = !is_enabled
+  })
+});
+
+//Handle download toggle for find photos
 downloadToggle.addEventListener('change', function(){
   const eventId = this.getAttribute('data-event-id');
   
@@ -214,7 +245,7 @@ downloadToggle.addEventListener('change', function(){
     this.checked = !is_downloadable
   })
 })
-  
+
 // photo grid of the event photos
 let lgInstance = null;
 let lgOpen = false;  // track if gallery is open

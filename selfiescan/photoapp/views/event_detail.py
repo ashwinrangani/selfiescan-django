@@ -11,6 +11,26 @@ from django.utils import timezone
 from ..tasks import branded_photo
 from django.contrib.auth.decorators import login_required
 
+
+def get_variant_urls(photo, event):
+    """
+    Decide branded vs normal and return variant URLs.
+    """
+    base = photo
+
+    if event.branding_enabled and photo.is_branded and photo.branded_image:
+        return {
+            "thumb": photo.thumb_image.url if photo.thumb_image else photo.branded_image.url,
+            "medium": photo.medium_image.url if photo.medium_image else photo.branded_image.url,
+            "large": photo.large_image.url if photo.large_image else photo.branded_image.url,
+        }
+
+    return {
+        "thumb": photo.thumb_image.url if photo.thumb_image else photo.image.url,
+        "medium": photo.medium_image.url if photo.medium_image else photo.image.url,
+        "large": photo.large_image.url if photo.large_image else photo.image.url,
+    }
+    
 @login_required
 def event_detail(request, event_id):
     event = get_object_or_404(Event, event_id=event_id)
@@ -43,11 +63,21 @@ def event_detail(request, event_id):
 
     photos_list = Photo.objects.filter(event=event).order_by('-id')  # Adjust ordering as needed
     photos_count = photos_list.count()
-    
     # Set up pagination - 12 photos
     paginator = Paginator(photos_list, 12)
     page = request.GET.get('page', 1)
-    photos = paginator.get_page(page)
+    photos_page = paginator.get_page(page)
+    photo_items = []
+    for photo in photos_page:
+        variants = get_variant_urls(photo, event)
+        photo_items.append({
+        "thumb": variants["thumb"], 
+        "medium": variants["medium"], 
+        "large": variants["large"],
+        "id": photo.id,   # keep this for checkbox
+        })
+
+    
 
     # total photos uploaded by photographer(all events)
     total_photographers_upload = Photo.objects.filter(event__photographer=request.user).count()
@@ -64,23 +94,15 @@ def event_detail(request, event_id):
     return render(request, "event_detail.html", {
         "event": event, 
         "num_photos": photos_count,
-        "photos": photos,
+        "photos": photo_items,
+        "photos_page": photos_page,
         "total_photographers_upload": total_photographers_upload,
         "is_unlimited_upload": is_unlimited_upload,
         "billing_redirect_url": "/billing/",
         'share_url': share_url,
     })
 
-def rename_event_directory(photographer_username, old_name, new_name):
-    base_dir = os.path.join(settings.MEDIA_ROOT, "photos", photographer_username)
-    old_path = os.path.join(base_dir, old_name)
-    new_path = os.path.join(base_dir, new_name)
 
-    if os.path.exists(old_path):
-        os.rename(old_path, new_path)
-        print(f"Renamed {old_path} to {new_path}")
-    else:
-        print(f"old event folder does not exists")
 
 
 def load_photos(request, event_id):
@@ -91,18 +113,27 @@ def load_photos(request, event_id):
     page = request.GET.get('page', 1)
 
     try:
-        photos = paginator.page(page)
+        photos_page = paginator.page(page)
     except (PageNotAnInteger, EmptyPage):
-        photos = paginator.page(1)
+        photos_page = paginator.page(1)
 
-    # Render the photo grid and pagination controls separately
+    photo_items = []
+    for photo in photos_page:
+        variants = get_variant_urls(photo, event)
+        photo_items.append({
+            "thumb": variants["thumb"],
+            "medium": variants["medium"],
+            "large": variants["large"],
+            "id": photo.id,   # keep this for checkbox
+        })
+
     html = render_to_string('partials/photo_grid.html', {
-        'photos': photos,
+        'photos': photo_items,
         'event': event
     })
 
     pagination_html = render_to_string('partials/pagination_controls.html', {
-        'photos': photos,
+        'photos': photos_page,
         'paginator': paginator
     })
 
@@ -111,6 +142,18 @@ def load_photos(request, event_id):
         'pagination_html': pagination_html
     })
 
+    
+    
+def rename_event_directory(photographer_username, old_name, new_name):
+    base_dir = os.path.join(settings.MEDIA_ROOT, "photos", photographer_username)
+    old_path = os.path.join(base_dir, old_name)
+    new_path = os.path.join(base_dir, new_name)
+
+    if os.path.exists(old_path):
+        os.rename(old_path, new_path)
+        print(f"Renamed {old_path} to {new_path}")
+    else:
+        print(f"old event folder does not exists")
 
 def create_branding(request, event_id):
     if request.method == "POST":

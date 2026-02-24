@@ -87,7 +87,15 @@
             Dashboard
           </a>
         </li>
-        
+        {% if user.is_staff %}
+        <li>
+          <a class="dropdown-item" href="{% url 'admin:index' %}">
+            <span class="icon-[tabler--adjustments]"></span>
+            Admin Settings
+          </a>
+        </li>
+        {% endif %}
+
         <li>
           <a class="dropdown-item" href="{% url 'profile'%}" >
             <span class="icon-[tabler--user]"></span>

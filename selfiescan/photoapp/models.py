@@ -30,8 +30,10 @@ class Event(models.Model):
     branding_enabled = models.BooleanField(default=False)
     branding_image = models.ImageField(upload_to='branding/', null=True, blank=True)
     branding_text = models.CharField(max_length=100, blank=True, null=True)
-    is_downloadable = models.BooleanField(null=True, default=False)
+    is_find_photos_enabled = models.BooleanField(default=True)
+    is_downloadable = models.BooleanField(null=True, default=False) #download control over find photos
     is_public_gallery_enabled = models.BooleanField(default=False)
+    is_public_gallery_downloadable = models.BooleanField(null=True, default=False)
     public_token = models.CharField(max_length=32, unique=True)
     studio_name = models.CharField(max_length=50, blank=True, null=True, editable=True)
 
@@ -45,7 +47,27 @@ class Event(models.Model):
             qr.save(qr_io, format='PNG')
             self.qr_code.save(f"{self.event_id}.png", ContentFile(qr_io.getvalue()), save=False)
         super().save(*args, **kwargs)
+        
+        
+class SubEvent(models.Model):
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="subevents"
+    )
+    name = models.CharField(max_length=255)
+    date = models.DateField(null=True, blank=True)
+    order = models.PositiveIntegerField(default=0)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "date", "created_at"]
+
+    def __str__(self):
+        return f"{self.event.name} - {self.name}"
+        
+        
 class EventShare(models.Model):
     event = models.ForeignKey(Event,on_delete=models.CASCADE,related_name = 'shares')
     token = models.UUIDField(default=uuid.uuid4, editable=False,unique=True)
@@ -100,6 +122,13 @@ class Photo(models.Model):
     is_branded = models.BooleanField(default=False) 
     customer_selected = models.BooleanField(default=False)
     display_number = models.PositiveIntegerField(null=True, blank=True)
+    subevent = models.ForeignKey(
+        SubEvent,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="photos"
+    )
 
     def save(self,*args, **kwargs):
         #assign a display number if not set

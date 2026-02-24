@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% block main_padding %}!p-0{% endblock %}
 {% load static %}
-{% block title %}SelfieScan{% endblock %}
+{% block title %}{{event.name}} - Find Your Photos{% endblock %}
 
 {% block content %}
 
-<div class="shadow-lg bg-inherit rounded-lg border border-blue-50 dark:border-none mt-12 shadow-gray-600 p-6">
+<div class="shadow-lg bg-inherit rounded-lg border border-blue-50 dark:border-none mt-12 shadow-gray-600 p-8">
   {% if message %}
   <p id="info" class="text-center font-semibold text-primary" >{{message}}</p>
    <!-- Countdown Notice -->
@@ -108,6 +109,7 @@
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/fullscreen/lg-fullscreen.min.js"></script>
+
 {% if message %}
 <script>
   // Auto-refresh the page after 30 seconds

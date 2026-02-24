@@ -18,7 +18,8 @@ from .views.share_album import share_album
 from .views.download_selected import download_selected_photos
 from .views.footer import about_us, privacy_policy, terms_of_service, cancellation_refund_policy,contact_us
 from .views.toggle_download import toggle_download
-from .views.toggle_public_gallery import toggle_public_gallery, update_studio_name
+from .views.toggle_find_photos import toggle_find_photos
+from .views.toggle_public_gallery import toggle_public_gallery, update_studio_name, toggle_public_gallery_download
 from .views.public_gallery import public_gallery
 
 urlpatterns = [
@@ -55,6 +56,7 @@ urlpatterns = [
     path('privacy-policy/', privacy_policy, name='privacy-policy'),
     path('terms-of-service/', terms_of_service, name='terms-of-service'),
     path('cancellation-refund-policy/', cancellation_refund_policy, name='cancellation-refund-policy'),
+    path('events/<uuid:event_id>/toggle-find-photos/', toggle_find_photos, name='toggle-find-photos'),
     path('events/<uuid:event_id>/toggle-download/', toggle_download, name='toggle_download'),
     path("contact-us/", contact_us, name='contact-us'),
     path("event/<uuid:event_id>/delete-selected/", delete_selected_photos, name="delete_selected_photos"),
@@ -62,6 +64,5 @@ urlpatterns = [
     path("events/<uuid:event_id>/toggle-public-gallery/", toggle_public_gallery, name="toggle_public_gallery"),
     path("event/<uuid:event_id>/update-studio-name/",update_studio_name, name="update_studio_name"),
     path("gallery/<uuid:event_id>/<str:token>/", public_gallery, name="public_gallery"),
-
-
+    path("event/<uuid:event_id>/toggle-public-download/", toggle_public_gallery_download, name="toggle_public_gallery_download"),
 ]

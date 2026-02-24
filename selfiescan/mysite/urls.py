@@ -21,7 +21,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from sitemap import sitemaps
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 
 urlpatterns = [
@@ -31,6 +32,10 @@ urlpatterns = [
     path('', include('chat.urls')),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain"), name="robots_txt"),
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url=staticfiles_storage.url("images/favicon.ico")),
+    ),
     
 ]
 
