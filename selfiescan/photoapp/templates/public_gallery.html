@@ -28,28 +28,65 @@
       </span>
     </a>
   </div>
+  <!-- SESSION FILTER -->
+<div class="flex flex-wrap gap-2 mt-6 justify-center">
+
+  <a href="?"
+   data-session=""
+   class="session-tab btn btn-xs {% if not active_session %}btn-primary{% else %}btn-outline{% endif %}">
+     All Photos
+  </a>
+
+  {% for session in sessions %}
+    <a href="?session={{ session.id }}"
+   data-session="{{ session.id }}"
+   class="session-tab btn btn-xs 
+   {% if active_session == session.id|stringformat:'s' %}
+     btn-primary
+   {% else %}
+     btn-outline
+   {% endif %}">
+        {{ session.name }}
+    </a>
+  {% endfor %}
+
+</div>
+
     <!-- LightGallery Container -->
-    <div 
-  id="lightgallery" class="gallery-grid mt-6">
+    <div id="lightgallery" class="gallery-grid mt-6">
 
-        {% for photo in photos %}
-            <a href="{{ photo.obj.medium_image.url }}" 
-            {% if photo.download_url %}
-              data-download-url="{{ photo.download_url }}"
-            {% endif %}
-            class="gallery-item group">
-            <div class="img-wrap">
-              <img
-                src="{{ photo.obj.thumb_image.url }}"
-                loading="lazy"
-                alt="Event photos"
-              />
-            </div>
-          </a>
+{% for photo in photos %}
+<a
+  href="{% if photo.obj.medium_image %}{{ photo.obj.medium_image.url }}{% else %}{{ photo.obj.image.url }}{% endif %}"
+  {% if photo.download_url %}
+    data-download-url="{{ photo.download_url }}"
+  {% endif %}
+  class="gallery-item group"
+>
 
-        {% endfor %}
-    </div>
+<div class="img-wrap">
+<img
+  src="{% if photo.obj.thumb_image %}{{ photo.obj.thumb_image.url }}{% else %}{{ photo.obj.image.url }}{% endif %}"
+  loading="lazy"
+  decoding="async"
+  alt="Event photos"
+/>
+</div>
 
+</a>
+{% endfor %}
+
+</div>
+<!-- Empty State OUTSIDE grid -->
+<div id="emptyState"
+     class="hidden text-center py-16">
+  <div class="text-primary text-lg font-semibold">
+    No Photos In This Session
+  </div>
+  <div class="text-base-content/60 text-sm mt-2">
+    Please check back later or select another session.
+  </div>
+</div>
     <!-- Load More -->
     <div class="mt-8 text-center mb-10">
         <button 
@@ -69,7 +106,7 @@
     </div>
 <style>
 .gallery-background {
-    
+    min-height: 100vh;
     background-image: radial-gradient(#d8d0d0 0.5px, transparent 0.5px);
     background-size: 18px 18px;
 }
@@ -257,7 +294,12 @@ if (loadMoreBtn) {
     loadMoreBtn.innerText = "Loading...";
     loadingIcon.classList.remove("hidden");
 
-    const res = await fetch(`?offset=${offset}&limit=${limit}`, {
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set("offset", offset);
+    currentParams.set("limit", limit);
+    const emptyState = document.getElementById("emptyState");
+
+    const res = await fetch(`?${currentParams.toString()}`, {
       headers: { "X-Requested-With": "XMLHttpRequest" },
     });
 
@@ -291,7 +333,91 @@ if (loadMoreBtn) {
 
     loadingIcon.classList.add("hidden");
   });
+  }
+  /* ============================================================
+   SESSION TAB SWITCH (AJAX)
+   ============================================================ */
+
+const sessionTabs = document.querySelectorAll(".session-tab");
+
+sessionTabs.forEach(tab => {
+  tab.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const sessionId = tab.dataset.session || "";
+
+    // Update URL without reload
+    const newUrl = sessionId ? `?session=${sessionId}` : window.location.pathname;
+    history.pushState({}, "", newUrl);
+
+    // UI active state switching
+    sessionTabs.forEach(t => {
+      t.classList.remove("btn-primary");
+      t.classList.add("btn-outline");
+    });
+    tab.classList.remove("btn-outline");
+    tab.classList.add("btn-primary");
+
+    // Reset UI
+    galleryEl.innerHTML = "";
+    offset = 0;
+    loadMoreBtn.style.display = "none";
+    loadingIcon.classList.remove("hidden");
+
+    // Fetch first batch
+    const params = new URLSearchParams();
+    if (sessionId) params.set("session", sessionId);
+    params.set("offset", 0);
+    params.set("limit", limit);
+
+    const res = await fetch(`?${params.toString()}`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    });
+
+    const data = await res.json();
+
+    data.photos.forEach(photo => {
+      const a = document.createElement("a");
+      a.href = photo.medium;
+      a.dataset.downloadUrl = photo.large;
+      a.className = "gallery-item group";
+
+      a.innerHTML = `
+        <div class="img-wrap">
+          <img src="${photo.thumb}" loading="lazy" alt="Event Photos">
+        </div>
+      `;
+
+      galleryEl.appendChild(a);
+    });
+
+    galleryInstance.refresh();
+
+    offset = data.loaded_photos;
+  const emptyState = document.getElementById("emptyState");
+
+// Hide first (reset state)
+emptyState.classList.add("hidden");
+
+// If no photos returned
+if (data.photos.length === 0) {
+  emptyState.classList.remove("hidden");
+  loadMoreBtn.style.display = "none";
+} else {
+  if (offset < data.total_photos) {
+    loadMoreBtn.style.display = "inline-flex";
+    loadMoreBtn.disabled = false;
+    loadMoreBtn.innerText = "Load More Photos";
+  } else {
+    loadMoreBtn.style.display = "none";
+  }
 }
+   
+
+    loadingIcon.classList.add("hidden");
+  });
+});
+
 </script>
 <script>
   const isPublicDownloadable = {{ event.is_public_gallery_downloadable|yesno:"true,false" }};

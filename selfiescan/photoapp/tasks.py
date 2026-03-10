@@ -186,11 +186,11 @@ def process_photo(self, photo_id):
             face_count = len(face_records)
 
             logger.info(f"Rekognition indexed {face_count} faces for {photo_id}")
-
+            generate_photo_variants(photo)
             photo.is_processed = True
             photo.save(update_fields=["is_processed"])
 
-            generate_photo_variants(photo)
+            
 
 
             return f"Photo {photo_id} processed with Rekognition: {face_count} faces"
@@ -222,11 +222,11 @@ def process_photo(self, photo_id):
                 photo=photo,
                 encoding=np.array(encoding).tobytes()
             )
-
+        generate_photo_variants(photo)
         photo.is_processed = True
         photo.save(update_fields=["is_processed"])
 
-        generate_photo_variants(photo)
+        
 
 
         return f"Photo {photo_id} processed with fallback: {len(face_locations)} faces"

@@ -21,6 +21,7 @@ from .views.toggle_download import toggle_download
 from .views.toggle_find_photos import toggle_find_photos
 from .views.toggle_public_gallery import toggle_public_gallery, update_studio_name, toggle_public_gallery_download
 from .views.public_gallery import public_gallery
+from .views.sessions.sessions import create_session, edit_session, delete_session
 
 urlpatterns = [
     path("", homepage, name='homepage'),
@@ -65,4 +66,7 @@ urlpatterns = [
     path("event/<uuid:event_id>/update-studio-name/",update_studio_name, name="update_studio_name"),
     path("gallery/<uuid:event_id>/<str:token>/", public_gallery, name="public_gallery"),
     path("event/<uuid:event_id>/toggle-public-download/", toggle_public_gallery_download, name="toggle_public_gallery_download"),
+    path('events/<uuid:event_id>/sessions/create/', create_session, name='create_session'),
+    path('events/<uuid:event_id>/sessions/<int:pk>/edit/', edit_session, name='edit_session'),
+    path('events/<uuid:event_id>/sessions/<int:pk>/delete/', delete_session, name='delete_session'),
 ]

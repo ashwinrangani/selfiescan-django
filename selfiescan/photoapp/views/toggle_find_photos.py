@@ -16,5 +16,5 @@ def toggle_find_photos(request, event_id):
 
     return JsonResponse({
         'success': True,
-        'message': f"Downloads {'enabled' if event.is_find_photos_enabled == True else 'disabled'} for end users."
+        'message': f"Find Photos Link {'enabled' if event.is_find_photos_enabled == True else 'disabled'} for end users."
     })

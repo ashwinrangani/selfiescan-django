@@ -12,6 +12,23 @@
         action="{% url 'upload_photos' event_id=event.event_id %}">
       {% csrf_token %}
       <div class="flex flex-col items-center justify-center gap-2 lg:gap-6">
+      <div class="w-full">
+  <label class="block text-sm font-medium mb-1">
+    Select Session (Optional)
+  </label>
+
+  <select id="session-select"
+          name="session_id"
+          class="select select-bordered w-full">
+    <option value="">Main Event (No Session)</option>
+
+    {% for session in event.subevents.all %}
+      <option value="{{ session.id }}">
+        {{ session.name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
         <!-- Upload data-->
         <input
           type="file"
@@ -41,9 +58,13 @@
       
   <span id="selected-photos"></span>
           
-      <div id="progressBarContainer" class="progress h-6 hidden w-full">
+      <div id="progressBarContainer" class="hidden w-full">
+    <div class="progress h-6">
         <div id="progressBar" class="progress-bar w-0 font-light">0%</div>
     </div>
+</div>
+
+<div id="upload-queue" class="mt-4 space-y-2"></div>
 
     <!-- Success Notification -->
     <p id="uploadSuccess" class="hidden text-green-500">Upload Successful!</p>

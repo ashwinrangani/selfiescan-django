@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from ..models import Event, Photo
+from ..models import Event, Photo, SubEvent
 from photoapp.utils.s3_download import generate_presigned_download
 
 def public_gallery(request, event_id, token):
@@ -10,14 +10,16 @@ def public_gallery(request, event_id, token):
         public_token=token,
         is_public_gallery_enabled=True
     )
-
+    session_id = request.GET.get("session")
     base_qs = (
         Photo.objects
         .filter(event=event)
-        .only("id", "thumb_image", "medium_image", "large_image", "event")
-        .order_by("id")
+        .only("id", "image", "thumb_image", "medium_image", "large_image", "event")
+        .order_by("image")
     )
-
+    # Filter by session if provided
+    if session_id:
+        base_qs = base_qs.filter(subevent_id=session_id)
     # AJAX: Load More
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         offset = int(request.GET.get("offset", 0))
@@ -29,9 +31,9 @@ def public_gallery(request, event_id, token):
             "photos": [
                 {
                     "id": p.id,
-                    "thumb": p.thumb_image.url,
-                    "medium": p.medium_image.url,
-                    "large": generate_presigned_download(p.large_image),
+                    "thumb": p.thumb_image.url if p.thumb_image else p.image.url,
+                    "medium": p.medium_image.url if p.medium_image else p.image.url,
+                    "large": generate_presigned_download(p.large_image if p.large_image else p.image),
                 }
                 for p in photos
             ],
@@ -46,7 +48,7 @@ def public_gallery(request, event_id, token):
     photo_data = [
         {
             "obj": p,
-            "download_url": generate_presigned_download(p.large_image)
+            "download_url": generate_presigned_download(p.large_image if p.large_image else p.image)
             if event.is_public_gallery_downloadable else None
         }
         for p in photos
@@ -56,9 +58,11 @@ def public_gallery(request, event_id, token):
         "event": event,
         "event_id": event_id,
         "token": token,
-        "photos": photo_data,
+        "photos": photo_data if photo_data else None,
         "total_photos": total_photos,
         "studio_name": event.studio_name,
         "hide_navbar": True,
+        "sessions": event.subevents.all(),
+        "active_session": session_id,
     })
 

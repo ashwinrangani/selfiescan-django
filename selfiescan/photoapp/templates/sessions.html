@@ -1,0 +1,309 @@
+
+<div class="p-4 rounded-xl shadow mt-6">
+  <div class="text-lg font-semibold mt-3 divider divider-secondary">Manage Sessions</div>
+
+  <!-- Add Session -->
+  <input type="text" id="session-name"
+           placeholder="Session Name"
+           class="input input-bordered w-full mb-2 mt-3">
+  <div class="flex flex-col sm:flex-row gap-2 mb-4">
+    <input type="date"
+           id="session-date"
+           class="input input-bordered">
+
+    <button id="add-session-btn"
+            class="btn btn-primary">
+      Add
+    </button>
+  </div>
+
+  <!-- Session List -->
+  <div id="sessions-container" class="space-y-2">
+
+    {% for session in event.subevents.all %}
+<div class="session-item flex flex-col sm:flex-row sm:items-center justify-between bg-base-100 p-3 rounded-lg border border-primary"
+     data-id="{{ session.id }}">
+
+    <div class="session-info">
+        <p class="font-medium session-name">{{ session.name }}</p>
+        <p class="text-sm text-gray-500 session-date">
+            {{ session.date|default:"No date" }}
+        </p>
+        <p class="text-sm text-gray-400 session-count">
+            {{ session.photos.count }} photos
+        </p>
+    </div>
+
+    <div class="session-actions flex gap-2">
+        <button class="edit-session btn btn-sm btn-outline">Edit</button>
+        <button class="delete-session btn btn-sm btn-error">Delete</button>
+    </div>
+</div>
+{% endfor %}
+
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* -----------------------------
+       Toast Instance
+    ----------------------------- */
+    const sessionNotyf = new Notyf({
+        duration: 4000,
+        dismissible: true,
+        position: { x: 'right', y: 'top' }
+    });
+
+    const eventId = "{{ event.event_id }}";
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    const addBtn = document.getElementById("add-session-btn");
+    const sessionsContainer = document.getElementById("sessions-container");
+    const sessionSelect = document.getElementById("session-select");
+    
+    function addSessionToSelect(id, name) {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = name;
+    sessionSelect.appendChild(option);
+}
+    /* -----------------------------
+       CREATE SESSION
+    ----------------------------- */
+    addBtn.addEventListener("click", () => {
+        const name = document.getElementById("session-name").value.trim();
+        const date = document.getElementById("session-date").value;
+        
+        
+        if (!name) {
+            sessionNotyf.error("Session name required");
+            return;
+        }
+        addBtn.innerText = "Adding.."
+
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("date", date);
+        formData.append("csrfmiddlewaretoken", csrfToken);
+
+        fetch(`/events/${eventId}/sessions/create/`, {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.error) {
+                sessionNotyf.error(data.error);
+                return;
+            }
+
+            addSessionToDOM(data);
+
+            document.getElementById("session-name").value = "";
+            document.getElementById("session-date").value = "";
+            addBtn.innerText = "Add"
+            addSessionToSelect(data.id, data.name);
+            sessionNotyf.success("Session created");
+        });
+    });
+
+    /* -------- EDIT -------- */
+    
+    function updateSessionInSelect(id, newName) {
+    const option = sessionSelect.querySelector(`option[value="${id}"]`);
+    if (option) {
+        option.textContent = newName;
+    }
+}
+    document.addEventListener("click", function(e) {
+
+        
+        if (e.target.classList.contains("edit-session")) {
+
+            const sessionItem = e.target.closest(".session-item");
+            const nameEl = sessionItem.querySelector(".session-name");
+            const dateEl = sessionItem.querySelector(".session-date");
+
+            const currentName = nameEl.innerText;
+            const currentDate = dateEl.innerText === "No date" ? "" : dateEl.innerText;
+
+            sessionItem.dataset.originalName = currentName;
+            sessionItem.dataset.originalDate = currentDate;
+
+            nameEl.innerHTML = `
+                <input type="text"
+                    class="edit-name-input input input-bordered input-sm w-full"
+                    value="${currentName}">
+            `;
+
+            dateEl.innerHTML = `
+                <input type="date"
+                    class="edit-date-input input input-bordered input-sm mt-2"
+                    value="${currentDate}">
+            `;
+
+            sessionItem.querySelector(".session-actions").innerHTML = `
+              <div class="flex flex-col sm:flex-row sm:items-center w-full gap-3 mt-4 ml-1">
+
+                  <div class="flex flex-col sm:flex-row gap-2 w-full">
+                      <button class="save-session btn btn-sm btn-primary">
+                          Save
+                      </button>
+                      <button class="cancel-edit btn btn-sm">
+                          Cancel
+                      </button>
+                  </div>
+
+              </div>
+          `;
+        }
+
+        /* -------- DELETE -------- */
+        function removeSessionFromSelect(id) {
+            const option = sessionSelect.querySelector(`option[value="${id}"]`);
+            if (option) {
+                option.remove();
+            }
+        }
+        if (e.target.classList.contains("delete-session")) {
+
+            const sessionItem = e.target.closest(".session-item");
+            const sessionId = sessionItem.dataset.id;
+
+            const formData = new FormData();
+            formData.append("csrfmiddlewaretoken", csrfToken);
+
+            fetch(`/events/${eventId}/sessions/${sessionId}/delete/`, {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    sessionItem.classList.add("opacity-0", "translate-x-4", "transition-all", "duration-300");
+
+                    setTimeout(() => {
+                        sessionItem.remove();
+                    }, 300);
+                    removeSessionFromSelect(sessionId);
+                    
+                    
+                    sessionNotyf.success("Session deleted");
+                }
+            });
+        }
+
+        /* -------- SAVE -------- */
+        if (e.target.classList.contains("save-session")) {
+
+            const sessionItem = e.target.closest(".session-item");
+            const sessionId = sessionItem.dataset.id;
+
+            const newName = sessionItem.querySelector(".edit-name-input").value.trim();
+            const newDate = sessionItem.querySelector(".edit-date-input").value;
+
+            if (!newName) {
+                sessionNotyf.error("Session name required");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("name", newName);
+            formData.append("date", newDate);
+            formData.append("csrfmiddlewaretoken", csrfToken);
+
+            fetch(`/events/${eventId}/sessions/${sessionId}/edit/`, {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.error) {
+                    sessionNotyf.error(data.error);
+                    return;
+                }
+
+                sessionItem.querySelector(".session-name").innerText = data.name;
+                sessionItem.querySelector(".session-date").innerText = data.date || "No date";
+
+                sessionItem.querySelector(".session-actions").innerHTML = `
+                    <button class="edit-session btn btn-sm btn-outline">Edit</button>
+                    <button class="delete-session btn btn-sm btn-error">Delete</button>
+                `;
+
+                sessionItem.classList.add("ring-2", "ring-success");
+                setTimeout(() => {
+                    sessionItem.classList.remove("ring-2", "ring-success");
+                }, 600);
+                
+                updateSessionInSelect(data.id, data.name);
+                sessionNotyf.success("Session updated");
+            });
+        }
+
+        /* -------- CANCEL -------- */
+        if (e.target.classList.contains("cancel-edit")) {
+
+            const sessionItem = e.target.closest(".session-item");
+
+            const originalName = sessionItem.dataset.originalName;
+            const originalDate = sessionItem.dataset.originalDate;
+
+            sessionItem.querySelector(".session-name").innerText = originalName;
+            sessionItem.querySelector(".session-date").innerText =
+                originalDate || "No date";
+
+            sessionItem.querySelector(".session-actions").innerHTML = `
+                <button class="edit-session btn btn-sm btn-outline">Edit</button>
+                <button class="delete-session btn btn-sm btn-error">Delete</button>
+            `;
+        }
+
+    });
+
+    /* -----------------------------
+       ADD SESSION TO DOM
+    ----------------------------- */
+    function addSessionToDOM(data) {
+
+        const div = document.createElement("div");
+        div.className = `
+            session-item
+            flex justify-between items-center
+            bg-base-100 p-3 rounded-lg
+            opacity-0 translate-y-2 transition-all duration-300
+        `;
+        div.dataset.id = data.id;
+
+        div.innerHTML = `
+            <div class="session-info">
+                <p class="font-medium session-name">${data.name}</p>
+                <p class="text-sm text-gray-500 session-date">
+                    ${data.date || "No date"}
+                </p>
+                <p class="text-sm text-gray-400 session-count">
+                    0 photos
+                </p>
+            </div>
+
+            <div class="session-actions flex gap-2">
+                <button class="edit-session btn btn-sm btn-outline">Edit</button>
+                <button class="delete-session btn btn-sm btn-error">Delete</button>
+            </div>
+        `;
+
+        sessionsContainer.appendChild(div);
+
+        setTimeout(() => {
+            div.classList.remove("opacity-0", "translate-y-2");
+        }, 10);
+    }
+
+});
+</script>
