@@ -46,10 +46,12 @@
       <p class="mb-6">Total photos uploaded: <strong>{{ num_photos }}</strong></p>
 
     <!-- upload photos -->
-      {% include 'upload_photos.html' %}
+   <a href="{% url 'upload_photos' event.event_id %}" class="btn btn-primary w-full"> Upload Photos 
+   <span class="icon-[tabler--cloud-upload] size-4"></span>
+  </a>
 
       </div>
-    </div>
+    
     <!-- find photos toggle -->
         <div class="mt-5 flex items-center justify-center gap-2 shadow-lg shadow-gray-600 rounded-md">
         <div class="p-1 flex justify-between items-center">
@@ -87,7 +89,7 @@
     </a>
   </div>
 </div>
-  
+
   <!-- delete event -->
   <div >
     <div class="shadow-lg shadow-gray-600 flex flex-col p-6 rounded-md">

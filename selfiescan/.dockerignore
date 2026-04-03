@@ -9,3 +9,5 @@ media/
 *.sqlite3
 .DS_Store
 .git/
+.env
+node_modules/

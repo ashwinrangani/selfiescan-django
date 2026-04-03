@@ -14,149 +14,250 @@ const MAX_PARALLEL = 3;
 
 let uploadQueue = [];
 let activeUploads = 0;
+let initialTotal = 0;
 let totalFiles = 0;
 let uploadedFiles = 0;
+let failedUploads = 0;
 
-const notyf = new Notyf({ duration: 20000 ,dismissible: true });
-
+const notyf = new Notyf({ duration: 20000, dismissible: true });
+window.addEventListener("offline", () => {
+    notyf.error("Internet connection lost");
+});
+window.addEventListener("online", () => {
+    notyf.success("Back online");
+});
+/* ---------------- Subscription Dialog ---------------- */
+function openSubDialog() {
+    const backdrop = document.getElementById("sub-dialog-backdrop");
+    backdrop.style.display = "flex";
+}
+ 
+function closeSubDialog() {
+    const backdrop = document.getElementById("sub-dialog-backdrop");
+    backdrop.style.display = "none";
+}
+ 
+// Wire close button and dismiss button
+document.getElementById("sub-dialog-close").onclick   = closeSubDialog;
+document.getElementById("sub-dialog-dismiss").onclick = closeSubDialog;
+ 
+// Close on backdrop click
+document.getElementById("sub-dialog-backdrop").addEventListener("click", function(e) {
+    if (e.target === this) closeSubDialog();
+});
+ 
 document.getElementById("upgrade-plan-btn").onclick = function () {
     if (billingURL) window.location.href = billingURL;
+    closeSubDialog();
 };
 
 function validate_input(files){
-
     const allowed = ['image/jpeg','image/png','image/psd','image/jpg','image/webp'];
-
     for (let f of files){
         if(!allowed.includes(f.type)){
             notyf.error("Invalid file type!");
             return false;
         }
     }
-
     return true;
 }
 
+// Prevent browser from opening dropped files
+["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+    document.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+});
+
 /* ---------------- Drag & Drop ---------------- */
+const dragArea = document.getElementById("drag-area");
 
-uploadForm.addEventListener("dragover",(e)=>{
+dragArea.addEventListener("dragenter", () => dragArea.classList.add("drag-active"));
+dragArea.addEventListener("dragleave", () => dragArea.classList.remove("drag-active"));
+dragArea.addEventListener("dragover",  (e) => { e.preventDefault(); dragArea.classList.add("drag-active"); });
+
+dragArea.addEventListener("drop", (e) => {
     e.preventDefault();
-    uploadForm.classList.add("border-primary");
-});
-
-uploadForm.addEventListener("dragleave",()=>{
-    uploadForm.classList.remove("border-primary");
-});
-
-uploadForm.addEventListener("drop",(e)=>{
-    e.preventDefault();
-    uploadForm.classList.remove("border-primary");
-
-    const files = e.dataTransfer.files;
-
-    if(!validate_input(files)) return;
-
+    dragArea.classList.remove("drag-active");
+    const files = Array.from(e.dataTransfer.files);
+    if (!files.length) return;
+    if (!validate_input(files)) return;
     addFilesToQueue(files);
+    uploadedPhotos.value = "";
 });
 
+/* ---------------- Upload Card ---------------- */
+function createUploadCard(item){
 
-/* ---------------- File Select ---------------- */
+    const queue = document.getElementById("upload-queue");
 
-uploadedPhotos.addEventListener('change', (e) => {
+    // Show queue section
+    const section = document.getElementById("queue-section");
+    if (section) section.style.display = "block";
 
-    const files = e.target.files;
+    // Card — vertical flex layout for grid
+    const card = document.createElement("div");
+    card.className = "upload-item";
+    card.id = "upload-" + item.id;
 
-    if(!validate_input(files)) return;
+    // Top row: icon + size
+    const top = document.createElement("div");
+    top.className = "item-top";
 
-    addFilesToQueue(files);
+    const icon = document.createElement("div");
+    icon.className = "item-icon";
+    icon.innerHTML = `<span class="icon-[tabler--photo] size-3.5"></span>`;
 
-});
+    const size = document.createElement("span");
+    size.className = "item-size font-semibold text-primary";
+    size.textContent = (item.file.size / (1024 * 1024)).toFixed(1) + " MB";
 
+    top.appendChild(icon);
+    top.appendChild(size);
 
-function addFilesToQueue(files){
+    // Filename
+    const name = document.createElement("span");
+    name.className = "item-name";
+    name.textContent = item.file.name;
 
-    for(let file of files){
+    // Status
+    const status = document.createElement("span");
+    status.className = "item-status";
+    status.textContent = "Waiting...";
 
-        uploadQueue.push({
-            file:file,
-            status:"pending",
-            retries:0
-        });
+    // Progress bar
+    const track = document.createElement("div");
+    track.className = "item-bar-track";
+    const progressBar = document.createElement("div");
+    progressBar.className = "item-bar-fill";
+    track.appendChild(progressBar);
 
+    // Retry button
+    const retryBtn = document.createElement("button");
+    retryBtn.className = "btn btn-xs btn-error btn-retry hidden";
+    retryBtn.textContent = "Retry";
+
+    retryBtn.onclick = function(){
+        if (failedUploads > 0) failedUploads--;
+        retryBtn.classList.add("hidden");
+        card.classList.remove("item-failed");
+        icon.className = "item-icon";
+        icon.innerHTML = `<span class="icon-[tabler--photo] size-3.5"></span>`;
+        status.textContent = "Retrying...";
+        item.retries = 0;
+        uploadQueue.push(item);
+        startUploadQueue();
+    };
+
+    card.appendChild(top);
+    card.appendChild(name);
+    card.appendChild(status);
+    card.appendChild(track);
+    card.appendChild(retryBtn);
+    queue.appendChild(card);
+
+    // Update count badge
+    const countBadge = document.getElementById("queue-count");
+    if (countBadge) {
+        const total = queue.querySelectorAll(".upload-item").length;
+        countBadge.textContent = total + (total === 1 ? " file" : " files");
     }
 
-    totalFiles = uploadQueue.length;
-    uploadedFiles = 0;
-
-    selectedPhotos.textContent = "Photos Selected: " + totalFiles;
-
+    item.ui = { card, icon, status, progressBar, retryBtn };
 }
 
-
-/* ---------------- Submit ---------------- */
-
-uploadForm.addEventListener('submit', (e) => {
-
-    e.preventDefault();
-
-    if(uploadQueue.length === 0){
-        notyf.error("Please select photos");
-        return;
-    }
-
-    const totalCount = total_upload_count + uploadQueue.length;
-
-    if (!isUnlimited && totalCount > 100) {
-        document.getElementById("open-subscription-modal").click();
-        return;
-    }
-
-    progressBarContainer.classList.remove("hidden");
-
-    startUploadQueue();
-
+/* ---------------- File Select ---------------- */
+uploadedPhotos.addEventListener('change', (e) => {
+    const files = e.target.files;
+    if(!validate_input(files)) return;
+    addFilesToQueue(files);
+     uploadedPhotos.value = "";
 });
 
+function addFilesToQueue(files){
+    for(let file of files){
+        const item = {
+            id: crypto.randomUUID(),
+            file: file,
+            status: "pending",
+            retries: 0
+        };
+        uploadQueue.push(item);
+        createUploadCard(item);
+    }
+    initialTotal += files.length;
+    totalFiles = initialTotal;
+    selectedPhotos.textContent = "Photos Selected: " + totalFiles;
+}
 
-/* ---------------- Queue Manager ---------------- */
+/* ---------------- Submit ---------------- */
+let isUploading = false;
 
-function startUploadQueue(){
+uploadForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    if (isUploading) {
+    notyf.error("Upload already in progress");
+    return;
+}
 
-    while(activeUploads < MAX_PARALLEL && uploadQueue.length){
+    if(uploadQueue.length === 0 && activeUploads === 0){
+    notyf.error("Please select photos");
+    return;
+}
 
-        const item = uploadQueue.shift();
-
-        activeUploads++;
-
-        uploadSingleFile(item);
-
+    const totalCount = total_upload_count + uploadQueue.length;
+    if (!isUnlimited && totalCount > 100) {
+        
+        openSubDialog();
+        return;
     }
 
+    isUploading = true;
+    document.getElementById("submitBtn").disabled = true;
+    progressBarContainer.classList.remove("hidden");
+    startUploadQueue();
+});
+
+/* ---------------- Queue Manager ---------------- */
+function startUploadQueue(){
+    while(activeUploads < MAX_PARALLEL && uploadQueue.length){
+        const item = uploadQueue.shift();
+        activeUploads++;
+        uploadSingleFile(item);
+    }
 }
 
 /* ---------------- Single Upload ---------------- */
-
 function uploadSingleFile(item){
 
-    
+    item.ui.card.classList.add("item-uploading");
+    item.ui.icon.innerHTML = `<span class="icon-[tabler--loader-2] size-3.5 spin"></span>`;
 
     const formData = new FormData();
     formData.append("upload_data", item.file);
 
     const sessionSelect = document.getElementById("session-select");
-
     if(sessionSelect && sessionSelect.value){
-        formData.append("session_id",sessionSelect.value);
+        formData.append("session_id", sessionSelect.value);
     }
 
     const xhr = new XMLHttpRequest();
 
-    
+    xhr.upload.onprogress = function(e){
+        if(e.lengthComputable){
+            const percent = Math.round((e.loaded / e.total) * 100);
+            item.ui.progressBar.style.width = percent + "%";
+            item.ui.status.textContent = percent + "%";
+        }
+    };
 
     xhr.onload = function(){
-
         activeUploads--;
-        uploadedFiles++;
+        item.ui.card.classList.remove("item-uploading");
+
+        if (xhr.status === 200) uploadedFiles++;
 
         const percent = Math.round((uploadedFiles / totalFiles) * 100);
         const remaining = totalFiles - uploadedFiles;
@@ -167,94 +268,81 @@ function uploadSingleFile(item){
         selectedPhotos.textContent =
             `Uploaded ${uploadedFiles} / ${totalFiles} • Remaining ${remaining}`;
 
-        try{
-
+        try {
             const response = JSON.parse(xhr.responseText);
 
             if(xhr.status === 200 && response.upload_success){
-
                 total_upload_count += response.uploaded_images;
                 uploadForm.dataset.uploadCount = total_upload_count;
-
-            }else{
-
-                handleUploadError(response,xhr.status,item);
-
+                item.ui.status.textContent = "Done";
+                item.ui.progressBar.style.width = "100%";
+                item.ui.card.classList.add("item-success");
+                item.ui.icon.className = "item-icon";
+                item.ui.icon.innerHTML = `<span class="icon-[tabler--circle-check] size-3.5"></span>`;
+            } else {
+                handleUploadError(response, xhr.status, item);
             }
-
-        }catch{
-
+        } catch {
             retryUpload(item);
-
         }
 
-        if(uploadedFiles === totalFiles){
-            notyf.success("All photos uploaded. Processing started.");
+        if(uploadedFiles + failedUploads === initialTotal){
+            isUploading = false;
+            document.getElementById("submitBtn").disabled = false;
+            if(failedUploads === 0){
+                notyf.success("All photos uploaded. Processing started.");
+            } else {
+                notyf.error(`${failedUploads} uploads failed.`);
+            }
         }
 
         startUploadQueue();
-
     };
 
     xhr.onerror = function(){
-
         activeUploads--;
-
+        item.ui.card.classList.remove("item-uploading");
         retryUpload(item);
-
         startUploadQueue();
-
     };
 
     xhr.open("POST", uploadForm.action, true);
-
     xhr.setRequestHeader(
         "X-CSRFToken",
         uploadForm.querySelector('[name=csrfmiddlewaretoken]').value
     );
-
+    
     xhr.send(formData);
-
 }
-
 
 /* ---------------- Retry ---------------- */
-
 function retryUpload(item){
-
     if(item.retries < 2){
-
         item.retries++;
-
+        item.ui.status.textContent = "Retry " + item.retries + "/2";
         uploadQueue.push(item);
-
-    }else{
-
-        notyf.error(`Failed to upload ${item.file.name}`);
-
+    } else {
+        failedUploads++;
+        item.ui.status.textContent = "Failed";
+        item.ui.retryBtn.classList.remove("hidden");
+        item.ui.card.classList.add("item-failed");
+        item.ui.icon.className = "item-icon";
+        item.ui.icon.innerHTML = `<span class="icon-[tabler--circle-x] size-3.5"></span>`;
     }
-
 }
 
-
 /* ---------------- Error Handler ---------------- */
-
-function handleUploadError(response,statusCode,item){
-
+function handleUploadError(response, statusCode, item){
     if(statusCode === 403 && response.redirect){
-
-        document.getElementById("open-subscription-modal").click();
-
+    openSubDialog();
         document.getElementById("upgrade-plan-btn").onclick = function () {
             window.location.href = response.redirect;
-        };
 
-    }else{
-
+};
+ 
+} else {
         retryUpload(item);
-
     }
-
 }
 
 });

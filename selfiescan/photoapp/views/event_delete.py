@@ -30,6 +30,11 @@ def event_delete(request, event_id):
             if photo.branded_image:
                 photo.branded_image.delete(save=False)
         
+        subscription = Subscription.objects.get(photographer=request.user)
+
+        subscription.photo_count = max(subscription.photo_count - photos.count(), 0)
+        subscription.save()
+        
         photos.delete()  # Delete DB entries
         
         # Remove the event folder if empty

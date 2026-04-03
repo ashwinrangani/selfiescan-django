@@ -36,19 +36,34 @@ def upload_photos(request, event_id):
 
         if not upload_data:
             return JsonResponse({"message": "No photos uploaded"}, status=400)
-
-        with transaction.atomic():
-            saved_data = []
-            for data in upload_data:
-                photo = Photo(event=event, image=data, subevent=session)
-                photo.save()
-                saved_data.append(photo.image.url)
         
-            count = len(saved_data)
+                
+        saved_data = []
+        
+        try:
+
+            with transaction.atomic():
+                
+                for data in upload_data:
+                    
+                    photo = Photo(event=event, image=data, subevent=session)
+                    photo.save()
+                    saved_data.append(photo.image.name)
+                      # all uploads fail → watch retry logic
             
-            Subscription.objects.filter(photographer=request.user,
-            subscription_type="FREE"
-            ).update(photo_count=F("photo_count") + count)
+                count = len(saved_data)
+                
+                Subscription.objects.filter(photographer=request.user,
+                subscription_type="FREE"
+                ).update(photo_count=F("photo_count") + count)
+        
+        except Exception as e:
+            from django.core.files.storage import default_storage
+
+            for s3_key in saved_data:
+                default_storage.delete(s3_key)
+            logger.exception("Upload failed")
+            return JsonResponse({"message": "Upload failed"}, status=500)
 
         return JsonResponse({
             "upload_success": True,
