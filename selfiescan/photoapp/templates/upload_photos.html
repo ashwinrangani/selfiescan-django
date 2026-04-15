@@ -113,7 +113,11 @@
     font-size: 0.99rem; font-weight: 700;
     color: oklch(var(--bc)); margin-bottom: 3px;
   }
-  .drag-sub { font-size: 0.75rem; font-weight:600 color: oklch(var(--bc) / 0.6); }
+  .drag-sub { 
+    font-size: 0.75rem; 
+    font-weight:600; 
+    color: oklch(var(--bc) / 0.6); 
+  }
 
   .format-chips { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 9px; }
   .format-chip {
@@ -296,6 +300,8 @@
           data-upload-count="{{ total_photographers_upload }}"
           data-unlimited-upload="{{ is_unlimited_upload|yesno:'true,false'}}"
           data-billing-url="{{ billing_redirect_url }}"
+          data-presigned-url="/get-presigned-url/{{ event.event_id }}/"
+          data-upload-complete-url="/upload-complete/{{ event.event_id }}/"
           action="{% url 'upload_photos' event_id=event.event_id %}">
       {% csrf_token %}
 

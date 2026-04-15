@@ -7,3 +7,4 @@ selfiescan/photoapp/templates/homepage-trial.html
 selfiescan/staticfiles/
 selfiescan/.env.dev
 selfiescan/.env.prod
+node_modules/

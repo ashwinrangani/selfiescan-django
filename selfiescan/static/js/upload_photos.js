@@ -25,6 +25,9 @@ window.addEventListener("offline", () => {
 });
 window.addEventListener("online", () => {
     notyf.success("Back online");
+    if (isUploading) {
+        startUploadQueue();
+    }
 });
 /* ---------------- Subscription Dialog ---------------- */
 function openSubDialog() {
@@ -230,89 +233,114 @@ function startUploadQueue(){
 }
 
 /* ---------------- Single Upload ---------------- */
-function uploadSingleFile(item){
+async function uploadSingleFile(item){
 
     item.ui.card.classList.add("item-uploading");
     item.ui.icon.innerHTML = `<span class="icon-[tabler--loader-2] size-3.5 spin"></span>`;
 
-    const formData = new FormData();
-    formData.append("upload_data", item.file);
+    const csrfToken = uploadForm.querySelector('[name=csrfmiddlewaretoken]').value;
 
     const sessionSelect = document.getElementById("session-select");
-    if(sessionSelect && sessionSelect.value){
-        formData.append("session_id", sessionSelect.value);
-    }
+    const sessionId = sessionSelect && sessionSelect.value ? sessionSelect.value : null;
 
-    const xhr = new XMLHttpRequest();
+    try {
+        // ✅ STEP 1: Get presigned URL
+        const presignedRes = await fetch(
+            `${uploadForm.dataset.presignedUrl}?file_name=${encodeURIComponent(item.file.name)}&file_type=${item.file.type}`
+        );
 
-    xhr.upload.onprogress = function(e){
-        if(e.lengthComputable){
-            const percent = Math.round((e.loaded / e.total) * 100);
-            item.ui.progressBar.style.width = percent + "%";
-            item.ui.status.textContent = percent + "%";
-        }
-    };
+        if (!presignedRes.ok) throw new Error("Failed to get upload URL");
 
-    xhr.onload = function(){
+        const presignedData = await presignedRes.json();
+
+        // ✅ STEP 2: Upload to S3 with progress
+        await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+
+            xhr.upload.onprogress = function(e){
+                if(e.lengthComputable){
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    item.ui.progressBar.style.width = percent + "%";
+                    item.ui.status.textContent = percent + "%";
+                }
+            };
+
+            xhr.onload = function(){
+                if (xhr.status === 200) {
+                    resolve();
+                } else {
+                    reject("S3 upload failed");
+                }
+            };
+
+            xhr.onerror = function(){
+                reject("S3 upload error");
+            };
+
+            xhr.open("PUT", presignedData.url, true);
+            xhr.setRequestHeader("Content-Type", item.file.type);
+            xhr.send(item.file);
+        });
+
+        // ✅ STEP 3: Notify Django (VERY IMPORTANT)
+        const completeRes = await fetch(uploadForm.dataset.uploadCompleteUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({
+                file_key: presignedData.file_key,
+                session_id: sessionId
+            })
+        });
+
+        if (!completeRes.ok) throw new Error("Backend save failed");
+
+        // ✅ SUCCESS
+        uploadedFiles++;
         activeUploads--;
+
         item.ui.card.classList.remove("item-uploading");
+        item.ui.status.textContent = "Done";
+        item.ui.progressBar.style.width = "100%";
+        item.ui.card.classList.add("item-success");
+        item.ui.icon.className = "item-icon";
+        item.ui.icon.innerHTML = `<span class="icon-[tabler--circle-check] size-3.5"></span>`;
 
-        if (xhr.status === 200) uploadedFiles++;
+        total_upload_count += 1;
+        uploadForm.dataset.uploadCount = total_upload_count;
 
-        const percent = Math.round((uploadedFiles / totalFiles) * 100);
-        const remaining = totalFiles - uploadedFiles;
+    } catch (error) {
+        console.error(error);
 
-        progressBar.style.width = percent + "%";
-        progressBar.textContent = percent + "%";
-
-        selectedPhotos.textContent =
-            `Uploaded ${uploadedFiles} / ${totalFiles} • Remaining ${remaining}`;
-
-        try {
-            const response = JSON.parse(xhr.responseText);
-
-            if(xhr.status === 200 && response.upload_success){
-                total_upload_count += response.uploaded_images;
-                uploadForm.dataset.uploadCount = total_upload_count;
-                item.ui.status.textContent = "Done";
-                item.ui.progressBar.style.width = "100%";
-                item.ui.card.classList.add("item-success");
-                item.ui.icon.className = "item-icon";
-                item.ui.icon.innerHTML = `<span class="icon-[tabler--circle-check] size-3.5"></span>`;
-            } else {
-                handleUploadError(response, xhr.status, item);
-            }
-        } catch {
-            retryUpload(item);
-        }
-
-        if(uploadedFiles + failedUploads === initialTotal){
-            isUploading = false;
-            document.getElementById("submitBtn").disabled = false;
-            if(failedUploads === 0){
-                notyf.success("All photos uploaded. Processing started.");
-            } else {
-                notyf.error(`${failedUploads} uploads failed.`);
-            }
-        }
-
-        startUploadQueue();
-    };
-
-    xhr.onerror = function(){
         activeUploads--;
         item.ui.card.classList.remove("item-uploading");
         retryUpload(item);
-        startUploadQueue();
-    };
+    }
 
-    xhr.open("POST", uploadForm.action, true);
-    xhr.setRequestHeader(
-        "X-CSRFToken",
-        uploadForm.querySelector('[name=csrfmiddlewaretoken]').value
-    );
-    
-    xhr.send(formData);
+    // ✅ Update global progress
+    const percent = Math.round((uploadedFiles / totalFiles) * 100);
+    const remaining = totalFiles - uploadedFiles;
+
+    progressBar.style.width = percent + "%";
+    progressBar.textContent = percent + "%";
+
+    selectedPhotos.textContent =
+        `Uploaded ${uploadedFiles} / ${totalFiles} • Remaining ${remaining}`;
+
+    if(uploadedFiles + failedUploads === initialTotal){
+        isUploading = false;
+        document.getElementById("submitBtn").disabled = false;
+
+        if(failedUploads === 0){
+            notyf.success("All photos uploaded. Processing started.");
+        } else {
+            notyf.error(`${failedUploads} uploads failed.`);
+        }
+    }
+
+    startUploadQueue();
 }
 
 /* ---------------- Retry ---------------- */

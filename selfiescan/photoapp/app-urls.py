@@ -22,6 +22,8 @@ from .views.toggle_find_photos import toggle_find_photos
 from .views.toggle_public_gallery import toggle_public_gallery, update_studio_name, toggle_public_gallery_download
 from .views.public_gallery import public_gallery
 from .views.sessions.sessions import create_session, edit_session, delete_session
+from .views.upload_complete import upload_complete
+from .views.get_presigned_url import get_presigned_url
 
 urlpatterns = [
     path("", homepage, name='homepage'),
@@ -69,4 +71,6 @@ urlpatterns = [
     path('events/<uuid:event_id>/sessions/create/', create_session, name='create_session'),
     path('events/<uuid:event_id>/sessions/<int:pk>/edit/', edit_session, name='edit_session'),
     path('events/<uuid:event_id>/sessions/<int:pk>/delete/', delete_session, name='delete_session'),
+    path('get-presigned-url/<uuid:event_id>/', get_presigned_url, name='get_presigned_url'),
+    path('upload-complete/<uuid:event_id>/', upload_complete, name='upload_complete'),
 ]
