@@ -1,6 +1,6 @@
 from django.core.cache import cache
 
-MAX_CONCURRENT_FACE_SEARCH = 10
+MAX_CONCURRENT_FACE_SEARCH = 15
 CACHE_KEY = "face_search_inflight"
 TTL = 60  # safety net (seconds)
 

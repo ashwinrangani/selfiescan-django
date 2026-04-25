@@ -1,5 +1,5 @@
 from re import I
-from django.db import models
+from django.db import models,transaction
 from django.contrib.auth.models import User
 import uuid,secrets
 import qrcode
@@ -130,13 +130,20 @@ class Photo(models.Model):
         related_name="photos"
     )
 
-    def save(self,*args, **kwargs):
-        #assign a display number if not set
+    
+
+    def save(self, *args, **kwargs):
         if self.display_number is None:
-            existing_photos = Photo.objects.filter(event=self.event).exclude(id=self.id)
-            max_number = existing_photos.aggregate(models.Max('display_number'))['display_number__max']
-            self.display_number = (max_number or 0) + 1
-        super().save(*args,**kwargs)
+            with transaction.atomic():
+                max_number = (
+                    Photo.objects
+                    .select_for_update()
+                    .filter(event=self.event)
+                    .aggregate(models.Max('display_number'))['display_number__max']
+                )
+                self.display_number = (max_number or 0) + 1
+
+        super().save(*args, **kwargs)
 
 
     def __str__(self):
@@ -146,10 +153,13 @@ class FaceEncoding(models.Model):
     photo = models.ForeignKey(Photo, on_delete=models.CASCADE, related_name="encodings")
     encoding = models.BinaryField(null=True,blank=True)
 
+
 @receiver(post_save, sender=Photo)
 def run_face_encoding_task(sender, instance, created, **kwargs):
     if created:
-        process_photo.delay(instance.id)  # Run the Celery task asynchronously
+        transaction.on_commit(
+            lambda: process_photo.delay(instance.id)
+        )
 
 
 class Subscription(models.Model):

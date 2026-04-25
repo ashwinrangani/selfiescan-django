@@ -73,4 +73,4 @@ urlpatterns = [
     path('events/<uuid:event_id>/sessions/<int:pk>/delete/', delete_session, name='delete_session'),
     path('get-presigned-url/<uuid:event_id>/', get_presigned_url, name='get_presigned_url'),
     path('upload-complete/<uuid:event_id>/', upload_complete, name='upload_complete'),
-]
+    ]

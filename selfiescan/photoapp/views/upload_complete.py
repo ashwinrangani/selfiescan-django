@@ -1,12 +1,13 @@
 import json
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import F
 from ..models import Event, Photo, SubEvent, Subscription
-from .payments.check_subscription import check_subscription
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def upload_complete(request, event_id):
@@ -30,35 +31,57 @@ def upload_complete(request, event_id):
                 event=event
             ).first()
 
-        # ✅ Subscription check (1 file at a time now)
-        if not check_subscription(request, event, 1):
-            return JsonResponse({
-                "message": "Subscription limit reached",
-                "redirect": "/billing/"
-            }, status=403)
+        from django.utils import timezone
 
         with transaction.atomic():
 
+            sub = Subscription.objects.select_for_update().filter(
+                photographer=request.user
+            ).first()
+
+            # --- VALIDATION ---
+            if sub:
+                if sub.subscription_type == "FREE":
+                    if sub.photo_count >= 100:
+                        return JsonResponse({
+                            "message": "Subscription limit reached",
+                            "redirect": "/billing/"
+                        }, status=403)
+
+                elif sub.subscription_type in ["MONTHLY", "YEARLY"]:
+                    if not sub.end_date or sub.end_date < timezone.now():
+                        return JsonResponse({
+                            "message": "Subscription expired",
+                            "redirect": "/billing/"
+                        }, status=403)
+
+            else:
+                return JsonResponse({
+                    "message": "No subscription found",
+                    "redirect": "/billing/"
+                }, status=403)
+
+            # --- CREATE PHOTO ---
             photo = Photo.objects.create(
                 event=event,
                 image=file_key,
                 subevent=session
             )
 
-            # update count
-            Subscription.objects.filter(
-                photographer=request.user,
-                subscription_type="FREE"
-            ).update(photo_count=F("photo_count") + 1)
-
+            # --- UPDATE COUNT ---
+            if sub.subscription_type == "FREE":
+                sub.photo_count += 1
+                sub.save(update_fields=["photo_count"])
+        
+        logger.info(
+            f"Upload complete | user={request.user.id} | event={event.event_id} | file={file_key}"
+        )
         return JsonResponse({
             "success": True,
             "photo_id": photo.id
         })
-
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
+       
         logger.exception("Upload complete failed")
 
         return JsonResponse({"error": "Failed to save"}, status=500)

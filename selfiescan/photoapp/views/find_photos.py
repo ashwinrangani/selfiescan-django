@@ -76,7 +76,7 @@ def find_matches(selfie_file, event_id, tolerance=0.55):
                     # ExternalImageId is our photo.id
                     photo_id = int(match['Face']['ExternalImageId'])
                     similarity = match['Similarity']  # 0-100 score
-                    matched_photos.append((photo_id, (100 - similarity) / 100))  # Normalize to distance-like (lower better)
+                    matched_photos.append((photo_id, similarity))  # Normalize to distance-like (lower better)
                     logger.info(f"Rekognition match: photo {photo_id} with similarity {similarity}%")
             
             if matched_photos:
@@ -97,7 +97,7 @@ def find_matches(selfie_file, event_id, tolerance=0.55):
         image = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
 
         if image is None:
-            return f"Failed to load image for photo {selfie_path}"
+            return f"Failed to load image for photo {image.name}"
         
         resized_image = resize_image_for_processing(image)
         image = np.array(resized_image)
@@ -145,7 +145,7 @@ def find_matches(selfie_file, event_id, tolerance=0.55):
 
         # Step 5: Return as list of (photo_url, distance)
         matched_photos = [(photo_id, dist) for photo_id, dist in best_matches.items()]
-        matched_photos.sort(key=lambda x: x[1])  # Sort by distance (lower = better match)
+        
         logger.info(f"Fallback: Total matched photos: {len(matched_photos)}")
         return matched_photos
 
@@ -187,7 +187,7 @@ def process_selfie(request, event_id):
     })
     
     unprocessed_photos = Photo.objects.filter(event__event_id=event_id, is_processed = False)
-    number_of_photos = Photo.objects.filter(event__event_id=event_id).count()
+    
     
     if unprocessed_photos.exists():
         return render(request, 'find_photos.html', {

@@ -29,6 +29,25 @@ window.addEventListener("online", () => {
         startUploadQueue();
     }
 });
+window.addEventListener("beforeunload", function (e) {
+    if (isUploading || uploadQueue.length > 0 || activeUploads > 0) {
+        e.preventDefault();
+        e.returnValue = "";
+    }
+});
+
+window.addEventListener("popstate", function () {
+    if (isUploading) {
+        const confirmLeave = confirm("Uploads are in progress. Are you sure you want to leave?");
+        if (!confirmLeave) {
+            history.pushState(null, "", location.href);
+        }
+    }
+});
+
+// push initial state
+history.pushState(null, "", location.href);
+
 /* ---------------- Subscription Dialog ---------------- */
 function openSubDialog() {
     const backdrop = document.getElementById("sub-dialog-backdrop");
@@ -55,15 +74,35 @@ document.getElementById("upgrade-plan-btn").onclick = function () {
 };
 
 function validate_input(files){
-    const allowed = ['image/jpeg','image/png','image/psd','image/jpg','image/webp'];
+    const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/psd',
+        'image/jpg',
+        'image/webp',
+        'image/heic',
+        'image/heif'
+    ];
+
+    const allowedExtensions = ['jpg','jpeg','png','psd','webp','heic','heif'];
+
     for (let f of files){
-        if(!allowed.includes(f.type)){
+        const ext = f.name.split('.').pop().toLowerCase();
+
+        if (!allowedTypes.includes(f.type) && !allowedExtensions.includes(ext)) {
+            console.log("Rejected file:", {
+                name: f.name,
+                type: f.type,
+                ext: ext
+            });
+
             notyf.error("Invalid file type!");
             return false;
         }
     }
     return true;
 }
+
 
 // Prevent browser from opening dropped files
 ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
@@ -80,15 +119,71 @@ dragArea.addEventListener("dragenter", () => dragArea.classList.add("drag-active
 dragArea.addEventListener("dragleave", () => dragArea.classList.remove("drag-active"));
 dragArea.addEventListener("dragover",  (e) => { e.preventDefault(); dragArea.classList.add("drag-active"); });
 
-dragArea.addEventListener("drop", (e) => {
+dragArea.addEventListener("drop", async (e) => {
     e.preventDefault();
     dragArea.classList.remove("drag-active");
-    const files = Array.from(e.dataTransfer.files);
-    if (!files.length) return;
-    if (!validate_input(files)) return;
-    addFilesToQueue(files);
-    uploadedPhotos.value = "";
+
+    const items = e.dataTransfer.items;
+
+    let allFiles = [];
+
+    for (let item of items) {
+        const entry = item.webkitGetAsEntry();
+
+        if (entry) {
+            const files = await readEntry(entry);
+            allFiles.push(...files);
+        }
+    }
+
+    if (!allFiles.length) return;
+    if (!validate_input(allFiles)) return;
+
+    addFilesToQueue(allFiles);
 });
+
+async function readEntry(entry, path = "") {
+    if (entry.isFile) {
+    return new Promise((resolve, reject) => {
+        entry.file(
+            file => {
+                // Skip hidden files (dotfiles) and known system files
+                if (file.name.startsWith('.') || file.name === 'Thumbs.db') {
+                    return resolve([]);
+                }
+                file.fullPath = path + file.name;
+                resolve([file]);
+            },
+            err => reject(err)
+        );
+    });
+}
+
+    if (entry.isDirectory) {
+        const reader = entry.createReader();
+        const allEntries = [];
+
+        // Keep calling readEntries until it returns an empty batch
+        while (true) {
+            const batch = await new Promise((resolve, reject) => {
+                reader.readEntries(resolve, reject);
+            });
+
+            if (batch.length === 0) break;   // done
+            allEntries.push(...batch);
+        }
+
+        // Recursively resolve all collected entries
+        const files = [];
+        for (const ent of allEntries) {
+            const res = await readEntry(ent, path + entry.name + "/");
+            files.push(...res);
+        }
+        return files;
+    }
+
+    return []; // safety: unknown entry type
+}
 
 /* ---------------- Upload Card ---------------- */
 function createUploadCard(item){
@@ -178,20 +273,140 @@ uploadedPhotos.addEventListener('change', (e) => {
      uploadedPhotos.value = "";
 });
 
+
+// compress images
+const MAX_COMPRESSION = 3;
+
+let compressionQueue = [];
+let activeCompressions = 0;
+
+const toggle = document.getElementById("compress-toggle");
+const options = document.getElementById("compression-options");
+
+toggle.addEventListener("change", () => {
+    options.classList.toggle("hidden", !toggle.checked);
+});
+function getCompressionOptions() {
+    const selected = document.querySelector('input[name="compression"]:checked')?.value;
+
+    switch (selected) {
+        case "low":
+            return {
+                maxSizeMB: 4,
+                maxWidthOrHeight: 3500,
+                initialQuality: 1
+            };
+        case "high":
+            return {
+                maxSizeMB: 0.6,
+                maxWidthOrHeight: 1600,
+                initialQuality: 0.7
+            };
+        default: // medium
+            return {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 2000,
+                initialQuality: 0.8
+            };
+    }
+}
+async function compressImage(file) {
+    const isEnabled = document.getElementById("compress-toggle").checked;
+
+    // ✅ Skip compression if disabled
+    if (!isEnabled) return file;
+
+    // ✅ Skip small files (important)
+    if (file.size < 1.5 * 1024 * 1024) return file;
+
+    const baseOptions = getCompressionOptions();
+
+    const options = {
+        ...baseOptions,
+        useWebWorker: true,
+        fileType: "image/jpeg"
+    };
+
+    try {
+        const compressedBlob = await imageCompression(file, options);
+
+        return new File(
+            [compressedBlob],
+            file.name.replace(/\.\w+$/, ".jpg"),
+            { type: "image/jpeg" }
+        );
+    } catch (err) {
+        console.error("Compression failed:", err);
+        return file;
+    }
+}
+
+
 function addFilesToQueue(files){
-    for(let file of files){
+    for (let file of files){
+
+        // create UI instantly
         const item = {
             id: crypto.randomUUID(),
             file: file,
             status: "pending",
             retries: 0
         };
-        uploadQueue.push(item);
+
         createUploadCard(item);
+        item.ui.status.textContent = "Queued for compression...";
+
+        // push to compression queue
+        compressionQueue.push(item);
     }
-    initialTotal += files.length;
-    totalFiles = initialTotal;
-    selectedPhotos.textContent = "Photos Selected: " + totalFiles;
+
+    startCompressionQueue();
+}
+function startCompressionQueue(){
+
+    while (activeCompressions < MAX_COMPRESSION && compressionQueue.length){
+
+        const item = compressionQueue.shift();
+        activeCompressions++;
+
+        compressAndQueue(item);
+    }
+}
+async function compressAndQueue(item){
+
+    item.ui.status.textContent = "Compressing...";
+
+    try {
+        const processedFile = await compressImage(item.file);
+
+        item.file = processedFile;
+
+        // update UI
+        item.ui.status.textContent = "Ready";
+        item.ui.card.querySelector(".item-size").textContent =
+            (processedFile.size / (1024 * 1024)).toFixed(1) + " MB";
+
+        // ✅ move to upload queue ONLY (do not start upload)
+        uploadQueue.push(item);
+
+        // ✅ update counters
+        initialTotal++;
+        totalFiles = initialTotal;
+
+        selectedPhotos.textContent = "Photos Selected: " + totalFiles;
+
+    } catch (err) {
+        console.error(err);
+
+        failedUploads++;
+        item.ui.status.textContent = "Compression failed";
+        item.ui.card.classList.add("item-failed");
+    }
+
+    activeCompressions--;
+
+    // continue compression queue
+    startCompressionQueue();
 }
 
 /* ---------------- Submit ---------------- */
@@ -242,7 +457,11 @@ async function uploadSingleFile(item){
 
     const sessionSelect = document.getElementById("session-select");
     const sessionId = sessionSelect && sessionSelect.value ? sessionSelect.value : null;
-
+    console.log("FILE DEBUG:", {
+    name: item.file.name,
+    type: item.file.type,
+    size: item.file.size
+});
     try {
         // ✅ STEP 1: Get presigned URL
         const presignedRes = await fetch(
@@ -268,7 +487,17 @@ async function uploadSingleFile(item){
             xhr.onload = function(){
                 if (xhr.status === 200) {
                     resolve();
-                } else {
+                } 
+                else if (xhr.status === 403) {
+                    // 🔥 DO NOT RETRY (signature/auth issue)
+                    item.ui.status.textContent = "Auth error";
+                    item.ui.card.classList.add("item-failed");
+                    item.ui.icon.innerHTML = `<span class="icon-[tabler--lock] size-3.5"></span>`;
+
+                    failedUploads++;
+                    reject("Auth error");  // stop retry chain
+                } 
+                else {
                     reject("S3 upload failed");
                 }
             };
@@ -279,6 +508,7 @@ async function uploadSingleFile(item){
 
             xhr.open("PUT", presignedData.url, true);
             xhr.setRequestHeader("Content-Type", item.file.type);
+            xhr.setRequestHeader("Cache-Control", "public, max-age=31536000, immutable");
             xhr.send(item.file);
         });
 
@@ -316,7 +546,19 @@ async function uploadSingleFile(item){
 
         activeUploads--;
         item.ui.card.classList.remove("item-uploading");
+        if (error === "Auth error") {
+        failedUploads++;
+
+        item.ui.status.textContent = "Auth error";
+        item.ui.retryBtn.classList.remove("hidden");
+        item.ui.card.classList.add("item-failed");
+        item.ui.icon.className = "item-icon";
+        item.ui.icon.innerHTML = `<span class="icon-[tabler--lock] size-3.5"></span>`;
+
+    } else {
         retryUpload(item);
+    }
+
     }
 
     // ✅ Update global progress
@@ -329,7 +571,7 @@ async function uploadSingleFile(item){
     selectedPhotos.textContent =
         `Uploaded ${uploadedFiles} / ${totalFiles} • Remaining ${remaining}`;
 
-    if(uploadedFiles + failedUploads === initialTotal){
+    if(uploadedFiles + failedUploads === totalFiles) {
         isUploading = false;
         document.getElementById("submitBtn").disabled = false;
 

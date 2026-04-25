@@ -38,6 +38,7 @@ def get_presigned_url(request, event_id):
                 "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
                 "Key": file_key,
                 "ContentType": file_type,
+                "CacheControl": "public, max-age=31536000, immutable",
             },
             ExpiresIn=3600,
         )

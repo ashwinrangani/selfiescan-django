@@ -273,6 +273,20 @@
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
     to   { opacity: 1; transform: scale(1) translateY(0); }
   }
+  /* Add this */
+.session-highlight {
+  animation: pulseGlow 1.8s ease-in-out;
+  border-color: oklch(var(--p)) !important;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 oklch(var(--p) / 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 6px oklch(var(--p) / 0.08);
+  }
+}
 </style>
 
 <div class="upload-page">
@@ -291,7 +305,44 @@
         <span class="icon-[tabler--arrow-left] size-3.5"></span>
         Back to event
       </a>
-    </div>
+      <label class="flex items-center justify-end gap-2 mb-3">
+    <input type="checkbox" id="compress-toggle" class="switch switch-primary">
+    <span>Compress Images</span>
+</label>
+
+<div id="compression-options" class="hidden mt-3 mb-3">
+  <div class="flex flex-col sm:flex-row gap-2">
+
+    <label class="compression-option flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-base-300 bg-base-100 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+      <input type="radio" name="compression" value="low" class="radio radio-primary radio-sm shrink-0" />
+      <div class="min-w-0">
+        <div class="text-xs font-bold text-base-content">Low</div>
+        <div class="text-[0.65rem] text-base-content/50 font-medium">Best quality</div>
+      </div>
+    </label>
+
+    <label class="compression-option flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-base-300 bg-base-100 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+      <input type="radio" name="compression" value="medium" checked class="radio radio-primary radio-sm shrink-0" />
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-bold text-base-content">Medium</span>
+          <span class="badge badge-primary badge-xs font-bold">Recommended</span>
+        </div>
+        <div class="text-[0.65rem] text-base-content/50 font-medium">Balanced quality</div>
+      </div>
+    </label>
+
+    <label class="compression-option flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-base-300 bg-base-100 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+      <input type="radio" name="compression" value="high" class="radio radio-primary radio-sm shrink-0" />
+      <div class="min-w-0">
+        <div class="text-xs font-bold text-base-content">High</div>
+        <div class="text-[0.65rem] text-base-content/50 font-medium">Fast upload</div>
+      </div>
+    </label>
+
+  </div>
+</div>
+
 
     <!-- Form -->
     <form method="post"
@@ -302,6 +353,7 @@
           data-billing-url="{{ billing_redirect_url }}"
           data-presigned-url="/get-presigned-url/{{ event.event_id }}/"
           data-upload-complete-url="/upload-complete/{{ event.event_id }}/"
+          data-has-sessions="{{ event.subevents.all|length|yesno:'true,false' }}"
           action="{% url 'upload_photos' event_id=event.event_id %}">
       {% csrf_token %}
 
@@ -312,7 +364,7 @@
         <div>
           <span class="field-label">Session</span>
           <select id="session-select" name="session_id"
-                  class="select select-bordered select-sm w-full rounded-lg">
+                  class="session-highlight select select-bordered select-sm w-full rounded-lg">
             <option  value="">Main Event (No Session)</option>
             {% for session in event.subevents.all %}
             <option value="{{ session.id }}">{{ session.name }}</option>
@@ -378,8 +430,6 @@
           <div id="upload-queue"></div>
         </div>
       </div>
-
-    </form>
   </div>
 </div>
 
@@ -448,5 +498,6 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <script src="{% static 'js/upload_photos.js' %}"></script>
 {% endblock %}
