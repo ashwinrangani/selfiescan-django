@@ -1,7 +1,7 @@
 from django.urls import path, include
 from .views.find_photos import process_selfie
 from .views.upload_photos import upload_photos
-from .views.auth_views import sign_in, sign_up, sign_out
+# from .views.auth_views import RateLimitedSignupView
 from .views.profile import profile
 from .views.acc_settings import settings, update_username, delete_account
 from .views.homepage import homepage
@@ -38,9 +38,7 @@ urlpatterns = [
     path("event/<uuid:event_id>/branding/", create_branding, name="branding"),
     path("event/<uuid:event_id>/branding/remove-logo/", remove_branding_logo, name="remove_branding_logo"),
     path('event/<uuid:event_id>/start-branding/', start_branding, name='start_branding'),
-    path('signin/', sign_in, name='signin'),
-    path('signout/', sign_out, name='signout'),
-    path('signup/', sign_up, name='signup'),
+    # path("accounts/signup/", RateLimitedSignupView.as_view(),name="account_signup"),
     path('accounts/', include('allauth.urls')),
     path('profile/', profile, name='profile'),
     path('settings/', settings, name='settings'),

@@ -68,14 +68,14 @@ if not DEBUG:
 
 # ALLOWED_HOSTS = []
 ALLOWED_HOSTS = [
-    'photoflow.in', 'www.photoflow.in', 'localhost', '127.0.0.1','3.109.123.110', 
+    'photoflow.in', 'www.photoflow.in', 'localhost', '127.0.0.1','3.110.49.159', 
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:82',
     'http://127.0.0.1:82',
-    'http://3.109.123.110:82',
-    'https://3.109.123.110:82',
+    'http://3.110.49.159:82',
+    'https://3.110.49.159:82',
     'http://photoflow.in',
     'http://www.photoflow.in',
     'https://photoflow.in',
@@ -115,7 +115,7 @@ INSTALLED_APPS = [
     'blog',
     'channels',
     'chat',
-    
+    'django_ratelimit',    
 ]
 
 SITE_ID = 1
@@ -185,6 +185,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
+                'photoapp.context_processors.turnstile',
             ],
         },
     },
@@ -199,19 +200,19 @@ AUTHENTICATION_BACKENDS = [
     
 ]
 # confirmation email verification locally(terminal)
-# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-# setup smtp server for email verification
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # Use an App Password if using Gmail
+# # setup smtp server for email verification
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # Use an App Password if using Gmail
 
-
+# ACCOUNT_ADAPTER = "photoapp.adapters.NoSignupAccountAdapter"
 
 WSGI_APPLICATION = 'mysite.wsgi.application'
 ASGI_APPLICATION = 'mysite.asgi.application'
@@ -323,3 +324,8 @@ CACHES = {
     }
 }
 
+TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY")
+TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY")
+ACCOUNT_FORMS = {
+    "signup": "photoapp.forms.CustomSignupForm",
+}

@@ -1,84 +1,94 @@
-from django.conf import settings
+import logging
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.db.models import F
+from django.db.models.functions import Greatest
 from ..models import Event, Photo, Subscription
-import os
 
-# delete event with all photos
+logger = logging.getLogger(__name__)
+
+
+def _collect_s3_fields(photos):
+    fields = []
+    for photo in photos:
+        for field in [
+            photo.image,
+            photo.thumb_image,
+            photo.medium_image,
+            photo.large_image,
+            photo.branded_image,
+        ]:
+            if field:
+                fields.append(field)
+    return fields
+
+
+def _delete_s3_fields(fields):
+    for field in fields:
+        try:
+            field.delete(save=False)
+        except Exception:
+            logger.exception("Failed to delete S3 file: %s", field.name)
+
+
+def _delete_photos_atomic(photos, user):
+    """
+    Collects S3 fields, deletes DB rows inside a transaction,
+    then returns S3 fields for deletion after commit.
+    """
+    photos = list(photos.select_for_update())
+    count = len(photos)
+
+    if not count:
+        return []
+
+    s3_fields = _collect_s3_fields(photos)
+
+    Photo.objects.filter(id__in=[p.id for p in photos]).delete()
+    Subscription.objects.filter(photographer=user).update(
+        photo_count=Greatest(F("photo_count") - count, 0)
+    )
+
+    return s3_fields  # caller deletes these after commit
+
+
+@login_required
 def event_delete(request, event_id):
-    event = get_object_or_404(Event, event_id=event_id)
-    
+    event = get_object_or_404(Event, event_id=event_id, photographer=request.user)
+
     if request.method == "POST":
+        with transaction.atomic():
+            s3_fields = _delete_photos_atomic(
+                Photo.objects.filter(event=event), request.user
+            )
+            event.delete()
 
-        event_folder = os.path.join(settings.MEDIA_ROOT, "photos", event.photographer.username, event.name)
-        photos = Photo.objects.filter(event=event)
-        
-        # Delete the image files from storage
-        for photo in photos:
-            if photo.image: 
-                photo.image.delete(save=False)  # Deletes file but not DB entry
-            if photo.thumb_image:
-                photo.thumb_image.delete(save=False)
+        # S3 deletions after DB transaction is committed
+        _delete_s3_fields(s3_fields)
 
-            if photo.medium_image:
-                photo.medium_image.delete(save=False)
-
-            if photo.large_image:
-                photo.large_image.delete(save=False)
-                
-            if photo.branded_image:
-                photo.branded_image.delete(save=False)
-        
-        subscription = Subscription.objects.get(photographer=request.user)
-
-        subscription.photo_count = max(subscription.photo_count - photos.count(), 0)
-        subscription.save()
-        
-        photos.delete()  # Delete DB entries
-        
-        # Remove the event folder if empty
-        if os.path.exists(event_folder) and not os.listdir(event_folder):
-            os.rmdir(event_folder)
-
-        event.delete()  # Delete event
-        messages.success(request, "Event and associated photos deleted successfully!")
+        messages.success(request, "Event deleted successfully!")
         return redirect(reverse("photographer"))
 
     return redirect(reverse("event_detail", kwargs={"event_id": event.event_id}))
 
-# delete only photos of the event
+
+@login_required
 def delete_event_photos(request, event_id):
-    event = get_object_or_404(Event, event_id=event_id)
+    event = get_object_or_404(Event, event_id=event_id, photographer=request.user)
 
     if request.method == "POST":
-        photos = Photo.objects.filter(event=event)
-        
-        for photo in photos:
-            if photo.image:
-                photo.image.delete(save=False)
-                
-            if photo.thumb_image:
-                photo.thumb_image.delete(save=False)
+        with transaction.atomic():
+            s3_fields = _delete_photos_atomic(
+                Photo.objects.filter(event=event), request.user
+            )
 
-            if photo.medium_image:
-                photo.medium_image.delete(save=False)
+        # S3 deletions after DB transaction is committed
+        _delete_s3_fields(s3_fields)
 
-            if photo.large_image:
-                photo.large_image.delete(save=False)
-                
-            if photo.branded_image:
-                photo.branded_image.delete(save=False)
-        
-        subscription = Subscription.objects.get(photographer=request.user)
-
-        subscription.photo_count = max(subscription.photo_count - photos.count(), 0)
-        subscription.save()
-
-        photos.delete()  # Delete DB entries
-        
-
-        messages.success(request, "All photos of the event have been deleted successfully!")
+        messages.success(request, "All photos deleted successfully!")
         return redirect(reverse("event_detail", kwargs={"event_id": event.event_id}))
 
     return redirect(reverse("event_detail", kwargs={"event_id": event.event_id}))

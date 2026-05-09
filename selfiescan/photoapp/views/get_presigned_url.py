@@ -5,7 +5,16 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from ..models import Event
 import uuid
-import os
+import os, re
+
+import re
+
+def sanitize_filename(name: str) -> str:
+    name = name.strip()
+    name = re.sub(r'\s+', '_', name)        # spaces → underscores
+    name = re.sub(r'[^\w\-.]', '', name)    # remove special chars
+    return name
+
 
 
 @login_required
@@ -25,9 +34,10 @@ def get_presigned_url(request, event_id):
         region_name=settings.AWS_S3_REGION_NAME,
     )
 
-    # ✅ Match your model path logic
+    
     name, ext = os.path.splitext(file_name)
-    unique_name = f"{name}_{uuid.uuid4().hex[:8]}{ext}"
+    safe_name = sanitize_filename(name)
+    unique_name = f"{safe_name}_{uuid.uuid4().hex[:8]}{ext.lower()}"
 
     file_key = f"photos/photographer_{event.photographer.id}/event_{event.event_id}/originals/{unique_name}"
 
@@ -38,7 +48,6 @@ def get_presigned_url(request, event_id):
                 "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
                 "Key": file_key,
                 "ContentType": file_type,
-                "CacheControl": "public, max-age=31536000, immutable",
             },
             ExpiresIn=3600,
         )

@@ -15,6 +15,9 @@ def upload_complete(request, event_id):
         return JsonResponse({"error": "Invalid method"}, status=405)
 
     event = get_object_or_404(Event, event_id=event_id)
+    
+    if event.photographer != request.user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
 
     try:
         data = json.loads(request.body)
@@ -73,9 +76,13 @@ def upload_complete(request, event_id):
                 sub.photo_count += 1
                 sub.save(update_fields=["photo_count"])
         
-        logger.info(
-            f"Upload complete | user={request.user.id} | event={event.event_id} | file={file_key}"
-        )
+        logger.info(f"""
+                User: {request.user}
+                Type: {sub.subscription_type}
+                End date: {sub.end_date}
+                Now: {timezone.now()}
+                Photo count: {sub.photo_count}
+                """)
         return JsonResponse({
             "success": True,
             "photo_id": photo.id

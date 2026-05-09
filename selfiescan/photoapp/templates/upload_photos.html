@@ -6,41 +6,62 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
-  .upload-page { font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+  .upload-page {
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
 
   /* ── Ambient glow ── */
   .glow-blob {
     position: fixed;
-    width: 600px; height: 600px;
+    width: 600px;
+    height: 600px;
     border-radius: 50%;
     background: radial-gradient(circle, oklch(var(--p) / 0.06) 0%, transparent 68%);
     pointer-events: none;
-    top: -100px; right: -100px;
+    top: -100px;
+    right: -100px;
     animation: blobFloat 10s ease-in-out infinite;
     z-index: 0;
   }
+
   @keyframes blobFloat {
-    0%,100% { transform: translate(0,0) scale(1); }
-    40%     { transform: translate(-25px,18px) scale(1.04); }
-    70%     { transform: translate(18px,-12px) scale(0.97); }
+
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+
+    40% {
+      transform: translate(-25px, 18px) scale(1.04);
+    }
+
+    70% {
+      transform: translate(18px, -12px) scale(0.97);
+    }
   }
 
   .upload-wrapper {
-  position: relative; 
-  z-index: 1;
-  /* Increased from 680px to 900px - adjust this value as needed */
-  max-width: 900px; 
-  /* 14px top, auto left/right, 0 bottom */
-  margin: 14px auto 0;
-  padding: 2.5rem 1.25rem 4rem;
-}
+    position: relative;
+    z-index: 1;
+    /* Increased from 680px to 900px - adjust this value as needed */
+    max-width: 900px;
+    /* 14px top, auto left/right, 0 bottom */
+    margin: 14px auto 0;
+    padding: 2.5rem 1.25rem 4rem;
+  }
 
   /* ── Header ── */
   .event-chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 3px 11px; border-radius: 999px;
-    font-size: 0.7rem; font-weight: 600;
-    letter-spacing: 0.07em; text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 11px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
     background: oklch(var(--p) / 0.15);
     color: oklch(var(--p));
     border: 1px solid oklch(var(--p) / 0.25);
@@ -49,20 +70,28 @@
 
   .page-title {
     font-family: 'Syne', sans-serif;
-    font-size: 2.5rem; font-weight: 650;
-    
+    font-size: 2.5rem;
+    font-weight: 650;
+
     line-height: 1.05;
     color: oklch(var(--bc));
   }
 
   .back-link {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 0.78rem; font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    font-weight: 500;
     color: oklch(var(--bc) / 0.6);
-    text-decoration: none; transition: color 0.2s;
+    text-decoration: none;
+    transition: color 0.2s;
     margin-top: 0.55rem;
   }
-  .back-link:hover { color: oklch(var(--p)); }
+
+  .back-link:hover {
+    color: oklch(var(--p));
+  }
 
   /* ── Controls card ── */
   .upload-card {
@@ -70,104 +99,161 @@
     border: 1px solid oklch(var(--b3));
     border-radius: 18px;
     padding: 1.25rem;
-    display: flex; flex-direction: column; gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .field-label {
     font-family: 'Syne', sans-serif;
-    font-size: 0.67rem; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: oklch(var(--bc) / 0.65);
-    margin-bottom: 5px; display: block;
+    margin-bottom: 5px;
+    display: block;
   }
 
   /* ── Drag zone ── */
   #drag-area {
     position: relative;
     border: 2px dashed oklch(var(--b3));
-    border-radius: 13px; padding: 2rem 1.25rem;
-    text-align: center; cursor: pointer;
+    border-radius: 13px;
+    padding: 2rem 1.25rem;
+    text-align: center;
+    cursor: pointer;
     background: oklch(var(--b1));
     overflow: hidden;
     transition: border-color 0.25s, background 0.25s;
   }
+
   #drag-area::before {
-    content: ''; position: absolute; inset: 0;
+    content: '';
+    position: absolute;
+    inset: 0;
     background: radial-gradient(ellipse at 50% 0%, oklch(var(--p) / 0.08) 0%, transparent 65%);
-    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
   }
-  #drag-area.drag-active { border-color: oklch(var(--p)); background: oklch(var(--p) / 0.03); }
-  #drag-area.drag-active::before { opacity: 1; }
+
+  #drag-area.drag-active {
+    border-color: oklch(var(--p));
+    background: oklch(var(--p) / 0.03);
+  }
+
+  #drag-area.drag-active::before {
+    opacity: 1;
+  }
 
   .drag-icon-wrap {
-    width: 48px; height: 48px; border-radius: 13px;
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
     background: oklch(var(--p) / 0.12);
     border: 1px solid oklch(var(--p) / 0.2);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 0.75rem; transition: transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+    transition: transform 0.3s;
   }
-  #drag-area.drag-active .drag-icon-wrap { transform: scale(1.1) translateY(-3px); }
+
+  #drag-area.drag-active .drag-icon-wrap {
+    transform: scale(1.1) translateY(-3px);
+  }
 
   .drag-title {
     font-family: 'Syne', sans-serif;
-    font-size: 0.99rem; font-weight: 700;
-    color: oklch(var(--bc)); margin-bottom: 3px;
-  }
-  .drag-sub { 
-    font-size: 0.75rem; 
-    font-weight:600; 
-    color: oklch(var(--bc) / 0.6); 
+    font-size: 0.99rem;
+    font-weight: 700;
+    color: oklch(var(--bc));
+    margin-bottom: 3px;
   }
 
-  .format-chips { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 9px; }
+  .drag-sub {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: oklch(var(--bc) / 0.6);
+  }
+
+  .format-chips {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 9px;
+  }
+
   .format-chip {
-    font-size: 0.6rem; font-weight: 700;
-    letter-spacing: 0.07em; text-transform: uppercase;
-    padding: 2px 6px; border-radius: 4px;
-    background: oklch(var(--b3)); color: oklch(var(--bc) / 0.55);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: oklch(var(--b3));
+    color: oklch(var(--bc) / 0.55);
   }
 
 
-  
+
 
   /* ── Status ── */
   .status-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 0.75rem; font-weight: 500;
-    color: oklch(var(--bc) / 0.65); min-height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: oklch(var(--bc) / 0.65);
+    min-height: 16px;
   }
 
   /* ── Progress ── */
   #progressBarContainer {
-    border-radius: 999px; overflow: hidden;
-    background: oklch(var(--b3)); height: 5px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: oklch(var(--b3));
+    height: 5px;
   }
+
   #progressBar {
-    height: 5px; border-radius: 999px;
+    height: 5px;
+    border-radius: 999px;
     background: linear-gradient(90deg, oklch(var(--p)), oklch(var(--s)));
-    transition: width 0.4s ease; font-size: 0;
+    transition: width 0.4s ease;
+    font-size: 0;
   }
 
   /* ── Queue section ── */
-  .queue-section { margin-top: 1.25rem; }
+  .queue-section {
+    margin-top: 1.25rem;
+  }
 
   .queue-section-header {
-    display: flex; align-items: center;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 0.6rem;
   }
 
   .queue-section-title {
     font-family: 'Syne', sans-serif;
-    font-size: 0.68rem; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: oklch(var(--bc) / 0.65);
   }
 
   .queue-count {
     font-family: 'Syne', sans-serif;
-    font-size: 0.63rem; font-weight: 700;
-    padding: 1px 7px; border-radius: 999px;
+    font-size: 0.63rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
     background: oklch(var(--b3));
     color: oklch(var(--bc) / 0.65);
   }
@@ -178,9 +264,19 @@
     overflow-y: auto;
     padding-right: 3px;
   }
-  .queue-scroll::-webkit-scrollbar { width: 4px; }
-  .queue-scroll::-webkit-scrollbar-track { background: transparent; }
-  .queue-scroll::-webkit-scrollbar-thumb { background: oklch(var(--b3)); border-radius: 99px; }
+
+  .queue-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .queue-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .queue-scroll::-webkit-scrollbar-thumb {
+    background: oklch(var(--b3));
+    border-radius: 99px;
+  }
 
   /* ── Queue grid ── */
   #upload-queue {
@@ -190,12 +286,16 @@
   }
 
   @media (max-width: 680px) {
-    #upload-queue { grid-template-columns: repeat(2, 1fr); }
+    #upload-queue {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   /* ── Upload item card ── */
   .upload-item {
-    display: flex; flex-direction: column; gap: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     padding: 9px 10px;
     border-radius: 10px;
     background: oklch(var(--b2));
@@ -205,88 +305,165 @@
     animation: slideIn 0.15s ease forwards;
     min-width: 0;
   }
+
   @keyframes slideIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  .upload-item.item-success { border-color: oklch(var(--su) / 0.4); background: oklch(var(--su) / 0.05); }
-  .upload-item.item-failed  { border-color: oklch(var(--er) / 0.4); background: oklch(var(--er) / 0.05); }
+  .upload-item.item-success {
+    border-color: oklch(var(--su) / 0.4);
+    background: oklch(var(--su) / 0.05);
+  }
+
+  .upload-item.item-failed {
+    border-color: oklch(var(--er) / 0.4);
+    background: oklch(var(--er) / 0.05);
+  }
 
   /* ── Item top row: icon + size ── */
   .item-top {
-    display: flex; align-items: center;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
   }
 
   .item-icon {
-    width: 28px; height: 28px; border-radius: 7px;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
     background: oklch(var(--b3));
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
     transition: background 0.25s, color 0.25s;
     color: oklch(var(--bc) / 0.5);
   }
-  .upload-item.item-uploading .item-icon { background: oklch(var(--p) / 0.12); color: oklch(var(--p)); }
-  .upload-item.item-success   .item-icon { background: oklch(var(--su) / 0.15); color: oklch(var(--su)); }
-  .upload-item.item-failed    .item-icon { background: oklch(var(--er) / 0.15); color: oklch(var(--er)); }
 
-  .item-size { font-size: 0.62rem; color: oklch(var(--bc) / 0.5); }
+  .upload-item.item-uploading .item-icon {
+    background: oklch(var(--p) / 0.12);
+    color: oklch(var(--p));
+  }
+
+  .upload-item.item-success .item-icon {
+    background: oklch(var(--su) / 0.15);
+    color: oklch(var(--su));
+  }
+
+  .upload-item.item-failed .item-icon {
+    background: oklch(var(--er) / 0.15);
+    color: oklch(var(--er));
+  }
+
+  .item-size {
+    font-size: 0.62rem;
+    color: oklch(var(--bc) / 0.5);
+  }
 
   /* ── Filename ── */
   .item-name {
-    font-size: 0.72rem; font-weight: 500;
+    font-size: 0.72rem;
+    font-weight: 500;
     color: oklch(var(--bc));
-    white-space: nowrap; overflow: hidden;
-    text-overflow: ellipsis; display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
   }
 
   /* ── Status text ── */
-  .item-status { font-size: 0.65rem; color: oklch(var(--bc) / 0.6); }
+  .item-status {
+    font-size: 0.65rem;
+    color: oklch(var(--bc) / 0.6);
+  }
 
   /* ── Progress bar ── */
   .item-bar-track {
-    height: 2px; border-radius: 999px;
-    background: oklch(var(--b3)); overflow: hidden;
+    height: 2px;
+    border-radius: 999px;
+    background: oklch(var(--b3));
+    overflow: hidden;
   }
+
   .item-bar-fill {
-    height: 100%; border-radius: 999px;
+    height: 100%;
+    border-radius: 999px;
     background: linear-gradient(90deg, oklch(var(--p)), oklch(var(--s)));
-    width: 0%; transition: width 0.3s ease;
+    width: 0%;
+    transition: width 0.3s ease;
   }
-  .upload-item.item-success .item-bar-fill { background: oklch(var(--su)); width: 100%; }
-  .upload-item.item-failed  .item-bar-fill { background: oklch(var(--er)); }
+
+  .upload-item.item-success .item-bar-fill {
+    background: oklch(var(--su));
+    width: 100%;
+  }
+
+  .upload-item.item-failed .item-bar-fill {
+    background: oklch(var(--er));
+  }
 
   /* ── Retry button ── */
   .btn-retry {
     font-family: 'Syne', sans-serif;
-    font-size: 0.62rem; font-weight: 700;
-    letter-spacing: 0.03em; border-radius: 6px;
-    height: auto; padding: 3px 8px; width: 100%;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    border-radius: 6px;
+    height: auto;
+    padding: 3px 8px;
+    width: 100%;
   }
 
   /* ── Spin ── */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .spin {
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+  }
+
   /* ── Custom dialog ── */
   @keyframes dialogIn {
-    from { opacity: 0; transform: scale(0.95) translateY(8px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-  }
-  /* Add this */
-.session-highlight {
-  animation: pulseGlow 1.8s ease-in-out;
-  border-color: oklch(var(--p)) !important;
-}
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(8px);
+    }
 
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 oklch(var(--p) / 0.2);
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   }
-  50% {
-    box-shadow: 0 0 0 6px oklch(var(--p) / 0.08);
+
+  /* Add this */
+  .session-highlight {
+    animation: pulseGlow 1.8s ease-in-out;
+    border-color: oklch(var(--p)) !important;
   }
-}
+
+  @keyframes pulseGlow {
+
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 oklch(var(--p) / 0.2);
+    }
+
+    50% {
+      box-shadow: 0 0 0 6px oklch(var(--p) / 0.08);
+    }
+  }
 </style>
 
 <div class="upload-page">
@@ -306,198 +483,196 @@
         Back to event
       </a>
       <label class="flex items-center justify-end gap-2 mb-3">
-    <input type="checkbox" id="compress-toggle" class="switch switch-primary">
-    <span>Compress Images</span>
-</label>
+        <input type="checkbox" id="compress-toggle" class="switch switch-primary">
+        <span>Compress Images</span>
+      </label>
 
-<div id="compression-options" class="hidden mt-3 mb-3">
-  <div class="flex flex-col sm:flex-row gap-2">
+      <div id="compression-options" class="hidden mt-3 mb-3">
+        <div class="flex flex-col sm:flex-row gap-2">
 
-    <label class="compression-option flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-base-300 bg-base-100 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-      <input type="radio" name="compression" value="low" class="radio radio-primary radio-sm shrink-0" />
-      <div class="min-w-0">
-        <div class="text-xs font-bold text-base-content">Low</div>
-        <div class="text-[0.65rem] text-base-content/50 font-medium">Best quality</div>
-      </div>
-    </label>
+          <label
+            class="compression-option flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-base-300 bg-base-100 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+            <input type="radio" name="compression" value="low" class="radio radio-primary radio-sm shrink-0" />
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-base-content">Low</div>
+              <div class="text-[0.65rem] text-base-content/50 font-medium">Best quality</div>
+            </div>
+          </label>
 
-    <label class="compression-option flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-base-300 bg-base-100 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-      <input type="radio" name="compression" value="medium" checked class="radio radio-primary radio-sm shrink-0" />
-      <div class="min-w-0">
-        <div class="flex items-center gap-1.5">
-          <span class="text-xs font-bold text-base-content">Medium</span>
-          <span class="badge badge-primary badge-xs font-bold">Recommended</span>
+          <label
+            class="compression-option flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-base-300 bg-base-100 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+            <input type="radio" name="compression" value="medium" checked
+              class="radio radio-primary radio-sm shrink-0" />
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-base-content">Medium</span>
+                <span class="badge badge-primary badge-xs font-bold">Recommended</span>
+              </div>
+              <div class="text-[0.65rem] text-base-content/50 font-medium">Balanced quality</div>
+            </div>
+          </label>
+
+          <label
+            class="compression-option flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-base-300 bg-base-100 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+            <input type="radio" name="compression" value="high" class="radio radio-primary radio-sm shrink-0" />
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-base-content">High</div>
+              <div class="text-[0.65rem] text-base-content/50 font-medium">Fast upload</div>
+            </div>
+          </label>
+
         </div>
-        <div class="text-[0.65rem] text-base-content/50 font-medium">Balanced quality</div>
       </div>
-    </label>
 
-    <label class="compression-option flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-base-300 bg-base-100 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-      <input type="radio" name="compression" value="high" class="radio radio-primary radio-sm shrink-0" />
-      <div class="min-w-0">
-        <div class="text-xs font-bold text-base-content">High</div>
-        <div class="text-[0.65rem] text-base-content/50 font-medium">Fast upload</div>
-      </div>
-    </label>
 
+      <!-- Form -->
+      <form method="post" enctype="multipart/form-data" id="upload_photos"
+        data-upload-count="{{ total_photographers_upload }}"
+        data-unlimited-upload="{{ is_unlimited_upload|yesno:'true,false'}}"
+        data-upload-limit="{{ upload_limit|default:0 }}" data-billing-url="{{ billing_redirect_url }}"
+        data-presigned-url="/get-presigned-url/{{ event.event_id }}/"
+        data-upload-complete-url="/upload-complete/{{ event.event_id }}/"
+        data-has-sessions="{{ event.subevents.all|length|yesno:'true,false' }}"
+        data-subscription-status="{{ subscription_status }}" action="">
+        {% csrf_token %}
+
+        <!-- Controls card -->
+        <div class="upload-card">
+
+          <!-- Session -->
+          <div>
+            <span class="field-label">Session</span>
+            <select id="session-select" name="session_id"
+              class="session-highlight select select-bordered select-sm w-full rounded-lg">
+              <option value="">Main Event (No Session)</option>
+              {% for session in event.subevents.all %}
+              <option value="{{ session.id }}">{{ session.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Hidden input -->
+          <input type="file" id="upload_data" name="upload_data" accept=".jpg,.jpeg,.png,.webp,.psd,.heic,.heif,.avif"
+            class="hidden" multiple />
+
+          <!-- Drag zone -->
+          <div id="drag-area">
+            <div class="drag-icon-wrap">
+              <span class="icon-[tabler--cloud-upload] size-5 text-primary"></span>
+            </div>
+            <div class="drag-title">Drop photos here</div>
+            <div class="drag-sub">or browse from your device</div>
+            <div class="format-chips">
+              <span class="format-chip">JPG</span>
+              <span class="format-chip">PNG</span>
+              <span class="format-chip">WEBP</span>
+              <span class="format-chip">PSD</span>
+              <span class="format-chip">HEIC</span>
+              <span class="format-chip">AVIF</span>
+            </div>
+          </div>
+
+
+          <div class="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-3">
+
+            <label for="upload_data" class="btn btn-primary btn-outline btn-md rounded-md">
+              <span class="icon-[tabler--photo-plus] size-4 md:size-5"></span>
+              Browse
+            </label>
+
+            <button type="submit" id="submitBtn" class="btn btn-primary btn-gradient btn-md rounded-md">
+              <span class="icon-[tabler--rocket] size-4 md:size-5"></span>
+              Start Upload
+            </button>
+
+          </div>
+
+
+          <!-- Status + progress -->
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="status-bar">
+              <span id="selected-photos">No photos selected</span>
+            </div>
+            <div id="progressBarContainer" class="hidden">
+              <div id="progressBar" class="w-0"></div>
+            </div>
+          </div>
+
+        </div><!-- /upload-card -->
+
+        <!-- Queue section -->
+        <div class="queue-section" id="queue-section" style="display:none">
+          <div class="queue-section-header">
+            <span class="queue-section-title">Upload Queue</span>
+            <span class="queue-count" id="queue-count">0 files</span>
+          </div>
+          <!-- scrollable wrapper -->
+          <div class="queue-scroll">
+            <div id="upload-queue"></div>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-
-    <!-- Form -->
-    <form method="post"
-          enctype="multipart/form-data"
-          id="upload_photos"
-          data-upload-count="{{ total_photographers_upload }}"
-          data-unlimited-upload="{{ is_unlimited_upload|yesno:'true,false'}}"
-          data-billing-url="{{ billing_redirect_url }}"
-          data-presigned-url="/get-presigned-url/{{ event.event_id }}/"
-          data-upload-complete-url="/upload-complete/{{ event.event_id }}/"
-          data-has-sessions="{{ event.subevents.all|length|yesno:'true,false' }}"
-          action="{% url 'upload_photos' event_id=event.event_id %}">
-      {% csrf_token %}
-
-      <!-- Controls card -->
-      <div class="upload-card">
-
-        <!-- Session -->
-        <div>
-          <span class="field-label">Session</span>
-          <select id="session-select" name="session_id"
-                  class="session-highlight select select-bordered select-sm w-full rounded-lg">
-            <option  value="">Main Event (No Session)</option>
-            {% for session in event.subevents.all %}
-            <option value="{{ session.id }}">{{ session.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <!-- Hidden input -->
-        <input type="file" id="upload_data" name="upload_data"
-               accept="image/*" class="hidden" multiple />
-
-        <!-- Drag zone -->
-        <div id="drag-area">
-          <div class="drag-icon-wrap">
-            <span class="icon-[tabler--cloud-upload] size-5 text-primary"></span>
-          </div>
-          <div class="drag-title">Drop photos here</div>
-          <div class="drag-sub">or browse from your device</div>
-          <div class="format-chips">
-            <span class="format-chip">JPG</span>
-            <span class="format-chip">PNG</span>
-            <span class="format-chip">WEBP</span>
-            <span class="format-chip">PSD</span>
-          </div>
-        </div>
-
-        
-  <div class="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-3">
-    
-    <label for="upload_data" class="btn btn-primary btn-outline btn-md rounded-md">
-      <span class="icon-[tabler--photo-plus] size-4 md:size-5"></span>
-      Browse
-    </label>
-
-    <button type="submit" id="submitBtn" class="btn btn-primary btn-gradient btn-md rounded-md">
-      <span class="icon-[tabler--rocket] size-4 md:size-5"></span>
-      Start Upload
-    </button>
-    
-  </div>
-
-
-        <!-- Status + progress -->
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <div class="status-bar">
-            <span id="selected-photos">No photos selected</span>
-          </div>
-          <div id="progressBarContainer" class="hidden">
-            <div id="progressBar" class="w-0"></div>
-          </div>
-        </div>
-
-      </div><!-- /upload-card -->
-
-      <!-- Queue section -->
-      <div class="queue-section" id="queue-section" style="display:none">
-        <div class="queue-section-header">
-          <span class="queue-section-title">Upload Queue</span>
-          <span class="queue-count" id="queue-count">0 files</span>
-        </div>
-        <!-- scrollable wrapper -->
-        <div class="queue-scroll">
-          <div id="upload-queue"></div>
-        </div>
-      </div>
-  </div>
-</div>
-
-<!-- Custom subscription dialog — pure CSS/JS, no FlyonUI dependency -->
-<div id="sub-dialog-backdrop"
-     style="display:none;position:fixed;inset:0;z-index:9999;
+  <!-- Custom subscription dialog — pure CSS/JS, no FlyonUI dependency -->
+  <div id="sub-dialog-backdrop" style="display:none;position:fixed;inset:0;z-index:9999;
             background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);
             align-items:center;justify-content:center;padding:1rem;">
-  <div id="sub-dialog"
-       style="background:oklch(var(--b1));border:1px solid oklch(var(--b3));
+    <div id="sub-dialog" style="background:oklch(var(--b1));border:1px solid oklch(var(--b3));
               border-radius:18px;padding:1.75rem;width:100%;max-width:400px;
               box-shadow:0 24px 60px rgba(0,0,0,0.25);
               font-family:'DM Sans',sans-serif;
               animation:dialogIn 0.2s ease forwards;">
-    <!-- Icon + close row -->
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;">
-      <div style="width:44px;height:44px;border-radius:12px;
+      <!-- Icon + close row -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;">
+        <div style="width:44px;height:44px;border-radius:12px;
                   background:oklch(var(--er)/0.12);border:1px solid oklch(var(--er)/0.2);
                   display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <span class="icon-[tabler--crown-off] size-5" style="color:oklch(var(--er))"></span>
-      </div>
-      <button id="sub-dialog-close"
-              style="width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;
+          <span class="icon-[tabler--crown-off] size-5" style="color:oklch(var(--er))"></span>
+        </div>
+        <button id="sub-dialog-close" style="width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;
                      background:oklch(var(--b3));display:flex;align-items:center;
                      justify-content:center;color:oklch(var(--bc)/0.6);transition:background 0.2s;"
-              onmouseover="this.style.background='oklch(var(--b2))'"
-              onmouseout="this.style.background='oklch(var(--b3))'">
-        <span class="icon-[tabler--x] size-4"></span>
-      </button>
-    </div>
-    <!-- Text -->
-    <div style="margin-bottom:1.5rem;">
-      <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
+          onmouseover="this.style.background='oklch(var(--b2))'" onmouseout="this.style.background='oklch(var(--b3))'">
+          <span class="icon-[tabler--x] size-4"></span>
+        </button>
+      </div>
+      <!-- Text -->
+      <div style="margin-bottom:1.5rem;">
+        <div id="sub-dialog-title" style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
                   color:oklch(var(--bc));margin-bottom:0.4rem;">
-        Subscription Limit Reached
+          Subscription Limit Reached
+        </div>
+        <div id="sub-dialog-body" style="font-size:0.83rem;color:oklch(var(--bc)/0.65);line-height:1.55;">
+          You've reached your photo upload limit under the current plan.
+          Upgrade to continue uploading photos.
+        </div>
       </div>
-      <div style="font-size:0.83rem;color:oklch(var(--bc)/0.65);line-height:1.55;">
-        You've reached your photo upload limit under the current plan.
-        Upgrade to continue uploading photos.
-      </div>
-    </div>
-    <!-- Buttons -->
-    <div style="display:flex;gap:8px;">
-      <button id="sub-dialog-dismiss"
-              style="flex:1;height:38px;border-radius:10px;border:1px solid oklch(var(--b3));
+      <!-- Buttons -->
+      <div style="display:flex;gap:8px;">
+        <button type="button" id="sub-dialog-dismiss" style="flex:1;height:38px;border-radius:10px;border:1px solid oklch(var(--b3));
                      background:oklch(var(--b2));color:oklch(var(--bc)/0.7);
                      font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:600;
-                     cursor:pointer;transition:background 0.2s;"
-              onmouseover="this.style.background='oklch(var(--b3))'"
-              onmouseout="this.style.background='oklch(var(--b2))'">
-        Dismiss
-      </button>
-      <button id="upgrade-plan-btn"
-              style="flex:1;height:38px;border-radius:10px;border:none;
+                     cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='oklch(var(--b3))'"
+          onmouseout="this.style.background='oklch(var(--b2))'">
+          Dismiss
+        </button>
+        <button type="button" id="upgrade-plan-btn" style="flex:1;height:38px;border-radius:10px;border:none;
                      background:oklch(var(--p));color:oklch(var(--pc));
                      font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:700;
                      cursor:pointer;letter-spacing:0.02em;transition:opacity 0.2s;"
-              onmouseover="this.style.opacity='0.88'"
-              onmouseout="this.style.opacity='1'">
-        Upgrade Plan
-      </button>
+          onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+          Upgrade Plan
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-{% endblock %}
+  {% endblock %}
 
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
-<script src="{% static 'js/upload_photos.js' %}"></script>
-{% endblock %}
+  {% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+  <script src="{% static 'js/upload_photos.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  {% endblock %}

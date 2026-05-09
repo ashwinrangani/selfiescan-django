@@ -1,4 +1,3 @@
-# tasks.py (modified)
 from celery import shared_task
 import face_recognition
 import numpy as np
@@ -12,7 +11,7 @@ from botocore.exceptions import ClientError, NoCredentialsError,EndpointConnecti
 from django.conf import settings
 from io import BytesIO
 from .utils.image_variants import generate_variant, VARIANTS
-
+from .utils.convert_to_jpeg import convert_original_to_jpeg_if_needed
 logger = logging.getLogger(__name__)
 
 # Initialize Rekognition client (singleton for efficiency)
@@ -132,11 +131,19 @@ def process_photo(self, photo_id):
 
     try:
         photo = Photo.objects.get(id=photo_id)
+        
+        if photo.is_processed:
+            return f"Photo {photo_id} already processed"
+        
+        _, ext = os.path.splitext(photo.image.name)
+        if ext.lower() in {".heic", ".heif", ".avif"}:
+            convert_original_to_jpeg_if_needed(photo)
+            photo.refresh_from_db()
+        
         image_name = photo.image.name
         bucket = settings.AWS_STORAGE_BUCKET_NAME
 
-        if photo.is_processed:
-            return f"Photo {photo_id} already processed"
+        
 
         if FaceEncoding.objects.filter(photo=photo).exists():
             photo.is_processed = True
