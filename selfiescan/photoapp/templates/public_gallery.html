@@ -3,233 +3,612 @@
 {% block title %}{{ event.name }} - Gallery{% endblock %}
 {% block main_padding %}!p-0{% endblock %}
 {% block content %}
+
 <div data-theme="luxury" class="gallery-background">
-<section class="p-3 md:p-2 lg:p-2">
-<div class="flex justify-between items-center">
-    <div class="navbar-center flex justify-center items-center">
-    <a class="link text-base-content/90 link-neutral text-xl font-pacifico no-underline" href="/">
-      PhotoFlow
-    </a><span class="bg-primary size-6 icon-[tabler--camera-search]"></span>
-   </div>
-   <div>
-   {% if studio_name %}
-    <h2 class="text-base font-serif font-semibold">
-      {{ studio_name }}
-    </h2>
-  {% endif %}
-  </div>
-  </div>
-    <h1 class="text-2xl pt-4 font-serif text-primary text-center font-semibold">{{ event.name }}</h1>
-    <h1 class="text-xl pt-4 font-mono text-primary text-center uppercase" >Photo Gallery</h1>
-    <div class="mt-5 flex justify-end">
-    <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block">
-      <span class="text-base text-sm flex items-center justify-center p-2 font-semibold">Click here to find your own photos
-        <span class="icon-[tabler--photo-ai] size-5 rtl:rotate-180 ml-1"></span>
-      </span>
-    </a>
-  </div>
-  <!-- SESSION FILTER -->
-<div class="flex flex-wrap gap-2 mt-6 justify-center">
+  <section class="gallery-section">
 
-  <a href="?"
-   data-session=""
-   class="session-tab btn btn-xs {% if not active_session %}btn-primary{% else %}btn-outline{% endif %}">
-     All Photos
-  </a>
-
-  {% for session in sessions %}
-    <a href="?session={{ session.id }}"
-   data-session="{{ session.id }}"
-   class="session-tab btn btn-xs 
-   {% if active_session == session.id|stringformat:'s' %}
-     btn-primary
-   {% else %}
-     btn-outline
-   {% endif %}">
-        {{ session.name }}
-    </a>
-  {% endfor %}
-
-</div>
-
-    <!-- LightGallery Container -->
-    <div id="lightgallery" class="gallery-grid mt-6">
-
-{% for photo in photos %}
-<a
-  href="{% if photo.obj.medium_image %}{{ photo.obj.medium_image.url }}{% else %}{{ photo.obj.image.url }}{% endif %}"
-  {% if photo.download_url %}
-    data-download-url="{{ photo.download_url }}"
-  {% endif %}
-  class="gallery-item group"
->
-
-<div class="img-wrap">
-<img
-  src="{% if photo.obj.thumb_image %}{{ photo.obj.thumb_image.url }}{% else %}{{ photo.obj.image.url }}{% endif %}"
-  loading="lazy"
-  decoding="async"
-  alt="Event photos"
-/>
-</div>
-
-</a>
-{% endfor %}
-
-</div>
-<!-- Empty State OUTSIDE grid -->
-<div id="emptyState"
-     class="hidden text-center py-16">
-  <div class="text-primary text-lg font-semibold">
-    No Photos In This Session
-  </div>
-  <div class="text-base-content/60 text-sm mt-2">
-    Please check back later or select another session.
-  </div>
-</div>
-    <!-- Load More -->
-    <div class="mt-8 text-center mb-10">
-        <button 
-            type="button" 
-            id="loadMoreBtn" 
-            class="btn btn-outline btn-sm shadow transition"
-            data-total-photos="{{ total_photos }}"
-            data-loaded-photos="{{ photos|length }}"
-            {% if total_photos <= photos|length %}style="display:none"{% endif %}
-        >
-            Load More Photos
-        </button>
-
-        <div id="loading-icon" class="mt-3 hidden">
-            <span class="loading loading-spinner text-primary loading-xl"></span>
+    <!-- ── TOPBAR ── -->
+    <header class="gallery-topbar">
+      <a href="/" class="brand-logo no-underline flex items-center gap-2.5">
+        <div class="brand-icon-wrap">
+          <span class="icon-[tabler--camera-search] brand-icon"></span>
+          <span class="brand-icon-glow"></span>
         </div>
+        <span class="brand-text">Photo<em>Flow</em></span>
+      </a>
+    </header>
+
+    <!-- ── HERO TITLE ── -->
+    <div class="gallery-hero">
+      <p class="hero-eyebrow">Photo&nbsp;&nbsp;Gallery</p>
+      {% if studio_name %}
+        <p class="hero-presents"><em>{{ studio_name }}</em>&ensp;presents</p>
+      {% endif %}
+      <h1 class="hero-title">{{ event.name }}</h1>
+      <div class="hero-ornament">
+        <span class="orn-line"></span>
+        <span class="orn-diamond">◆</span>
+        <span class="orn-line"></span>
+      </div>
+      <a href="{% url 'find_photos' event_id=event.event_id %}" class="find-photos-cta">
+        <span class="icon-[tabler--photo-ai] cta-icon"></span>
+        Find Your Photos
+      </a>
     </div>
+
+    <!-- ── SESSION FILTER ── -->
+    <div class="session-filter">
+      <a href="?"
+         data-session=""
+         class="session-tab btn btn-xs {% if not active_session %}btn-primary{% else %}btn-outline{% endif %}">
+        All Photos
+      </a>
+      {% for session in sessions %}
+        <a href="?session={{ session.id }}"
+           data-session="{{ session.id }}"
+           class="session-tab btn btn-xs {% if active_session == session.id|stringformat:'s' %}btn-primary{% else %}btn-outline{% endif %}">
+          {{ session.name }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- ── LIGHTGALLERY GRID ── -->
+    <div id="lightgallery" class="gallery-grid">
+      {% for photo in photos %}
+      <a
+        href="{% if photo.obj.medium_image %}{{ photo.obj.medium_image.url }}{% else %}{{ photo.obj.image.url %}{% endif %}"
+        {% if photo.download_url %}data-download-url="{{ photo.download_url }}"{% endif %}
+        class="gallery-item group"
+      >
+        <div class="img-wrap">
+          <img
+            src="{% if photo.obj.thumb_image %}{{ photo.obj.thumb_image.url }}{% else %}{{ photo.obj.image.url }}{% endif %}"
+            loading="lazy"
+            decoding="async"
+            alt="Event photos"
+          />
+          <div class="img-shimmer"></div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <!-- ── EMPTY STATE ── -->
+    <div id="emptyState" class="hidden empty-state">
+      <span class="empty-diamond">◆</span>
+      <p class="empty-title">No Photos In This Session</p>
+      <p class="empty-sub">Please check back later or select another session.</p>
+    </div>
+
+    <!-- ── LOAD MORE ── -->
+    <div class="load-more-section">
+      <button
+        type="button"
+        id="loadMoreBtn"
+        class="load-more-btn btn btn-outline btn-sm"
+        data-total-photos="{{ total_photos }}"
+        data-loaded-photos="{{ photos|length }}"
+        {% if total_photos <= photos|length %}style="display:none"{% endif %}
+      >
+        <span class="lm-text">Load More Photos</span>
+        <span class="lm-bar"></span>
+      </button>
+      <div id="loading-icon" class="mt-4 hidden flex justify-center">
+        <span class="loading loading-spinner text-primary loading-xl"></span>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     STYLES — Dark Editorial Luxury Gallery
+     ══════════════════════════════════════════════ -->
 <style>
-.gallery-background {
-    min-height: 100vh;
-    background-image: radial-gradient(#d8d0d0 0.5px, transparent 0.5px);
-    background-size: 18px 18px;
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@200;300;400;600&display=swap');
+
+/* ── TOKENS ──────────────────────────────────── */
+:root {
+  --g-bg:            #070A0F;
+  --g-surface:       #0D1118;
+  --g-gold:          #C8A76B;
+  --g-gold-bright:   #E2C98A;
+  --g-gold-dim:      rgba(200, 167, 107, 0.18);
+  --g-gold-border:   rgba(200, 167, 107, 0.25);
+  --g-gold-glow:     rgba(200, 167, 107, 0.12);
+  --g-text:          #EDE6D6;
+  --g-text-muted:    #736A5A;
+  --g-text-sub:      #4E4840;
+  --g-radius:        3px;
+  --g-transition:    0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── BACKGROUND ──────────────────────────────── */
+.gallery-background {
+  min-height: 100vh;
+  background-color: var(--g-bg);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200, 167, 107, 0.055) 0%, transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: auto, 300px 300px;
+  position: relative;
+}
+
+/* Hairline top border in gold */
+.gallery-background::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--g-gold) 40%, var(--g-gold-bright) 50%, var(--g-gold) 60%, transparent 100%);
+  z-index: 100;
+  opacity: 0.7;
+}
+
+/* ── LAYOUT ──────────────────────────────────── */
+.gallery-section {
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 4rem;
+}
+@media (min-width: 768px) { .gallery-section { padding: 1.5rem 2rem 5rem; } }
+@media (min-width: 1280px) { .gallery-section { padding: 1.75rem 3rem 6rem; } }
+
+/* ── TOPBAR ──────────────────────────────────── */
+.gallery-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(200, 167, 107, 0.1);
+  margin-bottom: 0;
+}
+
+/* ── HERO PRESENTS LINE ──────────────────────── */
+.hero-presents {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(1.15rem, 3vw, 1.55rem);
+  letter-spacing: 0.14em;
+  color: var(--g-gold);
+  margin: 0;
+  opacity: 1;
+  text-shadow: 0 0 28px rgba(200, 167, 107, 0.35);
+}
+.hero-presents em {
+  font-style: italic;
+  color: var(--g-gold-bright);
+  font-weight: 600;
+  font-size: 1.08em;
+}
+
+/* ── HERO TITLE BLOCK ────────────────────────── */
+.gallery-hero {
+  text-align: center;
+  padding: 3rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  animation: heroFadeIn 0.9s ease both;
+}
+
+@keyframes heroFadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-eyebrow {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 400;
+  font-size: 0.85rem;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--g-gold);
+  margin: 0;
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 6vw, 4.5rem);
+  line-height: 1.1;
+  color: var(--g-text);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.hero-ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 280px;
+  margin: 0.25rem 0;
+}
+
+.orn-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g-gold-border));
+}
+.orn-line:last-child {
+  background: linear-gradient(90deg, var(--g-gold-border), transparent);
+}
+
+.orn-diamond {
+  font-size: 0.5rem;
+  color: var(--g-gold);
+  line-height: 1;
+  opacity: 0.7;
+}
+
+/* ── FIND PHOTOS CTA ─────────────────────────── */
+.find-photos-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--g-gold);
+  text-decoration: none;
+  padding: 0.55rem 1.4rem;
+  border: 1px solid var(--g-gold-border);
+  border-radius: 30px;
+  margin-top: 0.5rem;
+  transition: background var(--g-transition), border-color var(--g-transition), color var(--g-transition), box-shadow var(--g-transition);
+}
+.find-photos-cta:hover {
+  background: var(--g-gold-dim);
+  border-color: var(--g-gold);
+  color: var(--g-gold-bright);
+  box-shadow: 0 0 20px var(--g-gold-glow);
+  text-decoration: none;
+}
+.cta-icon {
+  font-size: 0.95rem;
+}
+
+/* ── SESSION FILTER ──────────────────────────── */
+.session-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 1.5rem 0 0.5rem;
+}
+
+/* Override DaisyUI .btn .btn-xs completely within session filter */
+.session-filter .session-tab,
+.session-filter .btn {
+  font-family: 'Josefin Sans', sans-serif !important;
+  font-size: 0.65rem !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+  padding: 0.4rem 1.1rem !important;
+  height: auto !important;
+  min-height: unset !important;
+  border-radius: 30px !important;
+  transition: all var(--g-transition) !important;
+  line-height: 1.5 !important;
+}
+
+/* Inactive tab */
+.session-filter .btn-outline {
+  background: transparent !important;
+  border: 1px solid rgba(200, 167, 107, 0.22) !important;
+  color: var(--g-text-muted) !important;
+  box-shadow: none !important;
+}
+.session-filter .btn-outline:hover {
+  background: var(--g-gold-dim) !important;
+  border-color: var(--g-gold) !important;
+  color: var(--g-gold) !important;
+  box-shadow: 0 0 14px var(--g-gold-glow) !important;
+}
+
+/* Active tab */
+.session-filter .btn-primary {
+  background: var(--g-gold) !important;
+  border: 1px solid var(--g-gold) !important;
+  color: #0D0A06 !important;
+  box-shadow: 0 2px 18px rgba(200, 167, 107, 0.22) !important;
+}
+.session-filter .btn-primary:hover {
+  background: var(--g-gold-bright) !important;
+  border-color: var(--g-gold-bright) !important;
+}
+
+/* ── GALLERY GRID ────────────────────────────── */
 .gallery-grid {
   display: grid;
-  gap: 0.5rem;
+  gap: 3px;
   grid-auto-flow: row;
+  margin-top: 1.75rem;
+  animation: gridFadeIn 0.7s ease 0.2s both;
 }
 
-
-/* Mobile */
-@media (min-width: 0px) {
-  .gallery-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+@keyframes gridFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* Tablets */
-@media (min-width: 640px) {
-  .gallery-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+@media (min-width: 0px)    { .gallery-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 640px)  { .gallery-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1024px) { .gallery-grid { grid-template-columns: repeat(5, 1fr); } }
+@media (min-width: 1536px) { .gallery-grid { grid-template-columns: repeat(6, 1fr); } }
 
-/* Laptops */
-@media (min-width: 1024px) {
-  .gallery-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
-/* Large desktops */
-@media (min-width: 1536px) {
-  .gallery-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
-}
-
-/* ================================
-   GALLERY ITEM
-   ================================ */
-
+/* ── GALLERY ITEM ────────────────────────────── */
 .gallery-item {
-  border-radius: 8px;
+  display: block;
   overflow: hidden;
-  background: #f5f5f5;
-  box-shadow:
-    0 6px 18px rgba(0, 0, 0, 0.06);
+  border-radius: var(--g-radius);
+  background: var(--g-surface);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+    border-color var(--g-transition),
+    box-shadow var(--g-transition),
+    transform var(--g-transition);
+  position: relative;
 }
 
-/* Hover polish */
 .gallery-item:hover {
-  transform: translateY(-4px);
+  border-color: rgba(200, 167, 107, 0.38);
   box-shadow:
-    0 14px 30px rgba(0, 0, 0, 0.12);
+    0 0 0 1px rgba(200, 167, 107, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 24px rgba(200, 167, 107, 0.08);
+  transform: translateY(-3px) scale(1.01);
+  z-index: 2;
 }
 
-/* ================================
-   IMAGE WRAPPER
-   ================================ */
+/* Gold top-edge accent on hover */
+.gallery-item::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g-gold), transparent);
+  opacity: 0;
+  transition: opacity var(--g-transition);
+  z-index: 3;
+}
+.gallery-item:hover::before {
+  opacity: 1;
+}
 
+/* ── IMAGE WRAP ──────────────────────────────── */
 .img-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 4;   /* Portrait-friendly */
+  aspect-ratio: 3 / 4;
   overflow: hidden;
 }
 
-/* Image */
 .img-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: block;
 }
 
-/* Subtle zoom on hover */
-.gallery-item:hover img {
-  transform: scale(1.06);
+.gallery-item:hover .img-wrap img {
+  transform: scale(1.07);
 }
 
-/* ================================
-   TOUCH DEVICES (no hover jank)
-   ================================ */
+/* Subtle bottom dark vignette always visible */
+.img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 55%,
+    rgba(5, 7, 10, 0.45) 100%
+  );
+  pointer-events: none;
+  transition: opacity var(--g-transition);
+}
 
+/* Inner shimmer glow on hover */
+.img-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(200, 167, 107, 0.06) 0%,
+    transparent 50%,
+    rgba(200, 167, 107, 0.04) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--g-transition);
+  pointer-events: none;
+}
+.gallery-item:hover .img-shimmer {
+  opacity: 1;
+}
+
+/* ── SKELETON LOADING (touch devices) ────────── */
 @media (hover: none) {
   .gallery-item:hover {
     transform: none;
-    box-shadow:
-      0 6px 18px rgba(0, 0, 0, 0.08);
+    border-color: rgba(255, 255, 255, 0.03);
+    box-shadow: none;
   }
-
-  .gallery-item:hover img {
+  .gallery-item:hover .img-wrap img {
     transform: none;
   }
-.img-wrap {
-  background: linear-gradient(
-    110deg,
-    #ececec 8%,
-    #f5f5f5 18%,
-    #ececec 33%
-  );
-  background-size: 200% 100%;
-  animation: shine 1.5s infinite linear;
-}
-
-@keyframes shine {
-  to {
-    background-position-x: -200%;
+  .img-wrap {
+    background: linear-gradient(110deg, #0e1219 8%, #161d28 18%, #0e1219 33%);
+    background-size: 200% 100%;
+    animation: skelShine 1.6s infinite linear;
   }
+  @keyframes skelShine {
+    to { background-position-x: -200%; }
+  }
+  .img-wrap img { background: none; }
 }
 
-.img-wrap img {
-  background: none;
+/* ── EMPTY STATE ─────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 6rem 1rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  animation: heroFadeIn 0.5s ease both;
 }
+.empty-state:not(.hidden) {
+  display: flex;
 }
+.empty-diamond {
+  font-size: 1.2rem;
+  color: var(--g-gold);
+  opacity: 0.4;
+}
+.empty-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--g-text);
+  margin: 0;
+}
+.empty-sub {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--g-text-muted);
+  margin: 0;
+}
+
+/* ── LOAD MORE ───────────────────────────────── */
+.load-more-section {
+  text-align: center;
+  margin-top: 3.5rem;
+  margin-bottom: 2rem;
+}
+
+.load-more-btn {
+  font-family: 'Josefin Sans', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 0.68rem !important;
+  letter-spacing: 0.25em !important;
+  text-transform: uppercase !important;
+  padding: 0.7rem 2.5rem !important;
+  height: auto !important;
+  min-height: unset !important;
+  border-radius: 40px !important;
+  background: transparent !important;
+  border: 1px solid var(--g-gold-border) !important;
+  color: var(--g-gold) !important;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--g-transition) !important;
+}
+
+.load-more-btn:hover:not(:disabled) {
+  border-color: var(--g-gold) !important;
+  color: var(--g-gold-bright) !important;
+  box-shadow: 0 0 30px var(--g-gold-glow) !important;
+  background: var(--g-gold-dim) !important;
+}
+
+.load-more-btn:disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+}
+
+/* ── BRAND THEME TOKENS ──────────────────────── */
+[data-theme="gourmet"] {
+  --brand-icon-bg: oklch(92% 0.08 280);
+  --brand-icon-color: oklch(45% 0.22 280);
+  --brand-icon-ring: oklch(75% 0.15 280 / 0.35);
+  --brand-glow: oklch(72% 0.18 280 / 0.45);
+  --brand-text: oklch(22% 0.05 280);
+  --brand-em: oklch(45% 0.22 280);
+  --brand-dot: oklch(60% 0.2 280);
+}
+
+[data-theme="luxury"] {
+  --brand-icon-bg: oklch(25% 0.06 60);
+  --brand-icon-color: oklch(82% 0.18 72);
+  --brand-icon-ring: oklch(70% 0.16 72 / 0.3);
+  --brand-glow: oklch(78% 0.2 72 / 0.5);
+  --brand-text: oklch(92% 0.04 72);
+  --brand-em: oklch(82% 0.18 72);
+  --brand-dot: oklch(72% 0.18 72);
+}
+
+/* ── BRAND LOGO ──────────────────────────────── */
+.brand-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: var(--brand-icon-bg);
+  border-radius: 0.6rem;
+  box-shadow: 0 0 0 1.5px var(--brand-icon-ring), 0 2px 8px oklch(0% 0 0 / 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.brand-icon-wrap:hover {
+  transform: scale(1.08) rotate(-4deg);
+  box-shadow: 0 0 0 1.5px var(--brand-icon-ring), 0 4px 16px var(--brand-glow);
+}
+.brand-icon {
+  font-size: 1.2rem;
+  color: var(--brand-icon-color);
+  transition: color 0.3s ease;
+}
+.brand-icon-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 60% 35%, var(--brand-glow), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.brand-icon-wrap:hover .brand-icon-glow { opacity: 1; }
+
+.brand-text {
+  font-family: 'Pacifico', cursive;
+  font-size: 1.45rem;
+  letter-spacing: -0.01em;
+  color: var(--brand-text);
+  transition: color 0.3s ease;
+  line-height: 1;
+  user-select: none;
+}
+.brand-text em {
+  font-style: normal;
+  color: var(--brand-em);
+  transition: color 0.3s ease;
+}
+.brand-logo { position: relative; }
+.brand-logo::after { display: none; }
+.brand-text::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: var(--brand-dot);
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 0.15em;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.brand-logo:hover .brand-text::before { opacity: 1; }
 </style>
-</section>
-</div>
+
 {% endblock %}
 
 
@@ -314,6 +693,7 @@ if (loadMoreBtn) {
       a.innerHTML = `
         <div class="img-wrap">
           <img src="${photo.thumb}" loading="lazy" alt="Event Photos">
+          <div class="img-shimmer"></div>
         </div>
       `;
 
@@ -385,6 +765,7 @@ sessionTabs.forEach(tab => {
       a.innerHTML = `
         <div class="img-wrap">
           <img src="${photo.thumb}" loading="lazy" alt="Event Photos">
+          <div class="img-shimmer"></div>
         </div>
       `;
 
@@ -428,6 +809,5 @@ if (data.photos.length === 0) {
     });
   }
 </script>
-
 
 {% endblock %}

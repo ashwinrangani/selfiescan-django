@@ -114,8 +114,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'blog',
     'channels',
-    'chat',
-    'django_ratelimit',    
+    'chat',    
 ]
 
 SITE_ID = 1

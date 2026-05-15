@@ -29,7 +29,7 @@ class CustomSignupForm(SignupForm):
 
         if not token:
             raise forms.ValidationError(
-                "Please complete the Turnstile verification."
+                "Please complete the cloudflare's security verification."
             )
 
         response = requests.post(

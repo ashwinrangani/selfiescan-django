@@ -1,4 +1,5 @@
-<nav id="navbar" class="navbar rounded-box fixed top-0 z-10 backdrop-blur-md bg-opacity-90 bg-base-100 shadow transition-transform duration-300">
+<nav id="navbar"
+  class="navbar rounded-box fixed top-0 z-10 backdrop-blur-md bg-opacity-90 bg-base-100 shadow transition-transform duration-300">
   <div class="navbar-start">
     <!-- <div class="dropdown relative inline-flex [--auto-close:inside] [--offset:9]">
       <button id="dropdown-name" type="button" class="dropdown-toggle btn btn-text btn-circle dropdown-open:bg-base-content/10 dropdown-open:text-base-content" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
@@ -13,31 +14,176 @@
       </ul>
     </div> -->
     <div class="navbar-center flex items-center">
-    <a class="link text-base-content/90 link-neutral text-2xl font-pacifico no-underline" href="/">
-      PhotoFlow
-    </a>
-    <span class="bg-primary size-8 icon-[tabler--camera-search]"></span>
-    
-  </div>
+  <a href="/" class="brand-logo no-underline flex items-center gap-2.5">
+    <div class="brand-icon-wrap">
+      <span class="icon-[tabler--camera-search] brand-icon"></span>
+      <span class="brand-icon-glow"></span>
+    </div>
+    <span class="brand-text">
+      Photo<em>Flow</em>
+    </span>
+  </a>
+</div>
   </div>
 
   <div class="navbar-end items-center gap-2 md:gap-4">
-    <a class="pt-1 no-underline btn btn-sm btn-outline btn-accent" href="{% url 'chat-page' %}">Ask AI
-      <span class="mb-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18.5 7.84656v-5M5.5 20.8466v-5M16 5.34656h5M3 18.3466H8M6.5 1.84656 5.71554 3.41547c-.26549.53098-.39823.79647-.57557 1.02653C4.98261 4.64615 4.79959 4.82917 4.59545 4.98653c-.23007.17734-.49555.31008-1.02653.57557L2 6.34656l1.56892.78446c.53098.26549.79646.39823 1.02653.57557C4.79959 7.86395 4.98261 8.04696 5.13997 8.25111c.17734.23006.31008.49555.57557 1.02653L6.5 10.8466l.78446-1.56896C7.54995 8.74666 7.68269 8.48117 7.86003 8.25111 8.01739 8.04696 8.20041 7.86395 8.40455 7.70659 8.63462 7.52925 8.9001 7.3965 9.43108 7.13102L11 6.34656 9.43108 5.5621c-.53098-.26549-.79646-.39823-1.02653-.57557C8.20041 4.82917 8.01739 4.64615 7.86003 4.442c-.17734-.23006-.31008-.49555-.57557-1.02653L6.5 1.84656zM17 11.8466l-.9511 1.9022C15.7834 14.2798 15.6506 14.5453 15.4733 14.7753 15.3159 14.9795 15.1329 15.1625 14.9288 15.3199 14.6987 15.4972 14.4332 15.6299 13.9023 15.8954L12 16.8466l1.9023.9511C14.4332 18.0632 14.6987 18.1959 14.9288 18.3733 15.1329 18.5306 15.3159 18.7136 15.4733 18.9178c.177300000000001.23.3101.4955.5756 1.0265L17 21.8466l.9511-1.9023C18.2166 19.4133 18.3494 19.1478 18.5267 18.9178 18.6841 18.7136 18.8671 18.5306 19.0712 18.3733 19.3013 18.1959 19.5668 18.0632 20.0977 17.7977L22 16.8466 20.0977 15.8954C19.5668 15.6299 19.3013 15.4972 19.0712 15.3199 18.8671 15.1625 18.6841 14.9795 18.5267 14.7753 18.3494 14.5453 18.2166 14.2798 17.9511 13.7488L17 11.8466z" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg>
-<rect width="24" height="24" fill="currentColor" fill-opacity="1"></rect></span></a>
+    <a class="pt-0.5 no-underline btn btn-xs sm:btn-sm btn-outline btn-accent" href="{% url 'chat-page' %}">
+  Ask AI
+  <span class="hidden sm:inline-flex mb-1">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M18.5 7.84656v-5M5.5 20.8466v-5M16 5.34656h5M3 18.3466H8M6.5 1.84656 5.71554 3.41547c-.26549.53098-.39823.79647-.57557 1.02653C4.98261 4.64615 4.79959 4.82917 4.59545 4.98653c-.23007.17734-.49555.31008-1.02653.57557L2 6.34656l1.56892.78446c.53098.26549.79646.39823 1.02653.57557C4.79959 7.86395 4.98261 8.04696 5.13997 8.25111c.17734.23006.31008.49555.57557 1.02653L6.5 10.8466l.78446-1.56896C7.54995 8.74666 7.68269 8.48117 7.86003 8.25111 8.01739 8.04696 8.20041 7.86395 8.40455 7.70659 8.63462 7.52925 8.9001 7.3965 9.43108 7.13102L11 6.34656 9.43108 5.5621c-.53098-.26549-.79646-.39823-1.02653-.57557C8.20041 4.82917 8.01739 4.64615 7.86003 4.442c-.17734-.23006-.31008-.49555-.57557-1.02653L6.5 1.84656zM17 11.8466l-.9511 1.9022C15.7834 14.2798 15.6506 14.5453 15.4733 14.7753 15.3159 14.9795 15.1329 15.1625 14.9288 15.3199 14.6987 15.4972 14.4332 15.6299 13.9023 15.8954L12 16.8466l1.9023.9511C14.4332 18.0632 14.6987 18.1959 14.9288 18.3733 15.1329 18.5306 15.3159 18.7136 15.4733 18.9178c.177300000000001.23.3101.4955.5756 1.0265L17 21.8466l.9511-1.9023C18.2166 19.4133 18.3494 19.1478 18.5267 18.9178 18.6841 18.7136 18.8671 18.5306 19.0712 18.3733 19.3013 18.1959 19.5668 18.0632 20.0977 17.7977L22 16.8466 20.0977 15.8954C19.5668 15.6299 19.3013 15.4972 19.0712 15.3199 18.8671 15.1625 18.6841 14.9795 18.5267 14.7753 18.3494 14.5453 18.2166 14.2798 17.9511 13.7488L17 11.8466z"
+        stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+    </svg>
+  </span>
+</a>
     <button id="theme-toggle" class='h-10'>
       <!-- Light Mode Icon -->
-      <svg    class="fill-violet-700 block" fill="currentColor" viewBox="0 0 20 20" width="24" height="24">
+      <svg class="fill-violet-700 block" fill="currentColor" viewBox="0 0 20 20" width="24" height="24">
         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
       </svg>
       <!-- Dark Mode Icon -->
       <svg class="fill-yellow-500 hidden" fill="currentColor" viewBox="0 0 20 20" width="24" height="24">
-        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd">
+        <path
+          d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+          fill-rule="evenodd" clip-rule="evenodd">
         </path>
       </svg><span class="sr-only">theme</span>
     </button>
-    <div class="dropdown relative -mr-2 md:mr-0 lg:mr-0 inline-flex [--auto-close:inside] [--offset:8] [--placement:bottom-end]">
-      <button id="dropdown-scrollable" type="button" class="dropdown-toggle flex items-center" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+    <style>
+      @keyframes icon-pop {
+        0% {
+          transform: scale(0.5) rotate(-30deg);
+          opacity: 0;
+        }
+
+        60% {
+          transform: scale(1.15) rotate(8deg);
+          opacity: 1;
+        }
+
+        100% {
+          transform: scale(1) rotate(0deg);
+          opacity: 1;
+        }
+      }
+
+      .icon-animate {
+        animation: icon-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+      /* --- Theme-aware tokens --- */
+[data-theme="gourmet"] {
+  --brand-icon-bg: oklch(92% 0.08 280);
+  --brand-icon-color: oklch(45% 0.22 280);
+  --brand-icon-ring: oklch(75% 0.15 280 / 0.35);
+  --brand-glow: oklch(72% 0.18 280 / 0.45);
+  --brand-text: oklch(22% 0.05 280);
+  --brand-em: oklch(49.324% 0.18611 29.639);
+  --brand-dot: oklch(60% 0.2 280);
+}
+
+[data-theme="luxury"] {
+  --brand-icon-bg: oklch(25% 0.06 60);
+  --brand-icon-color: oklch(82% 0.18 72);
+  --brand-icon-ring: oklch(70% 0.16 72 / 0.3);
+  --brand-glow: oklch(78% 0.2 72 / 0.5);
+  --brand-text: oklch(92% 0.04 72);
+  --brand-em: oklch(71.423% 0.16539 55.18);
+  --brand-dot: oklch(72% 0.18 72);
+}
+
+/* --- Icon container --- */
+.brand-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: var(--brand-icon-bg);
+  border-radius: 0.6rem;
+  box-shadow:
+    0 0 0 1.5px var(--brand-icon-ring),
+    0 2px 8px oklch(0% 0 0 / 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.brand-icon-wrap:hover {
+  transform: scale(1.08) rotate(-4deg);
+  box-shadow:
+    0 0 0 1.5px var(--brand-icon-ring),
+    0 4px 16px var(--brand-glow);
+}
+
+.brand-icon {
+  font-size: 1.2rem;
+  color: var(--brand-icon-color);
+  transition: color 0.3s ease;
+}
+
+/* Subtle inner glow pulse on hover */
+.brand-icon-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 60% 35%, var(--brand-glow), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.brand-icon-wrap:hover .brand-icon-glow {
+  opacity: 1;
+}
+
+/* --- Wordmark --- */
+.brand-text {
+  font-family: 'Pacifico', cursive;
+  font-size: 1.45rem;
+  letter-spacing: -0.01em;
+  color: var(--brand-text);
+  transition: color 0.3s ease;
+  line-height: 1;
+  user-select: none;
+}
+
+.brand-text em {
+  font-style: normal;
+  color: var(--brand-em);
+  transition: color 0.3s ease;
+}
+
+/* Hairline divider between icon and text */
+.brand-logo {
+  position: relative;
+}
+
+.brand-logo::after {
+  display: none; /* remove if you don't want the separator */
+}
+
+/* Optional: dot accent between words */
+.brand-text::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: var(--brand-dot);
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 0.05em;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.brand-logo:hover .brand-text::before {
+  opacity: 1;
+}
+    </style>
+    <div
+      class="dropdown relative -mr-2 md:mr-0 lg:mr-0 inline-flex [--auto-close:inside] [--offset:8] [--placement:bottom-end]">
+      <button id="dropdown-scrollable" type="button" class="dropdown-toggle flex items-center" aria-haspopup="menu"
+        aria-expanded="false" aria-label="Dropdown">
         {% if user.is_authenticated %}
         <div class="avatar">
           <div class="size-9.5 rounded-full">
@@ -51,9 +197,10 @@
           </div>
         </div>
         {% endif %}
-        
+
       </button>
-      <ul class="dropdown-menu dropdown-open:opacity-100 hidden min-w-60" role="menu" aria-orientation="vertical" aria-labelledby="dropdown-avatar">
+      <ul class="dropdown-menu dropdown-open:opacity-100 hidden min-w-60" role="menu" aria-orientation="vertical"
+        aria-labelledby="dropdown-avatar">
         <li class="dropdown-header gap-2">
           {% if user.is_authenticated %}
           <div class="avatar">
@@ -79,7 +226,7 @@
             <small class="text-base-content/50">Anonymous</small>
           </div>
           {% endif %}
-          
+
         </li>
         <li>
           <a class="dropdown-item" href="{% url 'photographer' %}">
@@ -97,7 +244,7 @@
         {% endif %}
 
         <li>
-          <a class="dropdown-item" href="{% url 'profile'%}" >
+          <a class="dropdown-item" href="{% url 'profile'%}">
             <span class="icon-[tabler--user]"></span>
             My Profile
           </a>
@@ -142,24 +289,24 @@
 <script>
   let lastScroll = 0;
 
-window.addEventListener("scroll", () => {
-  const navbar = document.getElementById("navbar");
-  const currentScroll = window.scrollY;
+  window.addEventListener("scroll", () => {
+    const navbar = document.getElementById("navbar");
+    const currentScroll = window.scrollY;
 
-  if (currentScroll <= navbar.offsetHeight) {
-    // Reset to default position if at the top of the page
-    navbar.classList.remove("translate-y-[-100%]");
-    return;
-  }
+    if (currentScroll <= navbar.offsetHeight) {
+      // Reset to default position if at the top of the page
+      navbar.classList.remove("translate-y-[-100%]");
+      return;
+    }
 
-  if (currentScroll > lastScroll) {
-    // Scrolling down: hide the navbar
-    navbar.classList.add("translate-y-[-100%]");
-  } else {
-    // Scrolling up: show the navbar
-    navbar.classList.remove("translate-y-[-100%]");
-  }
+    if (currentScroll > lastScroll) {
+      // Scrolling down: hide the navbar
+      navbar.classList.add("translate-y-[-100%]");
+    } else {
+      // Scrolling up: show the navbar
+      navbar.classList.remove("translate-y-[-100%]");
+    }
 
-  lastScroll = currentScroll;
-});
+    lastScroll = currentScroll;
+  });
 </script>

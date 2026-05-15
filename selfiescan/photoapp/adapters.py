@@ -1,5 +1,3 @@
-# yourapp/adapters.py
-
 from allauth.account.adapter import DefaultAccountAdapter
 from django.core.exceptions import PermissionDenied
 

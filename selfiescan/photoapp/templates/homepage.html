@@ -11,97 +11,150 @@
 <!-- notify users if plan expired with modal -->
 {% include 'partials/subscription-expired.html'%}
 
-<!-- hero section -->
-<section class="hero py-20 text-center flex justify-center">
-    <div class="container w-full">
-        <h1 class="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white leading-tight animate-fade-in-up">
-            Transform Your Photography Business
-        </h1>
-        <p class="mt-4 text-lg md:text-xl text-gray-700 dark:text-gray-200 animate-fade-in-up animation-delay-200">
-            Streamline your workflow from shoot to delivery. Create events, share galleries, and let clients find their photos with AI-powered facial recognition.
-        </p>
-        
-        <!-- CTA buttons -->
-        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-400">
-            <a href="{% url 'photographer' %}" class="btn btn-primary shadow-lg hover:shadow-indigo-500/50 text-lg text-primary-content">
-                Start Free Trial
-            </a>
-            <button type="button" class="btn btn-outline border-2 text-lg" aria-haspopup="dialog" aria-expanded="false" aria-controls="fullscreen-modal" data-overlay="#fullscreen-modal">
-                See How It Works
-            </button>
-        </div>
+<!-- Hero Section -->
+<section class="py-20 text-center flex justify-center">
+  <div class="container w-full max-w-4xl">
 
-<!-- Fullscreen Demo Modal -->
-<div id="fullscreen-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden transition-opacity duration-300 ease-in-out" role="dialog" aria-labelledby="modal-title" aria-modal="true" tabindex="-1">
-  <div class="modal-dialog bg-white w-full h-full max-w-none max-h-none flex flex-col transform transition-all duration-500 ease-out scale-95 opacity-0 overlay-open:scale-100 overlay-open:opacity-100">
-    <div class="modal-content flex flex-col h-full justify-between">
+    <!-- 1. Badge -->
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-base-300 bg-base-200 text-base-content/50 text-xs font-semibold uppercase tracking-widest mb-6 animate-fade-in-up">
+      <span class="size-1.5 rounded-full bg-primary animate-pulse"></span>
+      AI-powered photography platform
+    </div>
+
+    <!-- 2. Headline -->
+    <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-base-content leading-tight tracking-tight animate-fade-in-up animation-delay-100 font-serif">
+      Every photo finds its
+      <span class="tagline-accent">person.
+        <svg class="tagline-underline" viewBox="0 0 200 10" preserveAspectRatio="none">
+          <path d="M2 7 Q50 2 100 6 Q150 10 198 4" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </h1>
+
+    <!-- 3. Divider + Subline -->
+    <div class="w-10 h-px bg-base-300 mx-auto my-5 animate-fade-in-up animation-delay-200"></div>
+    <!-- 5. Service Pills -->
+  <!-- Hero Stats -->
+<div class="mt-8 animate-fade-in-up animation-delay-400">
+  <div class="hero-stats-grid">
+
+    <div class="hero-stat-card">
+      <div class="hero-stat-number">HD+</div>
+      <div class="hero-stat-label">Original quality photo delivery</div>
+    </div>
+
+    <div class="hero-stat-card">
+      <div class="hero-stat-number">AI</div>
+      <div class="hero-stat-label">Face recognition with 99% accuracy</div>
+    </div>
+
+    <div class="hero-stat-card">
+      <div class="hero-stat-number">24/7</div>
+      <div class="hero-stat-label">Client gallery access</div>
+    </div>
+
+    <div class="hero-stat-card">
+      <div class="hero-stat-number">QR</div>
+      <div class="hero-stat-label">Instant event sharing</div>
+    </div>
+
+  </div>
+</div>
+
+    <!-- 4. CTA Buttons -->
+    <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-300">
+      <a href="{% url 'photographer' %}" class="btn btn-primary shadow-lg hover:shadow-indigo-500/50 text-lg text-primary-content">
+        Start Free Trial
+      </a>
+      <button type="button" class="btn btn-outline border-2 text-lg"
+        aria-haspopup="dialog" aria-expanded="false"
+        aria-controls="fullscreen-modal" data-overlay="#fullscreen-modal">
+        See How It Works
+      </button>
+    </div>
+
+    
+
+    <!-- 6. Hero Images -->
+    <div class="flex flex-col md:flex-row justify-center items-center mt-14 relative animate-fade-in-up animation-delay-500">
+      <div class="relative -ml-4 md:-ml-8 z-10">
+        <img src="{% static 'images/hero-image.webp' %}" alt="Photography event"
+          class="rounded-2xl shadow-2xl w-full h-96 object-cover border border-base-300"
+          onerror="this.src='/api/placeholder/600/400';this.onerror='';">
+      </div>
+      <div class="relative -z-0 md:mt-12 ml-4 md:-ml-6">
+        <img src="{% static 'images/hero-image-2.jpg' %}" alt="Photography gallery"
+          class="rounded-2xl shadow-2xl h-64 md:h-80 object-cover border border-base-300"
+          onerror="this.src='/api/placeholder/600/400';this.onerror='';">
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Demo Modal (outside section to avoid z-index issues) -->
+<div id="fullscreen-modal" class="overlay modal overlay-open:opacity-100 hidden fixed inset-0 z-50 bg-black/50 transition-opacity duration-300"
+  role="dialog" aria-labelledby="modal-title" aria-modal="true" tabindex="-1">
+  <div class="modal-dialog bg-base-100 w-full h-full max-w-none max-h-none flex flex-col transform transition-all duration-500 ease-out scale-95 opacity-0 overlay-open:scale-100 overlay-open:opacity-100">
+    <div class="modal-content flex flex-col h-full">
+
       <!-- Modal Header -->
-      <div class="modal-header flex justify-between items-center p-6 sm:p-8 border-b border-gray-200">
-        <h3 id="modal-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-200">How PhotoFlow Works</h3>
-        <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close" data-overlay="#fullscreen-modal">
-          <span class="icon-[tabler--x] size-4"></span>
+      <div class="flex items-center justify-between p-6 sm:p-8 border-b border-base-300">
+        <h3 id="modal-title" class="text-2xl sm:text-3xl font-bold text-base-content">
+          How PhotoFlow Works
+        </h3>
+        <button type="button" class="btn btn-text btn-circle btn-sm" aria-label="Close" data-overlay="#fullscreen-modal">
+          <span class="icon-[tabler--x] size-5"></span>
         </button>
       </div>
 
       <!-- Modal Body -->
-      <div class="modal-body grow p-6 mt-4 sm:p-8 overflow-y-auto">
-        <div class="flex gap-4">
-        <div class="space-y-6">
-          <div class="flex items-start space-x-4 sm:space-x-6 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-            <div class="text-4xl sm:text-5xl flex-shrink-0"><span class="icon-[tabler--cloud-code] size-12"></span></div>
-            <div class="flex flex-col">
-              <h4 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-200">Upload & Organize</h4>
-              <p class="text-sm sm:text-base">Seamlessly upload your event photos to secure high-speed organized cloud storage.</p>
+      <div class="grow p-6 sm:p-10 overflow-y-auto">
+        <div class="flex flex-col md:flex-row gap-8 items-start max-w-4xl mx-auto">
+
+          <div class="space-y-4 flex-1">
+            <div class="flex items-start gap-5 p-4 rounded-xl hover:bg-base-200 transition-colors duration-200">
+              <span class="icon-[tabler--cloud-code] size-10 text-primary flex-shrink-0 mt-0.5"></span>
+              <div>
+                <h4 class="text-lg font-semibold text-base-content mb-1">Upload & Organize</h4>
+                <p class="text-sm text-base-content/60 leading-relaxed">Seamlessly upload your event photos to secure high-speed organized cloud storage.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-5 p-4 rounded-xl hover:bg-base-200 transition-colors duration-200">
+              <span class="icon-[tabler--qrcode] size-10 text-primary flex-shrink-0 mt-0.5"></span>
+              <div>
+                <h4 class="text-lg font-semibold text-base-content mb-1">Share with QR Code</h4>
+                <p class="text-sm text-base-content/60 leading-relaxed">Generate unique QR codes for instant, secure access to event galleries on any device.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-5 p-4 rounded-xl hover:bg-base-200 transition-colors duration-200">
+              <span class="icon-[tabler--robot] size-10 text-primary flex-shrink-0 mt-0.5"></span>
+              <div>
+                <h4 class="text-lg font-semibold text-base-content mb-1">AI-Powered Face Recognition</h4>
+                <p class="text-sm text-base-content/60 leading-relaxed">Clients upload a selfie and our AI instantly finds and curates all their photos from the event.</p>
+              </div>
             </div>
           </div>
-          <div class="flex items-start space-x-4 sm:space-x-6 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-            <div class="text-4xl sm:text-5xl flex-shrink-0"><span class="icon-[tabler--qrcode] size-12"></div>
-            <div class="flex flex-col">
-              <h4 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-200">Share with QR Code</h4>
-              <p class="text-sm sm:text-base">Generate unique QR codes for instant, secure access to event galleries on any device.</p>
-            </div>
+
+          <div class="flex-shrink-0 w-full md:w-96">
+            <img src="{% static 'images/system-workflow-2.png' %}" alt="How PhotoFlow works"
+              class="rounded-2xl object-cover w-full h-72 md:h-96 border border-base-300"
+              onerror="this.src='/api/placeholder/600/400';this.onerror='';">
           </div>
-          <div class="flex items-start space-x-4 sm:space-x-6 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-            <div class="text-4xl sm:text-5xl flex-shrink-0"><span class="icon-[tabler--robot] size-12"></div>
-            <div class="flex flex-col">
-              <h4 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-200">AI-Powered Face Recognition</h4>
-              <p class=" text-sm sm:text-base">Clients upload selfies, and our advanced AI instantly identifies and curates their photos.</p>
-            </div>
-          </div>
+
         </div>
-       
-        <div>
-            <img src="{% static 'images/system-workflow-2.png' %}" alt="Corporate Event" class="rounded-xl object-cover w-96 h-96" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
-        </div>
-        </div>
-        
       </div>
 
       <!-- Modal Footer -->
-      <div class="modal-footer">
-        <button type="button" class="btn btn-soft btn-primary" data-overlay="#fullscreen-modal">Close</button>
+      <div class="p-6 border-t border-base-300 flex justify-end">
+        <button type="button" class="btn btn-soft btn-primary" data-overlay="#fullscreen-modal">
+          Close
+        </button>
       </div>
+
     </div>
   </div>
 </div>
-
-<!-- Hero Images -->
-<div class="flex flex-col md:flex-row justify-center items-center mt-4 relative">
-    
-    <div class="animate-fade-in-up animation-delay-700 relative -ml-4 md:-ml-8">
-        <img src="{% static 'images/hero-image.webp' %}" 
-     alt="Corporate Event" 
-     class="rounded-xl shadow-2xl w-full h-96 object-cover border border-gray-200" 
-     onerror="this.src='/api/placeholder/600/400';this.onerror='';">
-
-    </div>
-    <div class="animate-fade-in-up animation-delay-700 relative -z-10 md:mt-12 ml-4 md:-ml-4">
-        <img src="{% static 'images/hero-image-2.jpg' %}" alt="Corporate Event" class="rounded-xl overflow-visible border border-gray-200 shadow-2xl h-64 md:h-96 lg:h-96 object-cover" onerror="this.src='/api/placeholder/600/400';this.onerror='';">
-    </div>
-    
-</div>
-</section>
-
 <!-- How it works for photographers -->
 <section class="workflow py-10 backdrop-blur-sm">
     <div class="container max-w-6xl mx-auto px-6">
@@ -374,7 +427,84 @@
         background-clip: text;
     }
     
-    
+  /* Tagline accent */
+.tagline-accent {
+  color: var(--color-primary, #7F77DD);
+  position: relative;
+  display: inline-block;
+  font-style: italic;
+}
+.tagline-underline {
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  color: currentColor;
+  opacity: 0.5;
+}
+/* Feature strip */
+.hero-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.hero-stat-card {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.06),
+      rgba(255,255,255,0.03)
+    );
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+.hero-stat-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(127,119,221,0.25);
+  box-shadow: 0 10px 35px rgba(127,119,221,0.12);
+}
+
+.hero-stat-number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #7F77DD, #4F9CF9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-stat-label {
+  font-size: 0.82rem;
+  color: hsl(var(--bc) / 0.62);
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .hero-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero-stat-card {
+    padding: 16px;
+  }
+
+  .hero-stat-number {
+    font-size: 1.5rem;
+  }
+}
+
 </style>
 
 <script>
