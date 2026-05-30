@@ -19,6 +19,26 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
+TEXT_STYLE_CHOICES = [
+    ("box", "Frosted Box"),
+    ("plain", "Plain Text"),
+]
+POSITION_CHOICES = [
+    ("bottom_right", "Bottom Right"),
+    ("bottom_left", "Bottom Left"),
+    ("bottom_center", "Bottom Center"),
+    ("top_right", "Top Right"),
+]
+FONT_CHOICES = [
+    ("elegant", "Elegant"),
+    ("modern", "Modern"),
+    ("classic", "Classic"),
+    ("stylish", "Stylish"),
+    ("luxury", "Luxury"),
+    ("handwritten", "Handwritten"),
+    ("ultra_modern", "Ultra Modern"),
+]
+
 
 class Event(models.Model):
     photographer = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -36,7 +56,11 @@ class Event(models.Model):
     is_public_gallery_downloadable = models.BooleanField(null=True, default=False)
     public_token = models.CharField(max_length=32, unique=True)
     studio_name = models.CharField(max_length=50, blank=True, null=True, editable=True)
-
+    branding_text_style = models.CharField(max_length=10, choices=TEXT_STYLE_CHOICES, default="box")
+    branding_position = models.CharField(max_length=20, choices=POSITION_CHOICES, default="bottom_right")
+    branding_font = models.CharField(max_length=20, choices=FONT_CHOICES, default="modern")
+    branding_opacity = models.PositiveSmallIntegerField(default=78)
+    
     def save(self, *args, **kwargs):
         if not self.public_token:
             self.public_token = secrets.token_hex(16)

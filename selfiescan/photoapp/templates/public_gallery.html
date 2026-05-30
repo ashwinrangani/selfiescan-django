@@ -9,10 +9,10 @@
 
     <!-- ── TOPBAR ── -->
     <header class="gallery-topbar">
-      <a href="/" class="brand-logo no-underline flex items-center gap-2.5">
+      <a href="/" class="brand-logo no-underline flex items-center gap-1">
         <div class="brand-icon-wrap">
           <span class="icon-[tabler--camera-search] brand-icon"></span>
-          <span class="brand-icon-glow"></span>
+          
         </div>
         <span class="brand-text">Photo<em>Flow</em></span>
       </a>
@@ -20,19 +20,21 @@
 
     <!-- ── HERO TITLE ── -->
     <div class="gallery-hero">
-      <p class="hero-eyebrow">Photo&nbsp;&nbsp;Gallery</p>
+      
       {% if studio_name %}
         <p class="hero-presents"><em>{{ studio_name }}</em>&ensp;presents</p>
       {% endif %}
+      <p class="hero-eyebrow">Photo&nbsp;&nbsp;Gallery</p>
       <h1 class="hero-title">{{ event.name }}</h1>
       <div class="hero-ornament">
         <span class="orn-line"></span>
         <span class="orn-diamond">◆</span>
         <span class="orn-line"></span>
       </div>
-      <a href="{% url 'find_photos' event_id=event.event_id %}" class="find-photos-cta">
-        <span class="icon-[tabler--photo-ai] cta-icon"></span>
+      <a href="{% url 'find_photos' event_id=event.event_id %}" title="Click here to find your own photos of this event by providing your photo!" class="find-photos-cta">
+       <span class="icon-[tabler--photo-ai] cta-icon"></span>
         Find Your Photos
+        
       </a>
     </div>
 

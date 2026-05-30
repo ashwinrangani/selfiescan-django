@@ -193,7 +193,8 @@ def process_selfie(request, event_id):
         return render(request, 'find_photos.html', {
             'message': f'Kindly wait for some time, {unprocessed_photos.count()} photos are still being processed.',
             'pending_count': unprocessed_photos.count(),
-            'event':event
+            'event':event,
+            "studio_name": event.studio_name,
         }, status=202)
     
     # Check for unbranded photos if branding is enabled
@@ -202,7 +203,9 @@ def process_selfie(request, event_id):
         if unbranded_photos.exists():
             return render(request, 'find_photos.html',{
                 'message': f'Kindly wait for some time, {unbranded_photos.count()} photos are still being branded.',
-                'pending_count': unbranded_photos.count()
+                'pending_count': unbranded_photos.count(),
+                'event':event,
+                "studio_name": event.studio_name,
             }, status=202)
         
     if request.method == 'POST':
@@ -269,4 +272,4 @@ def process_selfie(request, event_id):
 
         return JsonResponse({'message': 'No file uploaded'}, status=400)    
 
-    return render(request, 'find_photos.html', {'event': event})
+    return render(request, 'find_photos.html', {'event': event,"studio_name": event.studio_name,})

@@ -1,213 +1,260 @@
-// ================= GLOBAL — Back Button LightGallery Handling =================
+// ── Back Button / LightGallery ───────────────────────────────────────────────
 let lgInstanceFind = null;
-let lgOpenFind = false;
+let lgOpenFind     = false;
 
-window.addEventListener("popstate", function (event) {
+window.addEventListener("popstate", function () {
     if (lgOpenFind && lgInstanceFind) {
-        // Close LightGallery instead of navigating back
-        try {
-            lgInstanceFind.closeGallery();
-        } catch (e) {}
-
-        // Restore fake state to prevent actual backward navigation again
+        try { lgInstanceFind.closeGallery(); } catch (e) {}
         history.pushState({ lgFind: true }, "");
     }
 });
-// ==============================================================================
+// ────────────────────────────────────────────────────────────────────────────
 
 
-// upload_selfie form
 document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('selfie');
-    const cameraInput = document.getElementById('camera_selfie');
-    const imagePreview = document.getElementById('image-preview');
-    const clearPreviewButton = document.getElementById('clear-preview');
-    const uploadForm = document.getElementById('upload_selfie');
-    const loadingState = document.querySelector('.loading');
-    const is_event_downloadable = document.getElementById('lightgallery').dataset.eventIsdownload.toLowerCase() === "true";
 
-    var notyf = new Notyf({ duration: 5000 });
+    // ── Element refs ─────────────────────────────────────────────────────────
+    const fileInput      = document.getElementById('selfie');
+    const cameraInput    = document.getElementById('camera_selfie');
+    const imagePreview   = document.getElementById('image-preview');
+    const clearBtn       = document.getElementById('clear-preview');
+    const uploadForm     = document.getElementById('upload_selfie');
+    const loadingSpinner = document.querySelector('.loading');
+    const submitBtn      = document.getElementById('search-btn');
+    const dropZone       = document.getElementById('drop-zone');
+    const resultsHeader  = document.getElementById('results-header');
+    const resultsCount   = document.getElementById('results-count');
+    const lgEl           = document.getElementById('lightgallery');
+    const messagesEl     = document.querySelector('.messages');
 
-    function validate_input(input) {
-        const allowed_types = ['image/jpeg', 'image/png', 'image/psd', 'image/jpg', 'image/webp'];
-        const files = input.files;
+    if (!lgEl) return;
 
-        for (let index = 0; index < files.length; index++) {
-            if (!allowed_types.includes(files[index].type)) {
-                notyf.error("Invalid file type! Please upload only images.");
-                input.value = '';
-            }
-        }
+    const isDownloadable =
+        lgEl.dataset.eventIsdownload.toLowerCase() === "true";
+
+    // ── Notyf ────────────────────────────────────────────────────────────────
+    const notyf = new Notyf({ duration: 5000 });
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    const ALLOWED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/psd'];
+
+    function isAllowedType(file) {
+        return ALLOWED.includes(file.type);
     }
 
-    function updatePreview(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-                clearPreviewButton.style.display = 'block';
-            };
-            reader.readAsDataURL(input.files[0]);
+    function validateInput(input) {
+        for (const file of input.files) {
+            if (!isAllowedType(file)) {
+                notyf.error("Invalid file type. Please upload a photo.");
+                input.value = '';
+                return false;
+            }
         }
+        return true;
+    }
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src          = e.target.result;
+            imagePreview.style.display = 'block';
+            clearBtn.style.display     = 'flex';
+            dropZone?.classList.add('has-preview');
+        };
+        reader.readAsDataURL(file);
     }
 
     function clearPreview() {
-        fileInput.value = '';
+        fileInput.value  = '';
         cameraInput.value = '';
-        fileInput.disabled = false;
+        fileInput.disabled   = false;
         cameraInput.disabled = false;
-        imagePreview.src = '';
-        imagePreview.style.display = 'none';
-        clearPreviewButton.style.display = 'none';
+        imagePreview.src           = '';
+        imagePreview.style.display  = 'none';
+        clearBtn.style.display      = 'none';
+        dropZone?.classList.remove('has-preview');
     }
 
-    if (fileInput) {
-        fileInput.addEventListener('change', (event) => {
-            validate_input(event.target);
-            cameraInput.disabled = fileInput.files.length > 0;
-            updatePreview(fileInput);
-        });
+    function setLoading(on) {
+        if (on) {
+            loadingSpinner?.classList.remove('hidden');
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Searching…'; }
+        } else {
+            loadingSpinner?.classList.add('hidden');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Find my photos'; }
+        }
     }
 
-    if (cameraInput) {
-        cameraInput.addEventListener('change', (event) => {
-            validate_input(event.target);
-            fileInput.disabled = cameraInput.files.length > 0;
-            updatePreview(cameraInput);
-        });
-    }
+    // ── File input events ────────────────────────────────────────────────────
+    fileInput?.addEventListener('change', () => {
+        if (!validateInput(fileInput)) return;
+        if (fileInput.files.length > 0) {
+            cameraInput.disabled = true;
+            showPreview(fileInput.files[0]);
+        }
+    });
 
-    if (clearPreviewButton) {
-        clearPreviewButton.addEventListener('click', clearPreview);
-    }
+    cameraInput?.addEventListener('change', () => {
+        if (!validateInput(cameraInput)) return;
+        if (cameraInput.files.length > 0) {
+            fileInput.disabled = true;
+            showPreview(cameraInput.files[0]);
+        }
+    });
 
-    if (uploadForm) {
-        uploadForm.addEventListener('submit', (e) => {
+    clearBtn?.addEventListener('click', clearPreview);
+
+    // ── Drag and drop ────────────────────────────────────────────────────────
+    if (dropZone) {
+        dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
 
-            const formdata = new FormData(uploadForm);
+        dropZone.addEventListener('dragleave', (e) => {
+            // only remove if leaving the zone entirely (not a child element)
+            if (!dropZone.contains(e.relatedTarget)) {
+                dropZone.classList.remove('drag-over');
+            }
+        });
 
-            const fileInputs = [fileInput, cameraInput];
-            let hasFiles = fileInputs.some(input => input && input.files.length > 0);
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
 
-            if (!hasFiles) {
-                notyf.error("Please select image or take a photo");
-                loadingState.style.display = 'none';
+            const file = e.dataTransfer?.files?.[0];
+            if (!file || !isAllowedType(file)) {
+                notyf.error("Please drop an image file.");
                 return;
             }
 
-            loadingState.style.display = 'block';
-
-            fetch(uploadForm.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': uploadForm.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-                body: formdata,
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    loadingState.style.display = 'none';
-
-                    if (data.matches) {
-                        const messages = document.querySelector('.messages');
-                        const count = data.matches.length;
-
-                        if (count > 0) {
-                            messages.textContent = `${count} ${data.message}`;
-                        } else {
-                            messages.textContent = data.message;
-                        }
-
-                        const matchesContainer = document.getElementById("lightgallery");
-                        matchesContainer.innerHTML = '';
-
-                        data.matches.forEach(match => {
-                            const container = document.createElement('div');
-                            container.className = "overflow-hidden rounded-lg";
-
-                            const anchor = document.createElement('a');
-                            anchor.href = match.medium;               // lightbox image
-                            anchor.dataset.src = match.medium;
-                            anchor.dataset.downloadUrl = match.download; // download target
-                            anchor.className = "block mb-4";
-
-                            const img = document.createElement('img');
-                            img.src = match.thumb;                    // thumbnail
-                            img.alt = "Matched photo";
-                            img.loading = "lazy";
-                            img.className =
-                                "w-full h-auto rounded-lg object-cover shadow-md shadow-gray-600 hover:scale-105 transition duration-300";
-
-                            if (!is_event_downloadable) {
-                                img.oncontextmenu = () => false;
-                                img.draggable = false;
-                            }
-
-                            anchor.appendChild(img);
-                            container.appendChild(anchor);
-                            matchesContainer.appendChild(container);
-                        });
-
-
-                        // ================= LightGallery Safe Init =================
-                        const lgEl = document.getElementById("lightgallery");
-
-                        // Destroy previous instance if exists
-                        if (lgInstanceFind) {
-                            try {
-                                lgInstanceFind.destroy(true);
-                            } catch (e) {}
-                        }
-
-                        lgInstanceFind = lightGallery(lgEl, {
-                            plugins: [lgZoom, lgFullscreen],
-                            selector: 'a',
-                            speed: 400,
-                            licenseKey: '0000-0000-000-0000',
-                            download: is_event_downloadable,
-
-                            mobileSettings: {
-                                controls: true,
-                                showCloseIcon: true,
-                                download: is_event_downloadable,
-                                closeOnTap: false,
-                            },
-                        });
-
-                        // Open + Close tracking (for back button fix)
-                        lgEl.addEventListener("lgAfterOpen", () => {
-                            lgOpenFind = true;
-                            history.pushState({ lgFind: true }, "");
-                            
-                        });
-
-                        lgEl.addEventListener("lgAfterClose", () => {
-                            lgOpenFind = false;
-                        });
-
-                        // Disable drag/save on each slide load
-                        lgEl.addEventListener('lgAfterSlide', function () {
-                            const galleryImg = document.querySelector('.lg-current .lg-img-wrap img');
-                            if (galleryImg) {
-                                if (!is_event_downloadable) {
-                                    galleryImg.setAttribute('oncontextmenu', 'return false;');
-                                    galleryImg.setAttribute('draggable', 'false');
-                                } else {
-                                    galleryImg.setAttribute('oncontextmenu', 'return true;');
-                                    galleryImg.setAttribute('draggable', 'true');
-                                }
-                            }
-                        });
-                        // ============================================================
-                    }
-                })
-                .catch((error) => {
-                    loadingState.style.display = 'none';
-                    console.error('Error:', error);
-                });
+            // Inject into the gallery input
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files       = dt.files;
+            cameraInput.disabled  = true;
+            showPreview(file);
         });
     }
-});
 
+    // ── LightGallery init ────────────────────────────────────────────────────
+    function initLightGallery() {
+        if (lgInstanceFind) {
+            try { lgInstanceFind.destroy(true); } catch (e) {}
+        }
+
+        lgInstanceFind = lightGallery(lgEl, {
+            plugins: [lgZoom, lgFullscreen],
+            selector: 'a',
+            speed: 400,
+            licenseKey: '0000-0000-000-0000',
+            download: isDownloadable,
+            mobileSettings: {
+                controls: true,
+                showCloseIcon: true,
+                download: isDownloadable,
+                closeOnTap: false,
+            },
+        });
+
+        lgEl.addEventListener("lgAfterOpen", () => {
+            lgOpenFind = true;
+            history.pushState({ lgFind: true }, "");
+        });
+
+        lgEl.addEventListener("lgAfterClose", () => {
+            lgOpenFind = false;
+        });
+
+        lgEl.addEventListener('lgAfterSlide', () => {
+            const galleryImg = document.querySelector('.lg-current .lg-img-wrap img');
+            if (!galleryImg) return;
+            galleryImg.setAttribute('oncontextmenu', isDownloadable ? 'return true;' : 'return false;');
+            galleryImg.setAttribute('draggable',     isDownloadable ? 'true'         : 'false');
+        });
+    }
+
+    // ── Render results ───────────────────────────────────────────────────────
+    function renderMatches(matches) {
+        lgEl.innerHTML = '';
+
+        matches.forEach(match => {
+            const container = document.createElement('div');
+            container.className = 'photo-item';
+
+            const anchor = document.createElement('a');
+            anchor.href                 = match.medium;
+            anchor.dataset.src          = match.medium;
+            anchor.dataset.downloadUrl  = match.download;
+
+            const img = document.createElement('img');
+            img.src     = match.thumb;
+            img.alt     = 'Matched photo';
+            img.loading = 'lazy';
+
+            if (!isDownloadable) {
+                img.oncontextmenu = () => false;
+                img.draggable     = false;
+            }
+
+            anchor.appendChild(img);
+            container.appendChild(anchor);
+            lgEl.appendChild(container);
+        });
+
+        initLightGallery();
+    }
+
+    // ── Form submit ──────────────────────────────────────────────────────────
+    uploadForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const hasFile = [fileInput, cameraInput]
+            .some(inp => inp?.files?.length > 0);
+
+        if (!hasFile) {
+            notyf.error("Please select a photo or take a selfie first.");
+            return;
+        }
+
+        setLoading(true);
+
+        fetch(uploadForm.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': uploadForm.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: new FormData(uploadForm),
+        })
+        .then(res => {
+            if (res.status === 429) throw new Error('busy');
+            if (!res.ok)           throw new Error('error');
+            return res.json();
+        })
+        .then(data => {
+            setLoading(false);
+
+            const matches = data.matches || [];
+            const count   = matches.length;
+
+            if (messagesEl) {
+                messagesEl.textContent = count > 0 ? `${count} ${data.message}` : data.message;
+            }
+
+            if (resultsHeader) {
+                resultsHeader.classList.toggle('visible', count > 0);
+                if (resultsCount) resultsCount.textContent = count;
+            }
+
+            renderMatches(matches);
+        })
+        .catch(err => {
+            setLoading(false);
+            notyf.error(err.message === 'busy'
+                ? "Server is busy — please try again shortly."
+                : "Something went wrong. Please try again.");
+            console.error('find_photos error:', err);
+        });
+    });
+
+});

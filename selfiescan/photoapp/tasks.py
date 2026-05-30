@@ -1,5 +1,6 @@
 from celery import shared_task
 import face_recognition
+from humanfriendly import text
 import numpy as np
 from PIL import Image, ImageOps
 import logging,os
@@ -8,7 +9,9 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError,EndpointConnectionError
-from django.conf import settings
+from qrcode import image
+from rest_framework import response
+import mysite.settings as settings
 from io import BytesIO
 from .utils.image_variants import generate_variant, VARIANTS
 from .utils.convert_to_jpeg import convert_original_to_jpeg_if_needed
@@ -17,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Initialize Rekognition client (singleton for efficiency)
 rekognition = boto3.client(
     'rekognition',
-    region_name= 'ap-south-1',  # e.g., 'us-east-1' from settings.py
+    region_name= 'ap-south-1',
     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
 )
@@ -260,7 +263,7 @@ def process_event_photos(event_id):
  
 
   
-
+# Apply branding (logo or text) to photos marked for customer selection
 from celery import shared_task
 from django.core.files.base import ContentFile
 
@@ -271,21 +274,124 @@ import os
 
 logger = logging.getLogger(__name__)
 
-# Use a system font that’s commonly available (e.g., DejaVuSans on Linux)
-SYSTEM_FONT_PATH = "/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf"  # Common on Linux servers
 
-def load_font(size):
-    """Load a system font with the specified size, fallback to default if unavailable."""
+FONT_DIR = os.path.join(settings.BASE_DIR, "static", "fonts")
+
+BRAND_FONTS = {
+    "elegant":  os.path.join(FONT_DIR, "Cormorant-SemiBold.ttf"), 
+    "modern":   os.path.join(FONT_DIR, "Montserrat-Medium.ttf"), 
+    "classic":  os.path.join(FONT_DIR, "PlayfairDisplay-Regular.ttf"),
+    "stylish":  os.path.join(FONT_DIR, "Rancho-Regular.ttf"),
+    "luxury":  os.path.join(FONT_DIR, "Cinzel-Medium.ttf"),  
+    "handwritten": os.path.join(FONT_DIR, "PlaywriteGBSGuides-Italic.ttf"),
+    "ultra_modern": os.path.join(FONT_DIR, "ZenTokyoZoo-Regular.ttf"),   
+}
+
+def load_font(size, style="modern"):
+    path = BRAND_FONTS.get(style, BRAND_FONTS["modern"])
     try:
-        if not os.path.exists(SYSTEM_FONT_PATH):
-            logger.warning(f"System font not found at {SYSTEM_FONT_PATH}, falling back to default font")
-            return ImageFont.load_default()
-        font = ImageFont.truetype(SYSTEM_FONT_PATH, size=size)
-        logger.info(f"Loaded system font from {SYSTEM_FONT_PATH} with size {size}")
-        return font
-    except Exception as e:
-        logger.error(f"Failed to load system font: {e}, falling back to default font")
+        return ImageFont.truetype(path, size=size)
+    except Exception:
         return ImageFont.load_default()
+    
+def apply_logo_premium(image, logo, position, opacity=220):
+    """Paste logo with configurable opacity and a subtle drop shadow."""
+    # Adjust logo opacity
+    r, g, b, a = logo.split()
+    a = a.point(lambda x: int(x * opacity / 255))
+    logo = Image.merge("RGBA", (r, g, b, a))
+
+    # Drop shadow: a blurred dark version offset by a few pixels
+    shadow = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    shadow_logo = Image.new("RGBA", logo.size, (0, 0, 0, 160))
+    shadow_logo.putalpha(a)  # same shape as logo
+    shadow_offset = (position[0] + 3, position[1] + 3)
+    shadow.paste(shadow_logo, shadow_offset, shadow_logo)
+
+    # Apply gaussian blur to shadow
+    from PIL import ImageFilter
+    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=4))
+
+    # Composite: shadow first, then logo
+    image = Image.alpha_composite(image, shadow)
+    image.paste(logo, position, logo)
+    return image
+
+def compute_position(event, element_w, element_h, img_w, img_h, margin=30):
+    pos = getattr(event, "branding_position", "bottom_right")
+    positions = {
+        "bottom_right":  (img_w - element_w - margin, img_h - element_h - margin),
+        "bottom_left":   (margin, img_h - element_h - margin),
+        "bottom_center": ((img_w - element_w) // 2, img_h - element_h - margin),
+        "top_right":     (img_w - element_w - margin, margin),
+    }
+    return positions.get(pos, positions["bottom_right"])
+
+
+def apply_text_premium(image, text, font, position, text_color=(255, 255, 255, 150)):
+    """Text with frosted-glass background, properly vertically centered."""
+    tx, ty = position
+    temp = Image.new("RGBA", (1, 1))
+    d = ImageDraw.Draw(temp)
+    bbox = d.textbbox((0, 0), text, font=font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+    bbox_top_offset = bbox[1]
+
+    pad_x, pad_y = 18, 10
+    pill_w = tw + pad_x * 2
+    pill_h = th + pad_y * 2
+
+    # Frosted glass background
+    region_box = (tx - pad_x, ty - pad_y, tx - pad_x + pill_w, ty - pad_y + pill_h)
+    region = image.crop(region_box).convert("RGBA")
+    from PIL import ImageFilter, ImageEnhance
+    blurred = region.filter(ImageFilter.GaussianBlur(radius=12))
+    darkened = ImageEnhance.Brightness(blurred).enhance(0.75)
+    overlay = Image.new("RGBA", darkened.size, (0, 0, 0, 40))
+    frosted = Image.alpha_composite(darkened, overlay)
+    image.paste(frosted, (region_box[0], region_box[1]))
+
+    # Vertically center text
+    center_y = (ty - pad_y + ty - pad_y + pill_h) // 2
+    text_y = center_y - th // 2 - bbox_top_offset
+
+    # Shadow layer via alpha_composite — respects opacity
+    shadow_layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    ImageDraw.Draw(shadow_layer).text((tx + 1, text_y + 1), text, font=font, fill=(0, 0, 0, 160))
+    image = Image.alpha_composite(image, shadow_layer)
+
+    # Text layer via alpha_composite — respects opacity
+    text_layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    ImageDraw.Draw(text_layer).text((tx, text_y), text, font=font, fill=text_color)
+    image = Image.alpha_composite(image, text_layer)
+
+    return image
+
+def apply_text_plain(image, text, font, position, text_color=(255, 255, 255, 80)):
+    tx, ty = position
+    temp = Image.new("RGBA", (1, 1))
+    d = ImageDraw.Draw(temp)
+    bbox = d.textbbox((0, 0), text, font=font)
+    th = bbox[3] - bbox[1]
+    text_y = ty - th // 2 - bbox[1]
+
+    from PIL import ImageFilter
+
+    # Shadow layer — draw text first, THEN blur
+    shadow_layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    ImageDraw.Draw(shadow_layer).text((tx, text_y), text, font=font, fill=(0, 0, 0, 180))
+    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=6))
+    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=4))
+    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=2))
+    image = Image.alpha_composite(image, shadow_layer)
+
+    # Text layer — alpha_composite properly blends opacity
+    text_layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    ImageDraw.Draw(text_layer).text((tx, text_y), text, font=font, fill=text_color)
+    image = Image.alpha_composite(image, text_layer)
+
+    return image
 
 @shared_task(bind=True, acks_late=True, autoretry_for=(Exception,), retry_backoff=True, retry_jitter=True)
 def branded_photo(self, photo_id):
@@ -306,10 +412,11 @@ def branded_photo(self, photo_id):
             logger.info(f"Photo {photo_id} already branded.")
             return f"Photo {photo_id} already branded"
 
-        # Open the image with PIL and convert to RGBA
-        image_name = photo.image.name
+        image_name = photo.large_image.name or photo.image.name
         with default_storage.open(image_name, 'rb') as f:
-            image = Image.open(f).convert("RGBA")
+            image = Image.open(f)
+            exif = image.getexif()
+            image = image.convert("RGBA")
 
         if image is None:
             logger.error(f"Failed to load image for branding photo {photo_id}")
@@ -317,119 +424,77 @@ def branded_photo(self, photo_id):
 
         logger.info(f"Image loaded: size={image.size}, mode={image.mode}")
         width, height = image.size
-        margin = 30  # Margin from edges in pixels
-
-        # Apply branding
-        right_margin = 30  # Margin from right edge in pixels
-        bottom_margin = 15  # Reduced margin from bottom edge in pixels
+        right_margin = 30
+        margin = 30
 
         if event.branding_image and event.branding_image.name:
-            # Load and scale the logo
             with default_storage.open(event.branding_image.name, 'rb') as logo_file:
                 logo = Image.open(logo_file).convert("RGBA")
             has_alpha = logo.getchannel('A').getextrema() != (255, 255)
             logger.info(f"Logo loaded: size={logo.size}, mode={logo.mode}, has_alpha={has_alpha}")
-            
-            if not has_alpha:
-                logger.warning(f"Logo for event {event.id} has no transparency. Please ensure the logo has a transparent background.")
 
-            # Determine if the logo is wide (e.g., a text logo)
+            if not has_alpha:
+                logger.warning(f"Logo for event {event.id} has no transparency.")
+
             logo_aspect = logo.width / logo.height
-            is_wide_logo = logo_aspect > 2  # Consider it wide if width/height > 2
+            is_wide_logo = logo_aspect > 2
             logger.info(f"Logo aspect ratio: {logo_aspect}, is_wide_logo={is_wide_logo}")
 
             if is_wide_logo:
-                # Scale based on height for better readability of text logos
-                logo_max_height = min(int(height * 0.1), 100)  # 10% of image height, max 100px
+                logo_max_height = min(int(height * 0.1), 100)
                 logo_height = logo_max_height
                 logo_width = int(logo_height * logo_aspect)
-                # Ensure the width doesn't exceed 50% of the image width or 600px
                 max_allowed_width = min(int(width * 0.5), 600)
                 if logo_width > max_allowed_width:
                     logo_width = max_allowed_width
                     logo_height = int(logo_width / logo_aspect)
                 logger.info(f"Scaling wide logo by height: new_size=({logo_width}, {logo_height})")
             else:
-                # Scale based on width for compact logos
-                logo_max_width = min(int(width * 0.15), 300)  # 15% of image width, max 300px
+                logo_max_width = min(int(width * 0.15), 300)
                 logo_width = logo_max_width
                 logo_height = int(logo_width / logo_aspect)
                 logger.info(f"Scaling compact logo by width: new_size=({logo_width}, {logo_height})")
 
-            # Ensure the logo fits within the image (accounting for right margin)
             if logo_width > (width - right_margin):
                 logo_width = width - right_margin
                 logo_height = int(logo_width / logo_aspect)
                 logger.info(f"Adjusted logo to fit within image: new_size=({logo_width}, {logo_height})")
 
             logo = logo.resize((logo_width, logo_height), Image.Resampling.LANCZOS)
-
-            # Position logo in bottom-right corner with separate margins
-            logo_position = (width - logo_width - right_margin, height - logo_height - bottom_margin)
-            image.paste(logo, logo_position, logo)  # Use alpha channel for transparency
+            logo_position = compute_position(event, logo_width, logo_height, width, height, margin=margin)
+            opacity_255 = int(event.branding_opacity * 255 / 100)
+            image = apply_logo_premium(image, logo, logo_position, opacity=opacity_255)
             logger.info(f"Logo pasted at position={logo_position}")
 
         elif event.branding_text:
-            # Load font with calculated size
-            font_size = max(min(int(width * 0.025), 80), 20)  # 2.5% of width, capped between 20px and 60px
-            logger.info(f"calculated font size - {font_size}")
-            
-           
-            font = load_font(font_size)
+            text = event.branding_text.strip()
+            font_size = max(min(int(width * 0.025), 80), 20)
+            font = load_font(size=font_size, style=event.branding_font)
 
-            text = event.branding_text
-            # Create a temporary draw object to calculate text size
-            temp_image = Image.new("RGBA", (1, 1))
-            temp_draw = ImageDraw.Draw(temp_image)
-            text_bbox = temp_draw.textbbox((0, 0), text, font=font)
-            text_width = text_bbox[2] - text_bbox[0]
-            text_height = text_bbox[3] - text_bbox[1]
-            logger.info(f"Text dimensions: width={text_width}, height={text_height}")
+            temp = Image.new("RGBA", (1, 1))
+            bbox = ImageDraw.Draw(temp).textbbox((0, 0), text, font=font)
+            text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            text_position = compute_position(event, text_w, text_h, width, height, margin=margin)
 
-            # Position text in bottom-right corner
-            text_x = width - text_width - margin
-            text_y = height - text_height - margin
-            rect_x1, rect_y1 = text_x - 10, text_y - 10
-            rect_x2, rect_y2 = text_x + text_width + 10, text_y + text_height + 10
-            logger.info(f"Text position: x={text_x}, y={text_y}, rect=({rect_x1},{rect_y1})-({rect_x2},{rect_y2})")
+            text_style = getattr(event, "branding_text_style", "box")
 
-            # Draw semi-transparent background and text on an overlay
-            overlay = Image.new("RGBA", image.size, (255, 255, 255, 0))
-            overlay_draw = ImageDraw.Draw(overlay)
-
-            # Draw semi-transparent background rectangle
-            overlay_draw.rectangle(
-                (rect_x1, rect_y1, rect_x2, rect_y2),
-                fill=(0, 0, 0, 128)  # Black with 50% opacity
-            )
-
-            # Draw text shadow on the overlay
-            shadow_offset = 2
-            overlay_draw.text(
-                (text_x + shadow_offset, text_y + shadow_offset),
-                text,
-                font=font,
-                fill=(0, 0, 0, 200)  # Dark shadow with slight transparency
-            )
-
-            # Draw main text on the overlay
-            overlay_draw.text(
-                (text_x, text_y),
-                text,
-                font=font,
-                fill=(235, 235, 235, 255)  # Light gray text
-            )
-
-            # Composite the overlay onto the main image
-            image = Image.composite(overlay, image, overlay)
-            logger.info(f"Overlay applied: mode={overlay.mode}, size={overlay.size}")
-
-        # Convert back to RGB for saving as JPEG
+            if text_style == "plain":
+                alpha = int(event.branding_opacity * 255 / 100)
+                image = apply_text_plain(image, text, font, text_position, text_color=(255, 255, 255, alpha))
+            else:
+                alpha = int(event.branding_opacity * 255 / 100)
+                image = apply_text_premium(image, text, font, text_position, text_color=(255, 255, 255, alpha))
+                
         image = image.convert("RGB")
-
-        # Save the branded image
         buffer = io.BytesIO()
-        image.save(buffer, format="JPEG", quality=95)
+        
+        exif = image.getexif()
+        
+        exif[0x010E] = f"Event: {event.name}"                          # ImageDescription
+        exif[0x013B] = event.studio_name or event.photographer.get_full_name()  # Artist
+        exif[0x8298] = event.photographer.get_full_name() if event.photographer else event.studio_name    # Copyright
+        exif[0x0131] = f"photoflow.in"          # Software
+        image.save(buffer, format="JPEG", quality=97, subsampling=0, exif=exif.tobytes())
         branded_file = ContentFile(buffer.getvalue())
 
         filename = f"{photo_id}_branded.jpg"

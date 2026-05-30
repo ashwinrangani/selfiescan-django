@@ -74,7 +74,7 @@
   
 <!-- find photos -->
   <div class="mt-5 shadow-lg shadow-gray-600 rounded-md">
-    <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block">
+    <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block" target="_blank">
       <span class="text-primary flex items-center justify-center p-2 font-semibold">Find photos
         <span class="icon-[tabler--face-id] size-5 rtl:rotate-180 ml-1"></span>
       </span>
@@ -160,96 +160,163 @@
     
   </div>
     <!-- Branding Settings -->
-<div class="mt-4 w-full shadow-lg shadow-gray-600 flex flex-col gap-4 p-6 rounded-md">
-  <h2 class="text-xl font-semibold ">Branding on Photographs</h2>
-  <span class="w-12 h-1 bg-primary -mt-2 mb-6 "></span>
+  <div class="mt-4 w-full shadow-lg shadow-gray-600 flex flex-col gap-4 p-6 rounded-md">
+  <h2 class="text-xl font-semibold">Branding on Photographs</h2>
+  <span class="w-12 h-1 bg-primary -mt-2 mb-2"></span>
 
-  <form method="post" id="branding-form" class="flex flex-col gap-4">
-    {% csrf_token %}
+ <form method="post" id="branding-form" class="flex flex-col gap-4">
+  {% csrf_token %}
 
-    <div class="flex items-center justify-between">
-      <label for="brandingSwitch" class="text-base font-medium">
-        Enable Branding on Matching Photos
-      </label>
-      <input 
-        name="branding_enabled"
-        type="checkbox"
-        id="brandingSwitch"
-        class="switch switch-outline switch-primary"
-        {% if event.branding_enabled %}checked{% endif %}
-      />
+  <!-- Enable toggle -->
+  <div class="flex items-center justify-between">
+    <label for="brandingSwitch" class="text-base font-medium">Enable Branding on Matching Photos</label>
+    <input name="branding_enabled" type="checkbox" id="brandingSwitch"
+      class="switch switch-outline switch-primary"
+      {% if event.branding_enabled %}checked{% endif %}>
+  </div>
+
+  <!-- Type tabs -->
+  <div class="flex gap-2">
+    <button type="button" id="tabLogo"
+      class="flex-1 btn btn-sm {% if not event.branding_text %}btn-primary{% else %}btn-outline{% endif %}">
+      Logo
+    </button>
+    <button type="button" id="tabText"
+      class="flex-1 btn btn-sm {% if event.branding_text %}btn-primary{% else %}btn-outline{% endif %}">
+      Text
+    </button>
+  </div>
+
+  <!-- ── Logo section ── -->
+  <div id="logoSection" class="flex flex-col gap-3 {% if event.branding_text %}hidden{% endif %}">
+    <div class="form-control">
+      <label class="label"><span class="label-text">Branding Logo (PNG with transparent background)</span></label>
+      {% if event.branding_image %}
+        <img src="{{ event.branding_image.url }}" alt="Brand Logo" id="branding-logo-preview" class="h-20 w-auto object-contain mb-2 rounded">
+        <button type="button" id="remove-branding-logo-btn" class="btn btn-xs btn-error w-fit mb-2">Remove Logo</button>
+      {% else %}
+        <img src="" alt="" id="branding-logo-preview" class="h-20 w-auto object-contain mb-2 rounded hidden">
+        <button type="button" id="remove-branding-logo-btn" class="btn btn-xs btn-error w-fit mb-2 hidden">Remove Logo</button>
+      {% endif %}
+      <input type="file" name="branding_image" id="brandingImage" accept="image/*" class="input input-sm">
     </div>
-  
-    <div class="flex items-center gap-3">
-      <div class="flex items-center gap-1">
-        <input type="radio" name="branding_type" class="radio radio-xs radio-info" id="brandingTypeLogo" 
-        {% if event.branding_enabled and not event.branding_text %}checked{% endif %}
-        {% if not event.branding_enabled %}disabled{% endif %} />
-        <label class="label-text text-base" for="brandingTypeLogo">Brand Logo </label>
-      </div>
-      <div class="flex items-center gap-1">
-        <input type="radio" name="branding_type" class="radio radio-xs radio-info" id="brandingTypeText"
-        {% if event.branding_enabled and event.branding_text %}checked{% endif %}
-        {% if not event.branding_enabled %}disabled{% endif %}
-        />
-        <label class="label-text text-base" for="brandingTypeText">Branding Text </label>
-      </div>
-      
-    </div>
+
+    <!-- Logo opacity preview — actual image rendered with opacity -->
     
+  </div>
+
+  <!-- ── Text section ── -->
+  <div id="textSection" class="flex flex-col gap-4 {% if not event.branding_text %}hidden{% endif %}">
 
     <div class="form-control">
-      <label for="studioNameInput" class="label">
-        <span class="label-text">Studio Name / Company Name</span>
-      </label>
-      <input 
-        type="text"
-        name="branding_text"
-        id="studioNameInput"
+      <label class="label"><span class="label-text">Studio / Photographer Name</span></label>
+      <input type="text" name="branding_text" id="studioNameInput"
         value="{{ event.branding_text|default:'' }}"
         class="input input-bordered input-primary w-full"
-        placeholder="e.g. Shree Krishna Studio"
-        {% if not event.branding_enabled or not event.branding_text %}disabled{% endif %}
-      />
+        placeholder="e.g. Ravi Photography">
     </div>
-    <div class="form-control">
-      <label for="brandingImage" class="label">
-        <span class="label-text">Branding Logo (optional)</span>
-      </label>
-    
-      {% if event.branding_image %}
-      <img src="{{ event.branding_image.url }}" alt="Brand Logo" class="h-20 w-20 object-cover mb-2 rounded" id="branding-logo-preview">
-      <button type="button" id="remove-branding-logo-btn" class="btn btn-xs btn-error w-fit mb-2 {% if not event.branding_image %}hidden{% endif %}">
-        Remove Logo
-      </button>
-      
-      {% else %}
-        <img src="" alt="" class="h-20 w-20 object-cover hidden" id="branding-logo-preview">
-        <button type="button" id="remove-branding-logo-btn" class="btn btn-xs btn-error w-fit mb-2 hidden">
-          Remove Logo
-        </button>
-      {% endif %}
-      
-      <input
-        type="file"
-        name="branding_image"
-        id="brandingImage"
-        accept="image/*"
-        class="input input-sm" aria-label="file-input"
-        {% if not event.branding_enabled or event.branding_text %}disabled{% endif %}
-      />
-    </div>
-    
 
-    <button id="branding-btn" type="submit" class="btn btn-primary text-md md:text-md lg:text-lg">
-      Apply Branding Settings
-    </button>
-  </form>
-  <!-- Start Branding Button (shown only when branding is enabled and photos are processed) -->
-<button id="start-branding-btn" class="btn btn-success text-md md:text-md lg:text-lg mt-2">
+    <!-- Font picker -->
+    <div class="form-control">
+      <label class="label"><span class="label-text">Font</span></label>
+      <div class="grid grid-cols-3 gap-2" id="fontGrid">
+        {% for value, label in font_choices %}
+        <div class="font-card border rounded-lg p-2 cursor-pointer text-center transition
+          {% if event.branding_font == value %}border-primary bg-primary/10{% else %}border-base-300{% endif %}"
+          data-font="{{ value }}">
+          <div class="text-xs text-base-content/50 mb-1">{{ label }}</div>
+          <div class="font-sample text-base" data-style="{{ value }}">Studio</div>
+        </div>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="branding_font" id="brandingFontInput" value="{{ event.branding_font|default:'modern' }}">
+    </div>
+
+    <!-- Text style -->
+    <div class="form-control">
+      <label class="label"><span class="label-text">Text Style</span></label>
+      <div class="flex gap-2">
+        <button type="button" id="styleBox"
+          class="flex-1 btn btn-sm {% if event.branding_text_style == 'box' %}btn-primary{% else %}btn-outline{% endif %}">
+          Frosted Box
+        </button>
+        <button type="button" id="stylePlain"
+          class="flex-1 btn btn-sm {% if event.branding_text_style == 'plain' %}btn-primary{% else %}btn-outline{% endif %}">
+          Plain Text
+        </button>
+      </div>
+      <input type="hidden" name="branding_text_style" id="brandingStyleInput" value="{{ event.branding_text_style|default:'box' }}">
+      
+      
+    </div> 
+
+  </div>
+  <!-- ── END text section ── -->
+
+  <!-- ── Opacity — single shared slider ── -->
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text">Opacity</span>
+      <span class="label-text-alt font-medium" id="opacityVal">{{ event.branding_opacity|default:78 }}%</span>
+    </label>
+    <input type="range" name="branding_opacity" id="opacitySlider"
+      min="20" max="100" step="1"
+      value="{{ event.branding_opacity|default:78 }}"
+      class="range range-primary range-sm">
+  </div>
+
+
+
+  <!-- Position — shared, always visible -->
+  <!-- Position — shared, always visible -->
+  <div class="form-control">
+    <label class="label"><span class="label-text">Position</span></label>
+    <div class="grid grid-cols-2 gap-2">
+      {% for value, label in position_choices %}
+      <button type="button" data-pos="{{ value }}"
+        class="pos-btn btn btn-sm {% if event.branding_position == value %}btn-primary{% else %}btn-outline{% endif %}
+        {% if value == 'bottom_center' %}col-span-2{% endif %}">
+        {{ label }}
+      </button>
+      {% endfor %}
+    </div>
+    <input type="hidden" name="branding_position" id="brandingPositionInput" value="{{ event.branding_position|default:'bottom_right' }}">
+  </div>
+  <!-- ── end position ── -->
+
+  <!-- ── Unified live preview ── -->
+  <div class="form-control">
+    <label class="label"><span class="label-text">Preview</span></label>
+    <div id="unifiedPreview" class="rounded-lg overflow-hidden relative"
+      style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); height: 110px;">
+      <img id="unifiedLogoPreview"
+        src="{% if event.branding_image %}{{ event.branding_image.url }}{% endif %}"
+        style="position:absolute; max-height:50px; max-width:45%; object-fit:contain; transition: all 0.25s ease;"
+        class="{% if not event.branding_image or event.branding_text %}hidden{% endif %}"
+        alt="Logo">
+      <span id="unifiedTextPreview"
+        style="position:absolute; font-size:18px; color:white; transition: all 0.25s ease; white-space:nowrap;"
+        class="px-3 py-1 {% if not event.branding_text %}hidden{% endif %}">
+        {{ event.branding_text|default:"Studio Name" }}
+      </span>
+    </div>
+  </div>
+
+  <button id="branding-btn" type="submit" class="btn btn-primary text-md md:text-md lg:text-lg">
+    Apply Branding Settings
+  </button>
+</form>
+
+<button id="start-branding-btn" class="btn btn-success text-md md:text-md lg:text-lg">
   Start Branding
 </button>
 </div>
+  
+    
+      
+    </div>
+    
+
 
   </div>
   

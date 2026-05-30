@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from ..tasks import branded_photo
 from django.contrib.auth.decorators import login_required
+from ..models import FONT_CHOICES, POSITION_CHOICES, TEXT_STYLE_CHOICES
 
 
 def get_variant_urls(photo, event):
@@ -75,6 +76,7 @@ def event_detail(request, event_id):
         "medium": variants["medium"], 
         "large": variants["large"],
         "id": photo.id,   # keep this for checkbox
+        "branded": photo.branded_image.url if photo.branded_image else None,  # keep this for checkbox
         })
 
     
@@ -89,6 +91,7 @@ def event_detail(request, event_id):
     
     event_share = EventShare.objects.filter(event=event, is_active=True).first()
     share_url = None
+
     if event_share:
         share_url = request.build_absolute_uri(reverse("customer_album_view", kwargs={"token": str(event_share.token)}))
     return render(request, "event_detail.html", {
@@ -100,6 +103,9 @@ def event_detail(request, event_id):
         "is_unlimited_upload": is_unlimited_upload,
         "billing_redirect_url": "/billing/",
         'share_url': share_url,
+        "font_choices": FONT_CHOICES,
+        "position_choices": POSITION_CHOICES,
+        "text_style_choices": TEXT_STYLE_CHOICES,
     })
 
 
@@ -124,7 +130,8 @@ def load_photos(request, event_id):
             "thumb": variants["thumb"],
             "medium": variants["medium"],
             "large": variants["large"],
-            "id": photo.id,   # keep this for checkbox
+            "id": photo.id,
+            "branded": photo.branded_image.url if photo.branded_image else None,  # keep this for checkbox
         })
 
     html = render_to_string('partials/photo_grid.html', {
@@ -163,19 +170,27 @@ def create_branding(request, event_id):
             branding_type = request.POST.get("branding_type", "").strip()
             branding_text = request.POST.get("branding_text", "").strip()
             branding_image = request.FILES.get("branding_image")
+
+            # ── Save all new branding settings ──────────────────
+            new_font = request.POST.get("branding_font", "modern")
+            new_position = request.POST.get("branding_position", "bottom_right")
+            new_text_style = request.POST.get("branding_text_style", "box")
+            new_opacity = int(request.POST.get("branding_opacity", 78))
             
             # if branding settings have changed or branding is being disabled
             branding_changed = (
-                # Case 1: Branding is enabled and settings have changed
-                (branding_enabled and (
-                    event.branding_text != branding_text or
-                    (branding_image is not None and event.branding_image != branding_image) or
-                    (branding_type == "text" and event.branding_image) or
-                    (branding_type == "logo" and event.branding_text)
-                )) or
-                # Case 2: Branding is being disabled (was enabled, now disabled)
-                (event.branding_enabled and not branding_enabled)
-            )
+            (branding_enabled and (
+                event.branding_text != branding_text or
+                (branding_image is not None and event.branding_image != branding_image) or
+                (branding_type == "text" and event.branding_image) or
+                (branding_type == "logo" and event.branding_text) or
+                event.branding_font != new_font or
+                event.branding_position != new_position or
+                event.branding_text_style != new_text_style or
+                event.branding_opacity != new_opacity
+            )) or
+            (event.branding_enabled and not branding_enabled)
+        )
 
             if branding_changed:
                 # Reset branding status and clear old branded images
@@ -189,11 +204,11 @@ def create_branding(request, event_id):
                 
             if branding_enabled and branding_type in ["logo", "text"]:
                 event.branding_enabled = True
-                if branding_type == "text" and branding_text:
-                    event.branding_text = branding_text
-                    event.branding_image = None  # Clear logo
+                if branding_type == "text":
+                    event.branding_text = branding_text  # save even if empty
+                    event.branding_image = None
                 elif branding_type == "logo":
-                    event.branding_text = ""  # Clear text
+                    event.branding_text = ""
                     if branding_image:
                         event.branding_image = branding_image
                     # Note: If no branding_image is uploaded, keep existing branding_image (if any)
@@ -202,7 +217,11 @@ def create_branding(request, event_id):
                 event.branding_enabled = False
                 event.branding_text = ""
                 event.branding_image = None
-
+            # Save updated font, position, text style, and opacity
+            event.branding_font = new_font
+            event.branding_position = new_position
+            event.branding_text_style = new_text_style
+            event.branding_opacity = new_opacity
             event.save()
 
             return JsonResponse({
