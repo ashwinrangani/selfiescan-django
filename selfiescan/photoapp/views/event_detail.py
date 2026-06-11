@@ -162,6 +162,23 @@ def rename_event_directory(photographer_username, old_name, new_name):
     else:
         print(f"old event folder does not exists")
 
+@login_required
+def event_branding(request, event_id):
+    event = get_object_or_404(
+        Event,
+        event_id=event_id,
+        photographer=request.user
+    )
+
+    return render(request, "event_branding.html",
+        {
+            "event": event,
+            "font_choices": FONT_CHOICES,
+            "position_choices": POSITION_CHOICES,
+            "text_style_choices": TEXT_STYLE_CHOICES,
+        }
+    )
+
 def create_branding(request, event_id):
     if request.method == "POST":
         try:
@@ -205,6 +222,11 @@ def create_branding(request, event_id):
             if branding_enabled and branding_type in ["logo", "text"]:
                 event.branding_enabled = True
                 if branding_type == "text":
+                    if not branding_text.strip():
+                        return JsonResponse({
+                            "success": False,
+                            "error": "Branding text required"
+                        }, status=400)
                     event.branding_text = branding_text  # save even if empty
                     event.branding_image = None
                 elif branding_type == "logo":
@@ -240,6 +262,8 @@ def remove_branding_logo(request, event_id):
     if request.method == "POST" and request.user.is_authenticated:
         try:
             event = Event.objects.get(event_id=event_id, photographer=request.user)
+            if event.branding_image:
+                event.branding_image.delete(save=False)
             event.branding_image = None
             event.save()
             return JsonResponse({
@@ -286,3 +310,48 @@ def start_branding(request, event_id):
 
     return JsonResponse({"success": False, "error": "Invalid request method"}, status=400)
 
+def branding_status(request, event_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+    event = get_object_or_404(Event, event_id=event_id, photographer=request.user)
+    photos = Photo.objects.filter(event=event)
+    total = photos.count()
+    branded = photos.filter(is_branded=True).count()
+    return JsonResponse({
+        "total": total,
+        "branded": branded,
+        "pending": total - branded,
+        "complete": branded == total and total > 0,
+        "branding_enabled": event.branding_enabled,
+    })
+
+import random
+
+def branding_sample_photos(request, event_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    event = get_object_or_404(Event, event_id=event_id, photographer=request.user)
+    photos = list(Photo.objects.filter(event=event, is_processed=True).order_by('id'))
+
+    if not photos:
+        return JsonResponse({"photos": []})
+
+    total = len(photos)
+    if total <= 3:
+        selected = photos
+    else:
+        # Spread across the set: first, middle, last
+        indices = sorted(set([0, total // 2, total - 1]))
+        while len(indices) < 3:
+            idx = random.randint(0, total - 1)
+            if idx not in indices:
+                indices.append(idx)
+        selected = [photos[i] for i in sorted(indices)[:3]]
+
+    urls = []
+    for photo in selected:
+        url = photo.medium_image.url if photo.medium_image else photo.image.url
+        urls.append(url)
+
+    return JsonResponse({"photos": urls})

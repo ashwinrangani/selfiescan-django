@@ -6,7 +6,7 @@ from .views.profile import profile
 from .views.acc_settings import settings, update_username, delete_account
 from .views.homepage import homepage
 from .views.photographer import create_event, download_qr, get_storage_usage
-from .views.event_detail import event_detail, load_photos, create_branding,remove_branding_logo,start_branding
+from .views.event_detail import event_detail, load_photos, create_branding,remove_branding_logo,start_branding,branding_status,event_branding,branding_sample_photos
 from .views.event_delete import event_delete,delete_event_photos
 from .views.delete_selected_photos import delete_selected_photos
 from .views.unsubscribe_email import unsubscribe_reminders
@@ -35,9 +35,12 @@ urlpatterns = [
     path("event/<uuid:event_id>/delete_event", event_delete, name="event_delete"),
     path('event/<uuid:event_id>/delete_photos/', delete_event_photos, name='delete_event_photos'),
     path("event/<uuid:event_id>/download_qr/", download_qr,name="download_qr"),
+    path("event/<uuid:event_id>/branding-settings/",event_branding, name="event_branding"),
     path("event/<uuid:event_id>/branding/", create_branding, name="branding"),
     path("event/<uuid:event_id>/branding/remove-logo/", remove_branding_logo, name="remove_branding_logo"),
     path('event/<uuid:event_id>/start-branding/', start_branding, name='start_branding'),
+    path('event/<uuid:event_id>/branding-status/', branding_status, name='branding_status'),
+    path('event/<uuid:event_id>/branding-sample-photos/', branding_sample_photos, name='branding_sample_photos'),
     # path("accounts/signup/", RateLimitedSignupView.as_view(),name="account_signup"),
     path('accounts/', include('allauth.urls')),
     path('profile/', profile, name='profile'),

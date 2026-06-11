@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% include "partials/breadcrumb.html" with page_level=3 %}
+
+<section id="branding-section"
+  data-event-id="{{ event.event_id }}"
+  data-logo-url="{% if event.branding_image %}{{ event.branding_image.url }}{% endif %}">
+
+  <!-- Page header -->
+  <div class="px-4 pt-6 pb-4 flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <p class="text-xs text-base-content/40 tracking-widest uppercase font-medium mb-1">{{ event.name }}</p>
+      <h1 class="text-2xl font-serif flex items-center gap-2">
+        Branding Studio
+        <span class="icon-[tabler--trademark] size-5 text-primary opacity-70"></span>
+      </h1>
+      <div class="w-12 h-0.5 bg-primary mt-1.5 rounded-full"></div>
+    </div>
+    <a href="{% url 'event_detail' event.event_id %}" class="btn btn-ghost btn-sm gap-1">
+      <span class="icon-[tabler--arrow-left] size-4"></span> Back to Event
+    </a>
+  </div>
+
+  <!-- Two column layout -->
+  <div class="px-4 pb-10 grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+
+    <!-- ══════════════════════════════
+         LEFT — Canvas preview (3/5)
+    ══════════════════════════════ -->
+    <div class="lg:col-span-3 flex flex-col gap-3">
+      <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm text-base-content/50 font-medium tracking-wide uppercase">Live Preview</span>
+            <span class="badge badge-soft badge-primary text-xs">Canvas</span>
+          </div>
+
+          <!-- Canvas wrapper -->
+          <div class="relative rounded-lg overflow-hidden bg-base-200" style="aspect-ratio: 3/2;">
+            <canvas id="brandingCanvas" class="w-full h-full block"></canvas>
+            <!-- Placeholder when no image loaded -->
+            <div id="canvasPlaceholder"
+              class="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none"
+              style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);">
+              <span class="icon-[tabler--photo] size-10 text-white/40"></span>
+              <p class="text-white/50 text-sm">Preview updates as you configure</p>
+            </div>
+          </div>
+          <!-- Canvas controls bar -->
+<div class="flex items-center justify-between mt-3">
+  <button id="loadSamplePhotosBtn" class="btn btn-outline btn-sm gap-1">
+    <span class="icon-[tabler--photo] size-4"></span> Use My Photos
+  </button>
+
+  <div id="sampleNav" class="hidden items-center gap-2">
+    <button id="samplePrevBtn" class="btn btn-ghost btn-sm btn-circle">
+      <span class="icon-[tabler--chevron-left] size-4"></span>
+    </button>
+    <span id="sampleCounter" class="text-xs text-base-content/50">1 / 3</span>
+    <button id="sampleNextBtn" class="btn btn-ghost btn-sm btn-circle">
+      <span class="icon-[tabler--chevron-right] size-4"></span>
+    </button>
+  </div>
+</div>
+
+          <!-- Canvas controls bar -->
+          <div class="flex items-center justify-between mt-3 text-xs text-base-content/40">
+            <span id="canvasInfo">800 × 533 px preview</span>
+            
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress box -->
+      <div id="brandingStatusBox" class="card bg-base-100 border border-base-300 shadow-sm hidden">
+        <div class="card-body p-4 flex flex-col gap-2">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-base-content/60 flex items-center gap-1.5">
+              <span class="icon-[tabler--brand-speedtest] size-4"></span>
+              Branding progress
+            </span>
+            <span id="brandingStatusText" class="font-semibold text-primary">0 / 0</span>
+          </div>
+          <div class="w-full bg-base-200 rounded-full h-2.5">
+            <div id="brandingProgressBar"
+              class="bg-primary h-2.5 rounded-full transition-all duration-500"
+              style="width: 0%">
+            </div>
+          </div>
+          <p id="brandingStatusLabel" class="text-xs text-base-content/50 text-center"></p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         RIGHT — Controls panel (2/5)
+    ══════════════════════════════ -->
+    <div class="lg:col-span-2 flex flex-col gap-4">
+
+      <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-5 flex flex-col gap-4">
+
+          <!-- Enable toggle -->
+          <div class="flex items-center justify-between">
+            <span class="font-medium">Enable Branding</span>
+            <input name="branding_enabled" type="checkbox" id="brandingSwitch"
+              class="switch switch-outline switch-primary"
+              {% if event.branding_enabled %}checked{% endif %}>
+          </div>
+
+          <div class="divider my-0"></div>
+
+          <form id="branding-form" class="flex flex-col gap-4">
+            {% csrf_token %}
+
+            <!-- Type tabs -->
+            <div id="brandingTabs" class="flex gap-1 p-1 bg-base-200 rounded-lg">
+              <button type="button" id="tabLogo"
+                class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200
+                {% if not event.branding_text %}bg-base-100 text-primary shadow-sm font-semibold{% else %}text-base-content/60{% endif %}">
+                <span class="icon-[tabler--photo] size-4"></span> Logo
+              </button>
+              <button type="button" id="tabText"
+                class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200
+                {% if event.branding_text %}bg-base-100 text-primary shadow-sm font-semibold{% else %}text-base-content/60{% endif %}">
+                <span class="icon-[tabler--typography] size-4"></span> Text
+              </button>
+            </div>
+
+            <!-- ── Logo section ── -->
+            <div id="logoSection" class="flex flex-col gap-3 {% if event.branding_text %}hidden{% endif %}">
+              <div class="form-control">
+                <label class="label pt-0">
+                  <span class="label-text text-sm text-base-content/60">PNG with transparent background</span>
+                </label>
+
+                {% if event.branding_image %}
+                <div class="bg-base-200 rounded-lg p-3 flex items-center gap-3 mb-2">
+                  <img src="{{ event.branding_image.url }}" alt="Brand Logo" id="branding-logo-preview"
+                    class="h-10 w-auto object-contain rounded">
+                  <p class="text-sm text-base-content/50 flex-1 truncate">Logo uploaded</p>
+                  <button type="button" id="remove-branding-logo-btn" class="btn btn-sm btn-ghost text-error">
+                    <span class="icon-[tabler--x] size-4"></span>
+                  </button>
+                </div>
+                {% else %}
+                <div class="bg-base-200 rounded-lg p-3 items-center gap-3 mb-2 hidden" id="logo-preview-row">
+                  <img src="" alt="" id="branding-logo-preview" class="h-10 w-auto object-contain rounded">
+                  <button type="button" id="remove-branding-logo-btn" class="btn btn-sm btn-ghost text-error ml-auto hidden">
+                    <span class="icon-[tabler--x] size-4"></span>
+                  </button>
+                </div>
+                {% endif %}
+
+                <input type="file" name="branding_image" id="brandingImage" accept="image/*"
+                  class="file input w-full">
+              </div>
+            </div>
+
+            <!-- ── Text section ── -->
+            <div id="textSection" class="flex flex-col gap-4 {% if not event.branding_text %}hidden{% endif %}">
+
+              <div class="form-control">
+                <label class="label pt-0">
+                  <span class="label-text text-sm text-base-content/60">Studio / Photographer name</span>
+                </label>
+                <input type="text" name="branding_text" id="studioNameInput"
+                  value="{{ event.branding_text|default:'' }}"
+                  class="input input-bordered input-primary w-full"
+                  placeholder="e.g. Ravi Photography">
+              </div>
+
+              <!-- Font picker -->
+              <div class="form-control">
+                <label class="label pt-0">
+                  <span class="label-text text-sm text-base-content/60">Font</span>
+                </label>
+                <div class="grid grid-cols-3 gap-1.5" id="fontGrid">
+                  {% for value, label in font_choices %}
+                  <div class="font-card border rounded-lg p-2 cursor-pointer text-center transition-all hover:border-primary/50
+                    {% if event.branding_font == value %}border-primary bg-primary/10{% else %}border-base-300{% endif %}"
+                    data-font="{{ value }}">
+                    <div class="text-xs text-base-content/40 mb-0.5">{{ label }}</div>
+                    <div class="font-sample text-sm leading-tight" data-style="{{ value }}">Studio</div>
+                  </div>
+                  {% endfor %}
+                </div>
+                <input type="hidden" name="branding_font" id="brandingFontInput" value="{{ event.branding_font|default:'modern' }}">
+              </div>
+
+              <!-- Text style -->
+              <div class="form-control">
+                <label class="label pt-0">
+                  <span class="label-text text-sm text-base-content/60">Text Style</span>
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-1.5">
+                  <button type="button" id="styleBox"
+                    class="flex-1 btn btn-sm {% if event.branding_text_style == 'box' %}btn-primary{% else %}btn-outline{% endif %}">
+                    Frosted Box
+                  </button>
+                  <button type="button" id="stylePlain"
+                    class="flex-1 btn btn-sm {% if event.branding_text_style == 'plain' %}btn-primary{% else %}btn-outline{% endif %}">
+                    Plain
+                  </button>
+                  <button type="button" id="styleDiagonal"
+                    class="flex-1 btn btn-sm {% if event.branding_text_style == 'diagonal' %}btn-primary{% else %}btn-outline{% endif %}">
+                    Diagonal
+                  </button>
+                </div>
+                <input type="hidden" name="branding_text_style" id="brandingStyleInput" value="{{ event.branding_text_style|default:'box' }}">
+              </div>
+
+            </div>
+            <!-- ── END text section ── -->
+
+            <!-- Opacity -->
+            <div class="form-control">
+              <label class="label pt-0">
+                <span class="label-text text-sm text-base-content/60">Opacity</span>
+                <span class="text-sm font-semibold text-primary" id="opacityVal">{{ event.branding_opacity|default:78 }}%</span>
+              </label>
+              <input type="range" name="branding_opacity" id="opacitySlider"
+                min="20" max="100" step="1"
+                value="{{ event.branding_opacity|default:78 }}"
+                class="range range-sm range-primary">
+            </div>
+
+            <!-- Position -->
+            <div class="form-control">
+              <label class="label pt-0">
+                <span class="label-text text-sm text-base-content/60">Position</span>
+              </label>
+              <div class="grid grid-cols-2 gap-1.5">
+                {% for value, label in position_choices %}
+                <button type="button" data-pos="{{ value }}"
+                  class="pos-btn btn btn-sm {% if event.branding_position == value %}btn-primary{% else %}btn-outline{% endif %}
+                  {% if value == 'bottom_center' %}col-span-2{% endif %}">
+                  {{ label }}
+                </button>
+                {% endfor %}
+              </div>
+              <input type="hidden" name="branding_position" id="brandingPositionInput" value="{{ event.branding_position|default:'bottom_right' }}">
+            </div>
+
+            <!-- Apply button -->
+            <button id="branding-btn" type="submit" class="btn btn-primary w-full">
+              <span class="icon-[tabler--device-floppy] size-4"></span> Apply Settings
+            </button>
+
+          </form>
+
+          <!-- Start Branding -->
+          <button id="start-branding-btn" class="btn btn-success w-full">
+            <span class="icon-[tabler--player-play] size-4"></span> Start Branding
+            <span id="unbrandedBadge" class="badge hidden"></span>
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Cormorant+Garamond:wght@600&family=Playfair+Display&family=Cinzel:wght@500&family=Rancho&family=Playwrite+GB+S+Guides:ital@0;1&family=Zen+Tokyo+Zoo&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/event_branding.js' %}"></script>
+{% endblock %}

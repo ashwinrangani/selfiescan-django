@@ -30,9 +30,22 @@
         {% endif %}
       </li>
     {% endif %}
+    <!-- Event Detail (shown for page_level >= 2) -->
+    {% if page_level >= 3 and event %}
+      <li class="breadcrumbs-separator rtl:rotate-180">
+        <span class="icon-[tabler--chevron-right] text-gray-400"></span>
+      </li>
+      <li>
+        {% if page_level == 3 %}
+          <span class="font-medium" aria-current="page">Branding Settings</span>
+        {% else %}
+          <a href="{% url 'branding_settings' event_id=event.event_id %}" class="text-primary hover:underline">Branding Settings</a>
+        {% endif %}
+      </li>
+    {% endif %}
 
-    <!-- Current Page (shown for page_level >= 3) -->
-    {% if page_level >= 3 and event and current_page %}
+    <!-- Current Page (shown for page_level >= 4) -->
+    {% if page_level >= 4 and event and current_page %}
       <li class="breadcrumbs-separator rtl:rotate-180">
         <span class="icon-[tabler--chevron-right] text-gray-400"></span>
       </li>

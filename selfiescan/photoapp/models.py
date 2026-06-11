@@ -22,6 +22,7 @@ class Profile(models.Model):
 TEXT_STYLE_CHOICES = [
     ("box", "Frosted Box"),
     ("plain", "Plain Text"),
+    ("diagonal", "Diagonal"),
 ]
 POSITION_CHOICES = [
     ("bottom_right", "Bottom Right"),

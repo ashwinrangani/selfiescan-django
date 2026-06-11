@@ -2,573 +2,414 @@
 {% load static %}
 
 {% block content %}
- {% include "partials/breadcrumb.html" with page_level=2 %}
-<section id="event-section" data-event-id="{{ event.event_id }}"> <!-- exporting event_id to external js -->
-<h1 class="text-3xl font-serif text-center mt-5">{{ event.name }}</h1>
-  <div class="container mt-6 mx-auto p-1 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-    
-    <!-- Left Section: Event Form -->
-    <div class="shadow-lg shadow-gray-600 p-6 rounded-lg">
-      <div class="flex flex-col">
-        <h1 class="text-xl font-semibold">Edit Event</h1>
-        <span class="w-12 h-1 bg-primary mb-3 mt-2"></span>
+{% include "partials/breadcrumb.html" with page_level=2 %}
+
+<section id="event-section" data-event-id="{{ event.event_id }}">
+
+  <!-- Page header -->
+  <div class="px-4 pt-6 pb-2 text-center">
+    <h1 class="text-3xl font-serif">{{ event.name }}</h1>
+    <div class="w-16 h-0.5 bg-primary mx-auto mt-2 mb-1 rounded-full"></div>
+    {% if event.date %}<p class="text-sm text-base-content/50">{{ event.date }}</p>{% endif %}
+  </div>
+
+  <div class="container mt-6 mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 items-start pb-10">
+
+    <!-- ════════════════════════════════════════════
+         LEFT COLUMN — Edit + Upload
+    ════════════════════════════════════════════ -->
+    <div class="flex flex-col gap-5">
+
+      <!-- Edit Event -->
+      <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-6">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="icon-[tabler--edit] size-5 text-primary"></span>
+            <h2 class="card-title text-lg">Edit Event</h2>
+          </div>
+          <div class="w-8 h-0.5 bg-primary mb-4 rounded-full"></div>
+          <form method="post" class="flex flex-col gap-4">
+            {% csrf_token %}
+            <div class="form-control">
+              <label class="label pt-0"><span class="label-text text-sm text-base-content/60">Event Name</span></label>
+              <input type="text" name="name" value="{{ event.name }}" class="input input-bordered input-primary w-full"
+                required>
+            </div>
+            <div class="form-control">
+              <label class="label pt-0"><span class="label-text text-sm text-base-content/60">Event Date</span></label>
+              <input type="date" name="date" value="{{ event.date|date:'Y-m-d' }}"
+                class="input input-bordered input-primary w-full" required>
+            </div>
+            <div class="form-control">
+              <label class="label pt-0"><span class="label-text text-sm text-base-content/60">Location</span></label>
+              <input type="text" name="location" value="{{ event.location }}"
+                class="input input-bordered input-primary w-full" required>
+            </div>
+            <button type="submit" class="btn btn-primary mt-1">
+              <span class="icon-[tabler--device-floppy] size-4"></span> Save Changes
+            </button>
+          </form>
+        </div>
       </div>
-      <form method="post" class="space-y-4">
-        {% csrf_token %}
-        <label for="name" class="block font-medium">Event Name</label>
-        <input type="text" name="name" value="{{ event.name }}" class="input input-primary w-full" required>
 
-        <label for="date" class="block font-medium">Event Date</label>
-        <input type="date" name="date" value="{{ event.date|date:'Y-m-d' }}" class="input input-primary w-full"
-          required>
+      <!-- Upload Sessions -->
+      <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-6">
+          {% include 'sessions.html' %}
+        </div>
+      </div>
 
-        <label for="location" class="block font-medium">Location</label>
-        <input type="text" name="location" value="{{ event.location }}" class="input input-primary w-full" required>
+      <!-- Danger Zone -->
+      <div class="card border border-error/30 bg-error/5 shadow-sm">
+        <div class="card-body p-6">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="icon-[tabler--alert-triangle] size-5 text-error"></span>
+            <h2 class="card-title text-lg text-error">Danger Zone</h2>
+          </div>
+          <div class="w-8 h-0.5 bg-error mb-4 rounded-full"></div>
+          <div class="flex flex-col gap-3">
+            <form action="{% url 'event_delete' event_id=event.event_id %}" method="post">
+              {% csrf_token %}
+              <button type="button" class="btn btn-error btn-outline w-full" aria-haspopup="dialog"
+                aria-expanded="false" aria-controls="slide-up-animated-modal" data-overlay="#slide-up-animated-modal">
+                <span class="icon-[tabler--trash] size-4"></span> Delete Event & Photos
+              </button>
+              <div id="slide-up-animated-modal"
+                class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 hidden" role="dialog"
+                tabindex="-1">
+                <div
+                  class="overlay-animation-target modal-dialog overlay-open:mt-4 overlay-open:opacity-100 overlay-open:duration-300 mt-12 transition-all ease-out">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h3 class="modal-title">Are you sure?</h3>
+                      <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3"
+                        aria-label="Close" data-overlay="#slide-up-animated-modal">
+                        <span class="icon-[tabler--x] size-4"></span>
+                      </button>
+                    </div>
+                    <div class="modal-body">This action cannot be undone! The event and all associated photos will be
+                      deleted permanently.</div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-soft btn-secondary"
+                        data-overlay="#slide-up-animated-modal">Cancel</button>
+                      <button type="submit" class="btn btn-error">Confirm Delete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
 
-        <button type="submit" class="btn btn-primary w-full">Save Changes</button>
-      </form>
-      <!-- upload photos -->
-      {% include 'sessions.html' %}
+            <form action="{% url 'delete_event_photos' event_id=event.event_id %}" method="post">
+              {% csrf_token %}
+              <button type="button" class="btn btn-error btn-outline w-full" aria-haspopup="dialog"
+                aria-expanded="false" aria-controls="middle-center-modal" data-overlay="#middle-center-modal">
+                <span class="icon-[tabler--photo-off] size-4"></span> Delete Photos Only
+              </button>
+              <div id="middle-center-modal"
+                class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 middle-center-modal hidden"
+                role="dialog" tabindex="-1">
+                <div class="modal-dialog overlay-open:opacity-100 overlay-open:duration-300">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h3 class="modal-title">Are you sure?</h3>
+                      <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3"
+                        aria-label="Close" data-overlay="#middle-center-modal">
+                        <span class="icon-[tabler--x] size-4"></span>
+                      </button>
+                    </div>
+                    <div class="modal-body">This action cannot be undone! All photos of this event will be deleted
+                      permanently.</div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-soft btn-secondary"
+                        data-overlay="#middle-center-modal">Cancel</button>
+                      <button type="submit" class="btn btn-error">Confirm Delete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
     </div>
-    
 
-    <!-- Right Section: Photographer Info & Actions -->
+    <!-- ════════════════════════════════════════════
+         MIDDLE COLUMN — Photographer Info + Controls
+    ════════════════════════════════════════════ -->
+    <div class="flex flex-col gap-5">
+
+      <!-- Photographer Info -->
+      <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="avatar placeholder">
+              <div class="bg-primary/10 text-primary rounded-full w-12">
+                <span class="icon-[tabler--user] size-6"></span>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm text-base-content/50">Photographer</p>
+              <p class="font-semibold">
+                {% if event.photographer.first_name %}
+                {{ event.photographer.first_name }} {{ event.photographer.last_name }}
+                {% else %}
+                {{ event.photographer.username }}
+                {% endif %}
+              </p>
+            </div>
+          </div>
+
+          <div class="stat bg-base-200 rounded-lg p-3 mb-3">
+            <div class="stat-title text-sm">Total Photos</div>
+            <div class="stat-value text-3xl text-primary">{{ num_photos }}</div>
+          </div>
+
+          <a href="{% url 'upload_photos' event.event_id %}" class="btn btn-primary w-full">
+            <span class="icon-[tabler--cloud-upload] size-4"></span> Upload Photos
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-6">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="icon-[tabler--settings-2] size-5 text-primary"></span>
+            <h2 class="card-title text-lg">Event Controls</h2>
+          </div>
+          <div class="w-8 h-0.5 bg-primary mb-4 rounded-full"></div>
+
+          <div class="flex flex-col gap-1">
+
+            <!-- Find Photos toggle -->
+            <div class="flex items-center justify-between py-3 border-b border-base-200">
+              <div class="flex items-center gap-2">
+                <span class="icon-[tabler--face-id] size-5 text-base-content/60"></span>
+                <span class="font-medium">Find Photos (Live QR)</span>
+              </div>
+              <input id="findPhotosToggle" type="checkbox" class="switch switch-primary"
+                data-event-id="{{ event.event_id }}" {% if event.is_find_photos_enabled %}checked{% endif %}>
+            </div>
+
+            <!-- Download toggle -->
+            <div class="flex items-center justify-between py-3 border-b border-base-200">
+              <div class="flex items-center gap-2">
+                <span class="icon-[tabler--download] size-5 text-base-content/60"></span>
+                <span class="font-medium">Allow Downloads</span>
+              </div>
+              <input type="checkbox" id="download-toggle" class="switch switch-primary"
+                data-event-id="{{ event.event_id }}" {% if event.is_downloadable %}checked{% endif %}>
+            </div>
+
+          </div>
+
+          <!-- Action links -->
+          <div class="flex flex-col gap-2 mt-4">
+            <a href="{% url 'find_photos' event_id=event.event_id %}" target="_blank"
+              class="btn btn-outline btn-primary w-full justify-start">
+              <span class="icon-[tabler--face-id] size-4"></span> Open Find Photos
+            </a>
+            <a href="{% url 'share_album' event_id=event.event_id %}"
+              class="btn btn-outline btn-primary w-full justify-start">
+              <span class="icon-[tabler--share] size-4"></span> Share Album for Selection
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Public Gallery -->
+      <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-6">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="icon-[tabler--world] size-5 text-primary"></span>
+            <h2 class="card-title text-lg">Public Gallery</h2>
+          </div>
+          <div class="w-8 h-0.5 bg-primary mb-4 rounded-full"></div>
+
+          <div class="flex flex-col gap-4">
+
+            <div class="flex items-center justify-between">
+              <span class="font-medium">Share Gallery</span>
+              <input id="publicGalleryToggle" type="checkbox" class="switch switch-primary" {% if event.is_public_gallery_enabled %}checked{% endif %}>
+            </div>
+
+            <!-- Public URL -->
+            <div id="publicGalleryLink"
+              class="bg-base-200 rounded-lg p-3 flex items-center justify-between gap-2 {% if not event.is_public_gallery_enabled %}hidden{% endif %}"
+              data-public-url="{% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}">
+              <span id="galleryUrl" class="text-sm text-primary break-all leading-snug">
+                {% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}
+              </span>
+              <button id="copy-btn" onclick="copyGalleryLink()" class="btn btn-sm btn-outline shrink-0">Copy</button>
+            </div>
+
+            <!-- Studio Name -->
+            <div class="form-control">
+              <label class="label pt-0">
+                <span class="label-text text-sm text-base-content/60">Studio Name <em
+                    class="not-italic opacity-60">(shown on gallery)</em></span>
+              </label>
+              <div class="flex gap-2">
+                <input id="studio_name" type="text" maxlength="50" class="input input-bordered w-full"
+                  placeholder="e.g. PhotoFlow Studio" value="{{ event.studio_name|default:'' }}">
+                <button id="saveStudioBtn" onclick="saveStudioName()" class="btn btn-primary shrink-0">Save</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="font-medium">Allow Public Downloads</span>
+              <input id="publicDownloadToggle" type="checkbox" class="switch switch-primary" {% if event.is_public_gallery_downloadable %}checked{% endif %}>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
     <div>
-      <div class="shadow-lg shadow-gray-600 p-6 rounded-lg flex flex-col">
-      {% if event.photographer.first_name %}
-      <h2 class="text-xl font-semibold mb-2">Photographer : {{ event.photographer.first_name }} {{event.photographer.last_name }}</h2>
-      {% else %}
-      <h2 class="text-xl font-semibold mb-2">Photographer : {{ event.photographer.username }}</h2>
-      {% endif %}
+      <!-- Branding Settings -->
+      <a href="{% url 'event_branding' event.event_id %}" class="btn btn-primary w-full" target="_blank">
+        Manage Branding
+      </a>
+    </div>
 
-      <span class="w-12 h-1 bg-primary mb-6"></span>
-
-      <p class="mb-6">Total photos uploaded: <strong>{{ num_photos }}</strong></p>
-
-    <!-- upload photos -->
-   <a href="{% url 'upload_photos' event.event_id %}" class="btn btn-primary w-full"> Upload Photos 
-   <span class="icon-[tabler--cloud-upload] size-4"></span>
-  </a>
-
-      </div>
-    
-    <!-- find photos toggle -->
-        <div class="mt-5 flex items-center justify-center gap-2 shadow-lg shadow-gray-600 rounded-md">
-        <div class="p-1 flex justify-between items-center">
-          <span class="text-primary font-semibold p-4">Enable Find Photos Link [Live QR] </span>
-          <input id="findPhotosToggle"
-                 type="checkbox"
-                 class="switch switch-primary"
-                 data-event-id="{{ event.event_id }}"
-                 {% if event.is_find_photos_enabled %}checked{% endif %}>
-        </div>
-        </div>
-
-    <!-- Download Toggle Switch -->
-        <div class="mt-5 flex items-center justify-center shadow-lg shadow-gray-600 rounded-md">
-        <div class="p-1 flex justify-between items-center">
-            <span for="download-toggle" class="text-primary font-semibold p-4">Allow Downloads for End Users</span>
-            <input type="checkbox" id="download-toggle" class="switch switch-primary" data-event-id="{{ event.event_id }}" {% if event.is_downloadable %}checked{% endif %}>
-         </div>   
-        </div>
-  
-<!-- find photos -->
-  <div class="mt-5 shadow-lg shadow-gray-600 rounded-md">
-    <a href="{% url 'find_photos' event_id=event.event_id %}" class="text-primary hover:underline block" target="_blank">
-      <span class="text-primary flex items-center justify-center p-2 font-semibold">Find photos
-        <span class="icon-[tabler--face-id] size-5 rtl:rotate-180 ml-1"></span>
-      </span>
+    <!-- Back to dashboard -->
+    <a href="{% url 'photographer' %}" class="btn btn-ghost w-full">
+      <span class="icon-[tabler--arrow-left] size-4"></span> Back to Dashboard
     </a>
-  </div>
-  <!-- album sharing -->
-    <div class="mt-5 shadow-lg shadow-gray-600 rounded-md">
-    <a href="{% url 'share_album' event_id=event.event_id %}" class="text-primary hover:underline block">
-      <span class="text-primary flex items-center justify-center font-semibold p-2">Share Album for Selection
-        <span class="icon-[tabler--external-link] size-5 rtl:rotate-180 ml-1 mb-1"></span>
-      </span>
-    </a>
-  </div>
-</div>
-
-  <!-- delete event -->
-  <div >
-    <div class="shadow-lg shadow-gray-600 flex flex-col p-6 rounded-md">
-    <h1 class="text-xl font-semibold">Danger Zone</h1>
-    <span class="w-12 h-1 bg-primary mt-1.5 mb-6 "></span>
-    <form action="{% url 'event_delete' event_id=event.event_id %}" method="post">
-      {% csrf_token %}
-      <button type="button" class="btn btn-error text-sm rounded-md" aria-haspopup="dialog" aria-expanded="false"
-        aria-controls="slide-up-animated-modal" data-overlay="#slide-up-animated-modal">Delete Event and Photos</button>
-
-      <div id="slide-up-animated-modal" class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 hidden"
-        role="dialog" tabindex="-1">
-        <div
-          class="overlay-animation-target modal-dialog overlay-open:mt-4 overlay-open:opacity-100 overlay-open:duration-300 mt-12 transition-all ease-out">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h3 class="modal-title">Are you sure?</h3>
-              <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close"
-                data-overlay="#slide-up-animated-modal">
-                <span class="icon-[tabler--x] size-4"></span>
-              </button>
-            </div>
-            <div class="modal-body">
-              This action cannot be undone! The event and all the associated photos will be deleted permanently.
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-soft btn-secondary" data-overlay="#slide-up-animated-modal">
-                Close
-              </button>
-              <button type="submit" class="btn btn-primary">Confirm</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </form>
-    <!-- delete event photos -->
-    <form action="{% url 'delete_event_photos' event_id=event.event_id %}" method="post" class="mt-4">
-      {% csrf_token %}
-
-      <button type="button" class="btn btn-error text-sm rounded-md" aria-haspopup="dialog" aria-expanded="false"
-        aria-controls="middle-center-modal" data-overlay="#middle-center-modal">Delete Event Photos Only</button>
-
-      <div id="middle-center-modal"
-        class="overlay modal overlay-open:opacity-100 overlay-open:duration-300 middle-center-modal hidden"
-        role="dialog" tabindex="-1">
-        <div class="modal-dialog overlay-open:opacity-100 overlay-open:duration-300">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h3 class="modal-title">Are you sure?</h3>
-              <button type="button" class="btn btn-text btn-circle btn-sm absolute end-3 top-3" aria-label="Close"
-                data-overlay="#middle-center-modal">
-                <span class="icon-[tabler--x] size-4"></span>
-              </button>
-            </div>
-            <div class="modal-body">
-              This action can not be undone! All the photos of this event will be deleted permanently.
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-soft btn-secondary"
-                data-overlay="#middle-center-modal">Cancel</button>
-              <button type="submit" class="btn btn-primary">Confirm</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </form>
-    
-  </div>
-    <!-- Branding Settings -->
-  <div class="mt-4 w-full shadow-lg shadow-gray-600 flex flex-col gap-4 p-6 rounded-md">
-  <h2 class="text-xl font-semibold">Branding on Photographs</h2>
-  <span class="w-12 h-1 bg-primary -mt-2 mb-2"></span>
-
- <form method="post" id="branding-form" class="flex flex-col gap-4">
-  {% csrf_token %}
-
-  <!-- Enable toggle -->
-  <div class="flex items-center justify-between">
-    <label for="brandingSwitch" class="text-base font-medium">Enable Branding on Matching Photos</label>
-    <input name="branding_enabled" type="checkbox" id="brandingSwitch"
-      class="switch switch-outline switch-primary"
-      {% if event.branding_enabled %}checked{% endif %}>
-  </div>
-
-  <!-- Type tabs -->
-  <div class="flex gap-2">
-    <button type="button" id="tabLogo"
-      class="flex-1 btn btn-sm {% if not event.branding_text %}btn-primary{% else %}btn-outline{% endif %}">
-      Logo
-    </button>
-    <button type="button" id="tabText"
-      class="flex-1 btn btn-sm {% if event.branding_text %}btn-primary{% else %}btn-outline{% endif %}">
-      Text
-    </button>
-  </div>
-
-  <!-- ── Logo section ── -->
-  <div id="logoSection" class="flex flex-col gap-3 {% if event.branding_text %}hidden{% endif %}">
-    <div class="form-control">
-      <label class="label"><span class="label-text">Branding Logo (PNG with transparent background)</span></label>
-      {% if event.branding_image %}
-        <img src="{{ event.branding_image.url }}" alt="Brand Logo" id="branding-logo-preview" class="h-20 w-auto object-contain mb-2 rounded">
-        <button type="button" id="remove-branding-logo-btn" class="btn btn-xs btn-error w-fit mb-2">Remove Logo</button>
-      {% else %}
-        <img src="" alt="" id="branding-logo-preview" class="h-20 w-auto object-contain mb-2 rounded hidden">
-        <button type="button" id="remove-branding-logo-btn" class="btn btn-xs btn-error w-fit mb-2 hidden">Remove Logo</button>
-      {% endif %}
-      <input type="file" name="branding_image" id="brandingImage" accept="image/*" class="input input-sm">
-    </div>
-
-    <!-- Logo opacity preview — actual image rendered with opacity -->
-    
-  </div>
-
-  <!-- ── Text section ── -->
-  <div id="textSection" class="flex flex-col gap-4 {% if not event.branding_text %}hidden{% endif %}">
-
-    <div class="form-control">
-      <label class="label"><span class="label-text">Studio / Photographer Name</span></label>
-      <input type="text" name="branding_text" id="studioNameInput"
-        value="{{ event.branding_text|default:'' }}"
-        class="input input-bordered input-primary w-full"
-        placeholder="e.g. Ravi Photography">
-    </div>
-
-    <!-- Font picker -->
-    <div class="form-control">
-      <label class="label"><span class="label-text">Font</span></label>
-      <div class="grid grid-cols-3 gap-2" id="fontGrid">
-        {% for value, label in font_choices %}
-        <div class="font-card border rounded-lg p-2 cursor-pointer text-center transition
-          {% if event.branding_font == value %}border-primary bg-primary/10{% else %}border-base-300{% endif %}"
-          data-font="{{ value }}">
-          <div class="text-xs text-base-content/50 mb-1">{{ label }}</div>
-          <div class="font-sample text-base" data-style="{{ value }}">Studio</div>
-        </div>
-        {% endfor %}
-      </div>
-      <input type="hidden" name="branding_font" id="brandingFontInput" value="{{ event.branding_font|default:'modern' }}">
-    </div>
-
-    <!-- Text style -->
-    <div class="form-control">
-      <label class="label"><span class="label-text">Text Style</span></label>
-      <div class="flex gap-2">
-        <button type="button" id="styleBox"
-          class="flex-1 btn btn-sm {% if event.branding_text_style == 'box' %}btn-primary{% else %}btn-outline{% endif %}">
-          Frosted Box
-        </button>
-        <button type="button" id="stylePlain"
-          class="flex-1 btn btn-sm {% if event.branding_text_style == 'plain' %}btn-primary{% else %}btn-outline{% endif %}">
-          Plain Text
-        </button>
-      </div>
-      <input type="hidden" name="branding_text_style" id="brandingStyleInput" value="{{ event.branding_text_style|default:'box' }}">
-      
-      
-    </div> 
 
   </div>
-  <!-- ── END text section ── -->
-
-  <!-- ── Opacity — single shared slider ── -->
-  <div class="form-control">
-    <label class="label">
-      <span class="label-text">Opacity</span>
-      <span class="label-text-alt font-medium" id="opacityVal">{{ event.branding_opacity|default:78 }}%</span>
-    </label>
-    <input type="range" name="branding_opacity" id="opacitySlider"
-      min="20" max="100" step="1"
-      value="{{ event.branding_opacity|default:78 }}"
-      class="range range-primary range-sm">
-  </div>
-
-
-
-  <!-- Position — shared, always visible -->
-  <!-- Position — shared, always visible -->
-  <div class="form-control">
-    <label class="label"><span class="label-text">Position</span></label>
-    <div class="grid grid-cols-2 gap-2">
-      {% for value, label in position_choices %}
-      <button type="button" data-pos="{{ value }}"
-        class="pos-btn btn btn-sm {% if event.branding_position == value %}btn-primary{% else %}btn-outline{% endif %}
-        {% if value == 'bottom_center' %}col-span-2{% endif %}">
-        {{ label }}
-      </button>
-      {% endfor %}
-    </div>
-    <input type="hidden" name="branding_position" id="brandingPositionInput" value="{{ event.branding_position|default:'bottom_right' }}">
-  </div>
-  <!-- ── end position ── -->
-
-  <!-- ── Unified live preview ── -->
-  <div class="form-control">
-    <label class="label"><span class="label-text">Preview</span></label>
-    <div id="unifiedPreview" class="rounded-lg overflow-hidden relative"
-      style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); height: 110px;">
-      <img id="unifiedLogoPreview"
-        src="{% if event.branding_image %}{{ event.branding_image.url }}{% endif %}"
-        style="position:absolute; max-height:50px; max-width:45%; object-fit:contain; transition: all 0.25s ease;"
-        class="{% if not event.branding_image or event.branding_text %}hidden{% endif %}"
-        alt="Logo">
-      <span id="unifiedTextPreview"
-        style="position:absolute; font-size:18px; color:white; transition: all 0.25s ease; white-space:nowrap;"
-        class="px-3 py-1 {% if not event.branding_text %}hidden{% endif %}">
-        {{ event.branding_text|default:"Studio Name" }}
-      </span>
-    </div>
-  </div>
-
-  <button id="branding-btn" type="submit" class="btn btn-primary text-md md:text-md lg:text-lg">
-    Apply Branding Settings
-  </button>
-</form>
-
-<button id="start-branding-btn" class="btn btn-success text-md md:text-md lg:text-lg">
-  Start Branding
-</button>
-</div>
-  
-    
-      
-    </div>
-    
-
 
   </div>
-  
-</div>
-
-<!-- Public Gallery Card -->
-<div class="mt-4 w-full shadow-lg shadow-gray-600 p-6 rounded-md">
-
-  <div class="p-2 flex flex-col gap-2">
-    <h2 class="text-lg font-semibold">Public Gallery</h2>
-
-    <label class="flex items-center gap-3 cursor-pointer">
-      <span class="font-medium text-md">Share Gallery</span>
-      <input id="publicGalleryToggle"
-             type="checkbox"
-             class="checkbox checkbox-primary"
-             {% if event.is_public_gallery_enabled %}checked{% endif %}>
-    </label>
-  </div>
-<!-- Public Gallery Link -->
-  <div id="publicGalleryLink"
-       class="p-3 rounded-lg border text-sm bg-base-200 flex items-center justify-between gap-3
-       {% if not event.is_public_gallery_enabled %}hidden{% endif %}"
-       data-public-url="{% if event.is_public_gallery_enabled %}{{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}{% endif %}">
-
-    <span id="galleryUrl" class="break-all text-primary">
-      {% if event.is_public_gallery_enabled %}
-        {{ request.scheme }}://{{ request.get_host }}{% url 'public_gallery' event.event_id event.public_token %}
-      {% endif %}
-    </span>
-
-    <button id="copy-btn"
-            onclick="copyGalleryLink()"
-            class="btn btn-sm btn-outline">
-      Copy
-    </button>
-  </div>
-  
-  <!-- Studio Name -->
-  <div class="p-2 flex flex-col gap-2">
-    <label class="text-md font-medium mb-1">
-      Studio Name <span class="text-sm italic"> [ To be displayed on Gallery Page ] </span>
-    </label>
-    <div class="flex items-center gap-1">
-    <input
-      id="studio_name"
-      type="text"
-      maxlength="50"
-      class="input w-full"
-      placeholder="Eg. PhotoFlow Studio"
-      value="{{ event.studio_name|default:'' }}"
-    >
-    <button
-      id="saveStudioBtn"
-      onclick="saveStudioName()"
-      class="btn btn-primary btn-sm">
-      Save
-    </button>
-    </div>
-  </div>
-
-<label class="flex items-center gap-3 cursor-pointer p-2">
-  <span class="font-medium text-md">Allow Public Downloads</span>
-  <input id="publicDownloadToggle"
-         type="checkbox"
-         class="checkbox checkbox-primary"
-         {% if event.is_public_gallery_downloadable %}checked{% endif %}>
-</label>
-
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const toggle = document.getElementById("publicGalleryToggle");
-  const linkBox = document.getElementById("publicGalleryLink");
-  const linkSpan = document.getElementById("galleryUrl");
-  const studioInput = document.getElementById("studio_name");
-
-  const notyf = new Notyf();
-
-  function setStudioState() {
-    studioInput.disabled = !toggle.checked;
-    studioInput.classList.toggle("opacity-50", !toggle.checked);
-  }
-
-  toggle.addEventListener("change", function () {
-    fetch("{% url 'toggle_public_gallery' event.event_id %}", {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": "{{ csrf_token }}",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({ enabled: toggle.checked })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.enabled) {
-        linkSpan.textContent = data.public_url;
-        linkBox.classList.remove("hidden");
-        notyf.success("Public gallery enabled");
-      } else {
-        linkBox.classList.add("hidden");
-        linkSpan.textContent = "";
-        notyf.error("Public gallery disabled");
-      }
-      setStudioState();
-    });
-  });
-
-  setStudioState();
-  
-const downloadToggle = document.getElementById("publicDownloadToggle");
-
-downloadToggle.addEventListener("change", function () {
-  fetch("{% url 'toggle_public_gallery_download' event.event_id %}", {
-    method: "POST",
-    headers: {
-      "X-CSRFToken": "{{ csrf_token }}",
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({ enabled: downloadToggle.checked })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.enabled) {
-      notyf.success("Public download enabled");
-    } else {
-      notyf.error("Public download disabled");
-    }
-  });
-});
-
-});
-</script>
-
-<script>
-function copyGalleryLink() {
-  const btn = document.getElementById("copy-btn");
-  const text = document.getElementById("galleryUrl").textContent;
-
-  navigator.clipboard.writeText(text);
-  btn.textContent = "Copied ✓";
-
-  setTimeout(() => {
-    btn.textContent = "Copy";
-  }, 1500);
-}
-</script>
-
-<script>
-function saveStudioName() {
-  const studioInput = document.getElementById("studio_name");
-  const saveBtn = document.getElementById("saveStudioBtn");
-  const notyf = new Notyf();
-
-  if (studioInput.disabled) return;
-
-  saveBtn.disabled = true;
-  saveBtn.innerText = "Saving...";
-
-  fetch("{% url 'update_studio_name' event.event_id %}", {
-    method: "POST",
-    headers: {
-      "X-CSRFToken": "{{ csrf_token }}",
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      studio_name: studioInput.value.trim()
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      notyf.success("Studio name saved");
-    } else {
-      notyf.error("Failed to save");
-    }
-  })
-  .catch(() => {
-    notyf.error("Something went wrong");
-  })
-  .finally(() => {
-    saveBtn.disabled = false;
-    saveBtn.innerText = "Save";
-  });
-}
-</script>
-
-
-
-
-<!-- back to dashboard -->
-  <div class="bottom-0 right-0 w-fit ml-auto p-4">
-    <a href="{% url 'photographer' %}" class="text-primary hover:underline block">
-      <span class="text-primary flex items-center justify-center p-2">
-        <span class="icon-[tabler--arrow-left] size-4 rtl:rotate-180"></span>Back to Dashboard
-      </span>
-    </a>
-  </div>
-
 </section>
-<!-- Photos Section -->
-<section>
+
+<!-- ════════════════════════════════════════════
+     PHOTOS SECTION
+════════════════════════════════════════════ -->
+<section class="px-3">
   {% if num_photos > 0 %}
   <div class="divider divider-secondary">
-    <button id="show-photo" class="btn btn-sm btn-outline">Show Photos</button>
+    <button id="show-photo" class="btn btn-sm btn-outline">
+      <span class="icon-[tabler--photo] size-4"></span>
+      {% if event.branding_enabled %}
+      Show Photos [Watermarked]
+      {% else %}
+      Show Photos
+      {% endif %}
+    </button>
   </div>
   {% else %}
-  <p class="divider divider-secondary">No photos uploaded for this event yet.</p>
+  <p class="divider divider-secondary text-base-content/40 text-sm">No photos uploaded yet.</p>
   {% endif %}
-  <div class="flex justify-center">
+
+  <div class="flex justify-center my-4">
     <span class="loading hidden loading-ring loading-lg"></span>
   </div>
 
- 
-<!-- Photo Action Bar -->
-<div id="photo-action-bar" class="hidden mb-3 flex justify-between items-center p-2 rounded-lg">
-  <div class="flex gap-2">
-    <button id="select-all" class="btn btn-sm btn-outline">Select All</button>
-    <button id="deselect-all" class="btn btn-sm btn-outline">Deselect All</button>
-  </div>
-  <button
-  id="delete-selected"
-  class="btn btn-error btn-circle fixed bottom-6 right-6 z-50 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
-  title="Delete selected photos"
->
-  <span class="icon-[tabler--trash-filled] size-6"></span>
-</button>
-
-</div>
- <!-- Include the photo grid -->
-  <div id="photo-grid" class="hidden">
-    {% include 'partials/photo_grid.html' %}
+  <!-- Photo Action Bar -->
+  <div id="photo-action-bar" class="hidden mb-3 flex justify-between items-center p-2 rounded-lg">
+    <div class="flex gap-2">
+      <button id="select-all" class="btn btn-sm btn-outline">Select All</button>
+      <button id="deselect-all" class="btn btn-sm btn-outline">Deselect All</button>
+    </div>
+    <button id="delete-selected"
+      class="btn btn-error btn-circle fixed bottom-6 right-6 z-50 shadow-lg hover:shadow-xl transition-all"
+      title="Delete selected photos">
+      <span class="icon-[tabler--trash-filled] size-5"></span>
+    </button>
   </div>
 
-  <!-- Include the pagination controls -->
-  <div id="pagination-controls" class="hidden">
-  {% include 'partials/pagination_controls.html' with photos=photos_page %}
-</div>
+  <div id="photo-grid" class="hidden">{% include 'partials/photo_grid.html' %}</div>
+  <div id="pagination-controls" class="hidden">{% include 'partials/pagination_controls.html' with photos=photos_page %}
+  </div>
 </section>
-<div class="mt-6">
-{% include 'footer.html'%}
-</div>
+
+<div class="mt-8">{% include 'footer.html' %}</div>
+
+<!-- ── Inline scripts (public gallery + studio name) ── -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.getElementById("publicGalleryToggle");
+    const linkBox = document.getElementById("publicGalleryLink");
+    const linkSpan = document.getElementById("galleryUrl");
+    const studioInput = document.getElementById("studio_name");
+    const notyf = new Notyf();
+
+    function setStudioState() {
+      studioInput.disabled = !toggle.checked;
+      studioInput.classList.toggle("opacity-50", !toggle.checked);
+    }
+
+    toggle.addEventListener("change", function () {
+      fetch("{% url 'toggle_public_gallery' event.event_id %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ enabled: toggle.checked })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.enabled) {
+            linkSpan.textContent = data.public_url;
+            linkBox.classList.remove("hidden");
+            notyf.success("Public gallery enabled");
+          } else {
+            linkBox.classList.add("hidden");
+            linkSpan.textContent = "";
+            notyf.success("Public gallery disabled");
+          }
+          setStudioState();
+        });
+    });
+
+    setStudioState();
+
+    const downloadToggle = document.getElementById("publicDownloadToggle");
+    downloadToggle.addEventListener("change", function () {
+      fetch("{% url 'toggle_public_gallery_download' event.event_id %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ enabled: downloadToggle.checked })
+      })
+        .then(res => res.json())
+        .then(data => {
+          notyf.success(data.enabled ? "Public download enabled" : "Public download disabled");
+        });
+    });
+  });
+
+  function copyGalleryLink() {
+    const btn = document.getElementById("copy-btn");
+    navigator.clipboard.writeText(document.getElementById("galleryUrl").textContent.trim());
+    btn.textContent = "Copied ✓";
+    setTimeout(() => btn.textContent = "Copy", 1500);
+  }
+
+  function saveStudioName() {
+    const studioInput = document.getElementById("studio_name");
+    const saveBtn = document.getElementById("saveStudioBtn");
+    const notyf = new Notyf();
+    if (studioInput.disabled) return;
+    saveBtn.disabled = true;
+    saveBtn.innerText = "Saving...";
+    fetch("{% url 'update_studio_name' event.event_id %}", {
+      method: "POST",
+      headers: { "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ studio_name: studioInput.value.trim() })
+    })
+      .then(res => res.json())
+      .then(data => { notyf.success(data.success ? "Studio name saved" : "Failed to save"); })
+      .catch(() => notyf.error("Something went wrong"))
+      .finally(() => { saveBtn.disabled = false; saveBtn.innerText = "Save"; });
+  }
+</script>
 
 {% endblock %}
 
 {% block scripts %}
 <script src="{% static 'js/event_detail.js' %}"></script>
-<!-- <script src="{% static 'js/download-img.js' %}"></script> -->
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/fullscreen/lg-fullscreen.min.js"></script>
-
 {% endblock %}

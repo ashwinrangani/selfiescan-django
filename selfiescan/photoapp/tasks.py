@@ -125,7 +125,10 @@ def generate_photo_variants(photo):
     photo.save(update_fields=["thumb_image", "medium_image", "large_image"])
 
 
-        
+def trigger_branding_if_enabled(photo):
+    """Trigger branded_photo task if event has branding enabled."""
+    if photo.event.branding_enabled and not photo.is_branded:
+        branded_photo.delay(photo.id)      
         
 # face encoding of uploaded photos (Rekognition + fallback)
 @shared_task(bind=True,acks_late=True,autoretry_for=(ClientError, EndpointConnectionError),retry_backoff=True,retry_jitter=True,retry_kwargs={"max_retries": 3})
@@ -151,6 +154,7 @@ def process_photo(self, photo_id):
         if FaceEncoding.objects.filter(photo=photo).exists():
             photo.is_processed = True
             photo.save(update_fields=["is_processed"])
+            trigger_branding_if_enabled(photo)
             return f"Encodings already exist for photo {photo_id}"
 
         collection_id = get_or_create_collection(photo.event.event_id)
@@ -203,9 +207,7 @@ def process_photo(self, photo_id):
             generate_photo_variants(photo)
             photo.is_processed = True
             photo.save(update_fields=["is_processed"])
-
-            
-
+            trigger_branding_if_enabled(photo)
 
             return f"Photo {photo_id} processed with Rekognition: {face_count} faces"
 
@@ -220,6 +222,7 @@ def process_photo(self, photo_id):
         if image is None:
             photo.is_processed = True
             photo.save()
+            trigger_branding_if_enabled(photo)
             return f"Failed to load image for photo {photo_id}"
 
         image = resize_image_for_processing(image)
@@ -228,6 +231,7 @@ def process_photo(self, photo_id):
         if not face_locations:
             photo.is_processed = True
             photo.save()
+            trigger_branding_if_enabled(photo)
             return f"No faces found (fallback) for photo {photo_id}"
 
         for loc in face_locations:
@@ -239,9 +243,7 @@ def process_photo(self, photo_id):
         generate_photo_variants(photo)
         photo.is_processed = True
         photo.save(update_fields=["is_processed"])
-
-        
-
+        trigger_branding_if_enabled(photo)
 
         return f"Photo {photo_id} processed with fallback: {len(face_locations)} faces"
 
@@ -357,9 +359,7 @@ def apply_text_premium(image, text, font, position, text_color=(255, 255, 255, 1
     text_y = center_y - th // 2 - bbox_top_offset
 
     # Shadow layer via alpha_composite — respects opacity
-    shadow_layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
-    ImageDraw.Draw(shadow_layer).text((tx + 1, text_y + 1), text, font=font, fill=(0, 0, 0, 160))
-    image = Image.alpha_composite(image, shadow_layer)
+    
 
     # Text layer via alpha_composite — respects opacity
     text_layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
@@ -379,19 +379,100 @@ def apply_text_plain(image, text, font, position, text_color=(255, 255, 255, 80)
     from PIL import ImageFilter
 
     # Shadow layer — draw text first, THEN blur
-    shadow_layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
-    ImageDraw.Draw(shadow_layer).text((tx, text_y), text, font=font, fill=(0, 0, 0, 180))
-    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=6))
-    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=4))
-    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=2))
-    image = Image.alpha_composite(image, shadow_layer)
-
+    
     # Text layer — alpha_composite properly blends opacity
     text_layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
     ImageDraw.Draw(text_layer).text((tx, text_y), text, font=font, fill=text_color)
     image = Image.alpha_composite(image, text_layer)
 
     return image
+
+def apply_text_diagonal(image, text, font, opacity=150, num_lines=3):
+    """
+    Draw repeated diagonal watermark text similar to the frontend canvas preview.
+    """
+    import math
+    from PIL import Image, ImageDraw, ImageFont
+
+    width, height = image.size
+
+    # Match frontend diagonal angle
+    angle = math.degrees(math.atan2(height, width))
+
+    # Measure text
+    temp_img = Image.new("RGBA", (1, 1))
+    temp_draw = ImageDraw.Draw(temp_img)
+
+    bbox = temp_draw.textbbox((0, 0), text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+
+    # Match frontend spacing
+    spacing_x = text_width + 80
+    spacing_y = text_height + 60
+
+    # Work on a larger square so rotation doesn't clip
+    diagonal = int(math.sqrt(width**2 + height**2))
+    canvas_size = diagonal * 2
+
+    watermark = Image.new(
+        "RGBA",
+        (canvas_size, canvas_size),
+        (0, 0, 0, 0)
+    )
+
+    draw = ImageDraw.Draw(watermark)
+
+    center_x = canvas_size // 2
+    center_y = canvas_size // 2
+
+    start_y = -(diagonal / 2)
+    line_gap = diagonal / (num_lines + 1)
+
+    # Draw exactly like frontend
+    for row in range(num_lines):
+        y = start_y + line_gap * (row + 1)
+
+        # Stagger every second row
+        x_offset = spacing_x / 2 if row % 2 else 0
+
+        x = -diagonal
+        while x < diagonal:
+            draw.text(
+                (
+                    center_x + x + x_offset,
+                    center_y + y
+                ),
+                text,
+                font=font,
+                fill=(255, 255, 255, opacity),
+            )
+            x += spacing_x
+
+    # Rotate to image diagonal
+    watermark = watermark.rotate(
+        angle,
+        resample=Image.Resampling.BICUBIC,
+        expand=False,
+    )
+
+    # Crop center region back to image size
+    left = (canvas_size - width) // 2
+    top = (canvas_size - height) // 2
+
+    watermark = watermark.crop(
+        (
+            left,
+            top,
+            left + width,
+            top + height,
+        )
+    )
+
+    result = image.convert("RGBA")
+    result = Image.alpha_composite(result, watermark)
+
+    return result
 
 @shared_task(bind=True, acks_late=True, autoretry_for=(Exception,), retry_backoff=True, retry_jitter=True)
 def branded_photo(self, photo_id):
@@ -481,6 +562,9 @@ def branded_photo(self, photo_id):
             if text_style == "plain":
                 alpha = int(event.branding_opacity * 255 / 100)
                 image = apply_text_plain(image, text, font, text_position, text_color=(255, 255, 255, alpha))
+            elif text_style == "diagonal":
+                alpha = int(event.branding_opacity * 255 / 100)
+                image = apply_text_diagonal(image, text, font, opacity=alpha, num_lines=3)
             else:
                 alpha = int(event.branding_opacity * 255 / 100)
                 image = apply_text_premium(image, text, font, text_position, text_color=(255, 255, 255, alpha))
